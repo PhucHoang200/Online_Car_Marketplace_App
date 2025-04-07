@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "537702901908",
+    "project_id": "onlinecarmarketplaceapp",
+    "storage_bucket": "onlinecarmarketplaceapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:537702901908:android:13bcf1a4c52ea45abd2c81",
+        "android_client_info": {
+          "package_name": "com.example.online_car_marketplace_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAnfC_LklM4RIQIq-US_oe-Qof1BuDJU_E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
