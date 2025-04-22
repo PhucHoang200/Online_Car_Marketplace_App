@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
 import '../models/post_model.dart';
 import '../repositories/post_repository.dart';
+import 'package:online_car_marketplace_app/models/post_with_car_and_images.dart';
 
 class PostProvider with ChangeNotifier {
   final PostRepository _postRepository = PostRepository();
-  List<Post> _posts = [];
+  List<PostWithCarAndImages> _posts = [];
 
-  List<Post> get posts => _posts;
+  List<PostWithCarAndImages> get posts => _posts;
 
   Future<void> fetchPosts() async {
-    _posts = await _postRepository.getPosts();
+    final rawData = await _postRepository.getPostsWithCarAndImages();
+
+    _posts = rawData.map((item) {
+      return PostWithCarAndImages(
+        post: item['post'],
+        car: item['car'],
+        imageUrls: List<String>.from(item['images']),
+      );
+    }).toList();
+
     notifyListeners();
   }
 
