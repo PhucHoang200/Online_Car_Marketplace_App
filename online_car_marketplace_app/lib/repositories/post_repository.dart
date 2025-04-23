@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/post_model.dart';
+import '../models/car_model.dart';
+
 
 class PostRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -40,5 +42,37 @@ class PostRepository {
   Future<List<Post>> getPosts() async {
     final snapshot = await _firestore.collection('posts').get();
     return snapshot.docs.map((doc) => Post.fromMap(doc.data())).toList();
+  }
+
+  /// Lấy danh sách post kèm car và danh sách ảnh (từ carId)
+  Future<List<Map<String, dynamic>>> getPostsWithCarAndImages() async {
+    final postsSnapshot = await _firestore.collection('posts').get();
+
+    List<Map<String, dynamic>> results = [];
+
+    for (var doc in postsSnapshot.docs) {
+      final post = Post.fromMap(doc.data());
+
+      // Lấy car theo carId
+      final carDoc = await _firestore.collection('cars').doc(post.carId.toString()).get();
+      Car? car = carDoc.exists ? Car.fromMap(carDoc.data()!) : null;
+
+      // Lấy ảnh theo carId
+      final imagesSnapshot = await _firestore
+          .collection('images')
+          .where('carId', isEqualTo: post.carId)
+          .get();
+      List<String> imageUrls = imagesSnapshot.docs.map((doc) => doc['url'] as String).toList();
+
+      print('Post ID: ${post.id}, Car ID: ${post.carId}, Images: $imageUrls');
+
+      results.add({
+        'post': post,
+        'car': car,
+        'images': imageUrls,
+      });
+    }
+
+    return results;
   }
 }
