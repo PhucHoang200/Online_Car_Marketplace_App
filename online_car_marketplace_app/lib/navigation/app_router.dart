@@ -3,9 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:online_car_marketplace_app/ui/screen/user/home_screen.dart';
 import 'package:online_car_marketplace_app/ui/screen/user/sell_screen.dart';
 import 'package:online_car_marketplace_app/ui/screen/user/buy_screen.dart';
+import 'package:online_car_marketplace_app/ui/screen/user/profile_screen.dart';
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/buy',
   routes: [
     GoRoute(
       path: '/',
@@ -18,6 +19,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/buy',
       builder: (context, state) => const BuyScreen(),
+    ),
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) => const ProfileScreen(), // Thêm route Profile
     ),
   ],
 );

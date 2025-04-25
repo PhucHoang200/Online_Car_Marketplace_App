@@ -172,7 +172,11 @@ class _BuyScreenState extends State<BuyScreen> {
   Widget _buildBottomNavBar(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: 0,
-      onTap: (index) {},
+      onTap: (index) {
+        if (index == 3) {
+          context.go('/profile'); // chuyển sang màn hình Profile
+        }
+      },
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.directions_car), label: 'Buy'),
         BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'Favorite'),
