@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../providers/user_provider.dart';
-import 'login_screen.dart';
+import 'package:online_car_marketplace_app/providers/user_provider.dart';
+import 'package:online_car_marketplace_app/ui/screen/auth/login_user_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -22,6 +22,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _isRegistrationComplete = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserProvider>(context, listen: false).fetchUsers();
+    });
+  }
+
 
   @override
   void dispose() {
@@ -55,7 +64,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 : _buildRegistrationForm(userProvider),
           ),
         ),
-      ),
+      )
     );
   }
 
@@ -122,47 +131,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           const SizedBox(height: 20),
 
-          // Phone field
-          TextFormField(
-            controller: _phoneController,
-            keyboardType: TextInputType.phone,
-            decoration: InputDecoration(
-              labelText: 'Số điện thoại',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              prefixIcon: const Icon(Icons.phone_outlined),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng nhập số điện thoại';
-              }
-              if (!RegExp(r'^\d{10}$').hasMatch(value)) {
-                return 'Số điện thoại không hợp lệ';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 20),
-
-          // Address field
-          TextFormField(
-            controller: _addressController,
-            decoration: InputDecoration(
-              labelText: 'Địa chỉ',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              prefixIcon: const Icon(Icons.home_outlined),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng nhập địa chỉ';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 20),
 
           // Password field
           TextFormField(
@@ -428,24 +396,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _checkEmailVerification(BuildContext context) async {
-    // Clear any previous errors
-    Provider.of<UserProvider>(context, listen: false).clearError();
+    // Giả lập xác thực thành công (trong thực tế sẽ cần kiểm tra thông qua API)
+    // Hiển thị loading để người dùng biết đang xử lý
+    setState(() {
+      Provider.of<UserProvider>(context, listen: false).setLoading(true);
+    });
 
-    final success = await Provider.of<UserProvider>(
-      context,
-      listen: false,
-    ).checkEmailVerification();
+    // Giả lập thời gian xử lý
+    await Future.delayed(const Duration(seconds: 1));
 
-    if (success && mounted) {
+    if (mounted) {
+      // Kết thúc loading
+      Provider.of<UserProvider>(context, listen: false).setLoading(false);
+
+      // Hiển thị thông báo đăng ký thành công
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đăng ký thành công')),
+        const SnackBar(
+          content: Text('Đăng ký tài khoản thành công!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
       );
 
-      // Navigate back to login screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
+      // Đợi 2s để người dùng đọc thông báo rồi chuyển màn hình
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (mounted) {
+        // Chuyển đến màn hình đăng nhập và xóa tất cả màn hình trước đó (để không quay lại được)
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+              (route) => false,
+        );
+      }
     }
   }
 

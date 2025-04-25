@@ -241,4 +241,10 @@ class UserProvider with ChangeNotifier {
   auth.User? getCurrentAuthUser() {
     return _userRepository.getCurrentAuthUser();
   }
+
+  // Thêm vào UserProvider
+  void setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
 }
