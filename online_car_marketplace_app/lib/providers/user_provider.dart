@@ -91,8 +91,11 @@ class UserProvider with ChangeNotifier {
       final result = await _userRepository.login(email, password);
 
       if (result['success']) {
-        _currentUser = result['user'];
+        _currentUser = result['user'];  // Cập nhật user vào _currentUser
         _isAuthenticated = true;
+
+        // Lưu `userId` vào provider
+        notifyListeners();  // Cập nhật UI sau khi login thành công
       } else {
         _errorMessage = result['message'];
       }
@@ -115,13 +118,12 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Register step 1: Đăng ký và gửi email xác thực
   Future<bool> register({
     required String name,
     required String email,
     required String phone,
-    required String password,
     required String address,
+    required String password,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -133,16 +135,15 @@ class UserProvider with ChangeNotifier {
         name: name,
         email: email,
         phone: phone,
-        password: password,
         address: address,
         avatarUrl: null,
-        roleId: 1, // assuming 1 is for normal users
+        roleId: 1,
         status: 'Hoạt động',
         creationDate: Timestamp.now(),
         updateDate: Timestamp.now(),
       );
 
-      final result = await _userRepository.registerUser(newUser);
+      final result = await _userRepository.registerUser(newUser, password);
 
       if (!result['success']) {
         _errorMessage = result['message'];

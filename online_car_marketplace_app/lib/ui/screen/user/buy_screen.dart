@@ -6,20 +6,58 @@ import 'package:online_car_marketplace_app/models/post_with_car_and_images.dart'
 import 'package:online_car_marketplace_app/providers/brand_provider.dart';
 import '../../../models/post_model.dart';
 import 'package:online_car_marketplace_app/navigation/app_router.dart';
+import 'package:online_car_marketplace_app/models/user_model.dart';
+import 'package:online_car_marketplace_app/ui/screen/user/profile_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class BuyScreen extends StatefulWidget {
-  const BuyScreen({super.key});
+  final String uid;
+  const BuyScreen({required this.uid, super.key});
 
   @override
   State<BuyScreen> createState() => _BuyScreenState();
 }
 
 class _BuyScreenState extends State<BuyScreen> {
+  late String userId;
+  int _selectedIndex = 0;
+
   @override
   void initState() {
     super.initState();
-    Provider.of<PostProvider>(context, listen: false).fetchPosts();
-    Provider.of<BrandProvider>(context, listen: false).fetchBrands();
+    userId = widget.uid;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<PostProvider>(context, listen: false).fetchPosts();
+      Provider.of<BrandProvider>(context, listen: false).fetchBrands();
+    });
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+      // Đang ở Buy, không cần đi đâu
+        break;
+      case 1:
+      // TODO: Điều hướng sang FavoriteScreen (chưa có thì để sau)
+        break;
+      case 2:
+      // TODO: Điều hướng sang ChatScreen (chưa có thì để sau)
+        break;
+      case 3:
+        final firebaseUser = FirebaseAuth.instance.currentUser;
+
+        // Kiểm tra xem firebaseUser có tồn tại không
+        if (firebaseUser != null) {
+          final userId = firebaseUser.uid;
+          // Điều hướng đến BuyScreen, truyền userId (uid)
+          GoRouter.of(context).go('/profile', extra: firebaseUser.uid);
+        }
+        break;
+    }
   }
 
   @override
@@ -27,13 +65,12 @@ class _BuyScreenState extends State<BuyScreen> {
     final posts = Provider.of<PostProvider>(context).posts;
 
     return Scaffold(
-      bottomNavigationBar: _buildBottomNavBar(context),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              _buildTopBar(context),
+              _buildTopBar(),
               const SizedBox(height: 16),
               _buildSearchBar(),
               const SizedBox(height: 10),
@@ -53,10 +90,11 @@ class _BuyScreenState extends State<BuyScreen> {
           ),
         ),
       ),
+      bottomNavigationBar: _buildBottomNavBar(),
     );
   }
 
-  Widget _buildTopBar(BuildContext context) {
+  Widget _buildTopBar() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: const [
@@ -92,11 +130,10 @@ class _BuyScreenState extends State<BuyScreen> {
         }
 
         return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,  // Cho phép cuộn ngang
+          scrollDirection: Axis.horizontal,
           child: Row(
             children: brands.map((brand) {
               final brandName = brand.name.toUpperCase();
-              // Giả sử bạn đã lưu ảnh trong thư mục assets như 'assets/brands/brand_name.png'
               final brandAvatarPath = 'assets/brands/${brand.name.toLowerCase()}.png';
 
               return Padding(
@@ -107,13 +144,13 @@ class _BuyScreenState extends State<BuyScreen> {
                     ClipOval(
                       child: Image.asset(
                         brandAvatarPath,
-                        width: 48,  // Giảm kích thước hình ảnh
+                        width: 48,
                         height: 48,
                         fit: BoxFit.cover,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(brandName, style: const TextStyle(fontSize: 10)),  // Giảm kích thước chữ
+                    Text(brandName, style: const TextStyle(fontSize: 10)),
                   ],
                 ),
               );
@@ -123,9 +160,6 @@ class _BuyScreenState extends State<BuyScreen> {
       },
     );
   }
-
-
-
 
   Widget _buildPostList(List<PostWithCarAndImages> posts) {
     return ListView.builder(
@@ -169,19 +203,18 @@ class _BuyScreenState extends State<BuyScreen> {
     );
   }
 
-  Widget _buildBottomNavBar(BuildContext context) {
+  Widget _buildBottomNavBar() {
     return BottomNavigationBar(
-      currentIndex: 0,
-      onTap: (index) {
-        if (index == 3) {
-          context.go('/profile'); // chuyển sang màn hình Profile
-        }
-      },
+      type: BottomNavigationBarType.fixed,
+      currentIndex: _selectedIndex,
+      selectedItemColor: Colors.orange,
+      unselectedItemColor: Colors.grey,
+      onTap: _onItemTapped,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.directions_car), label: 'Buy'),
         BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'Favorite'),
-        BottomNavigationBarItem(icon: Icon(Icons.help_outline), label: 'Help'),
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Chat'),
+        BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
       ],
     );
   }

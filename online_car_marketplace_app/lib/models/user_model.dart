@@ -6,7 +6,6 @@ class User {
   final String name;
   final String email;
   final String phone;
-  final String password;
   final String address;
   final String? avatarUrl;
   final int roleId;
@@ -19,7 +18,6 @@ class User {
     required String name,
     required this.email,
     required this.phone,
-    required String password,
     required this.address,
     this.avatarUrl,
     required this.roleId,
@@ -28,9 +26,6 @@ class User {
     required this.updateDate,
     bool isHashed = false,
   })  : name = UserValidator.validateName(name),
-        password = isHashed
-            ? password
-            : UserValidator.validateAndHashPassword(password),
         status = UserValidator.validateStatus(status);
 
   factory User.fromMap(Map<String, dynamic> map) {
@@ -39,7 +34,6 @@ class User {
       name: map['name'],
       email: map['email'],
       phone: map['phone'],
-      password: map['password'],
       address: map['address'],
       avatarUrl: map['avatarUrl'],
       roleId: map['roleId'],
@@ -55,7 +49,6 @@ class User {
     'name': name,
     'email': email,
     'phone': phone,
-    'password': password,
     'address': address,
     'avatarUrl': avatarUrl,
     'roleId': roleId,

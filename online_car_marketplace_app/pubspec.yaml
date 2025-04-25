@@ -51,6 +51,7 @@ dependencies:
   dio: ^5.8.0+1
   shared_preferences: ^2.5.3
   syncfusion_flutter_charts: ^29.1.38
+  whatsapp_unilink: ^2.1.0
 
 dev_dependencies:
   flutter_test:

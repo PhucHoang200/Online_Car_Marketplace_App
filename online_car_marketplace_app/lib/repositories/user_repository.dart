@@ -38,7 +38,6 @@ class UserRepository {
       name: user.name,
       email: user.email,
       phone: user.phone,
-      password: user.password,
       address: user.address,
       avatarUrl: user.avatarUrl,
       roleId: user.roleId,
@@ -102,21 +101,30 @@ class UserRepository {
     await _firestore.collection('users').doc(id.toString()).delete();
   }
 
-  // Authentication Methods
-
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
-      // Đầu tiên kiểm tra trong Firestore để lấy thông tin status
-      final user = await getUserByEmail(email);
+      final authResult = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      if (user == null) {
+      // Kiểm tra xác thực email
+      if (!authResult.user!.emailVerified) {
         return {
           'success': false,
-          'message': 'Tài khoản không tồn tại',
+          'message': 'Email chưa được xác thực. Vui lòng kiểm tra email.',
         };
       }
 
-      // Kiểm tra trạng thái tài khoản
+      // Lấy thông tin user trong Firestore
+      final user = await getUserByEmail(email);
+      if (user == null) {
+        return {
+          'success': false,
+          'message': 'Không tìm thấy người dùng trong hệ thống',
+        };
+      }
+
       if (user.status != 'Hoạt động') {
         return {
           'success': false,
@@ -124,24 +132,11 @@ class UserRepository {
         };
       }
 
-      // Sau đó đăng nhập với Firebase Auth
-      try {
-        await _auth.signInWithEmailAndPassword(
-            email: email,
-            password: password
-        );
-
-        return {
-          'success': true,
-          'user': user,
-          'message': 'Đăng nhập thành công',
-        };
-      } catch (authError) {
-        return {
-          'success': false,
-          'message': 'Email hoặc mật khẩu không chính xác',
-        };
-      }
+      return {
+        'success': true,
+        'user': user,
+        'message': 'Đăng nhập thành công',
+      };
 
     } catch (e) {
       return {
@@ -151,38 +146,53 @@ class UserRepository {
     }
   }
 
+
+
   // Đăng xuất
   Future<void> logout() async {
     await _auth.signOut();
   }
 
-  // Register Method - Step 1: Tạo tài khoản Firebase Auth và gửi email xác thực
-  Future<Map<String, dynamic>> registerUser(User user) async {
+  Future<Map<String, dynamic>> registerUser(User user, String password) async {
     try {
-      // Kiểm tra email đã tồn tại chưa
-      final existingUser = await getUserByEmail(user.email);
-      if (existingUser != null) {
+      // Kiểm tra email đã tồn tại trên Firebase Auth chưa
+      final methods = await _auth.fetchSignInMethodsForEmail(user.email);
+      if (methods.isNotEmpty) {
         return {
           'success': false,
           'message': 'Email đã được sử dụng',
         };
       }
 
-      // Tạo người dùng Firebase Authentication
+      // Tạo tài khoản trên Firebase Authentication
       final authResult = await _auth.createUserWithEmailAndPassword(
         email: user.email,
-        password: user.password,
+        password: password,
       );
 
-      // Lưu thông tin người dùng vào bộ nhớ tạm thời
-      _pendingRegistrations[user.email] = user;
+      // Tự động lấy UID từ Firebase làm ID người dùng nếu muốn (hoặc dùng auto increment Firestore)
+      final newUser = User(
+        id: 0, // Sẽ được gán auto trong addUserAutoIncrement
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        avatarUrl: user.avatarUrl,
+        roleId: user.roleId,
+        status: user.status,
+        creationDate: user.creationDate,
+        updateDate: user.updateDate,
+      );
+
+      // Lưu vào Firestore
+      await addUserAutoIncrement(newUser);
 
       // Gửi email xác thực
       await authResult.user!.sendEmailVerification();
 
       return {
         'success': true,
-        'message': 'Vui lòng kiểm tra email của bạn để xác thực tài khoản',
+        'message': 'Tài khoản đã được tạo. Vui lòng kiểm tra email để xác thực.',
         'authUser': authResult.user,
       };
 
@@ -194,7 +204,7 @@ class UserRepository {
     }
   }
 
-  // Kiểm tra xác thực email
+
   Future<Map<String, dynamic>> checkEmailVerification() async {
     try {
       // Reload user để cập nhật trạng thái xác thực

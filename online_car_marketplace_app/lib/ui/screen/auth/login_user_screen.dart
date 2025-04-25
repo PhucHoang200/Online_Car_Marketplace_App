@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:provider/provider.dart';
 import '../../../providers/user_provider.dart';
 import 'register_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:online_car_marketplace_app/ui/screen/user/reset_password_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';  // Import FirebaseAuth
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -13,6 +17,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  StreamSubscription? _linkSubscription;
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -91,6 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _linkSubscription?.cancel();
     super.dispose();
   }
 
@@ -278,11 +284,20 @@ class _LoginScreenState extends State<LoginScreen> {
       ).login(email, password);
 
       if (success && mounted) {
-        // Navigate to home screen on successful login
-        context.go('/home');
+        // Lấy thông tin người dùng hiện tại từ Firebase
+        final firebaseUser = FirebaseAuth.instance.currentUser;
+
+        // Kiểm tra xem firebaseUser có tồn tại không
+        if (firebaseUser != null) {
+          final userId = firebaseUser.uid;
+          // Điều hướng đến BuyScreen, truyền userId (uid)
+          GoRouter.of(context).go('/buy', extra: firebaseUser.uid);
+        }
       }
+
     }
   }
+
 
   void _showForgotPasswordDialog(BuildContext context) {
     final emailController = TextEditingController();

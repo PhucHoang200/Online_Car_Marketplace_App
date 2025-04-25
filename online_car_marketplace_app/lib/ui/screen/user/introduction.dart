@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 // Provider để quản lý trạng thái
 class LandingProvider with ChangeNotifier {
-  void onGetStarted() {
+  void onGetStarted(BuildContext context) {
     // Xử lý khi nhấn nút "Get Started"
     print("Get Started button pressed");
-    // Bạn có thể thêm logic điều hướng hoặc xử lý tại đây
+    context.go('/register');
   }
 }
 
@@ -23,7 +24,7 @@ class LandingPage extends StatelessWidget {
           children: [
             // Hình nền
             Image.asset(
-              'assets/images/anhxe.jpg', // Thay bằng URL hình ảnh thực tế
+              'assets/images/cars-1638594_1920.jpg', // Thay bằng URL hình ảnh thực tế
               fit: BoxFit.cover,
               color: Colors.black.withOpacity(0.3),
               colorBlendMode: BlendMode.darken,
@@ -59,7 +60,7 @@ class LandingPage extends StatelessWidget {
                     builder: (context, provider, child) {
                       return ElevatedButton(
                         onPressed: () {
-                          provider.onGetStarted();
+                          provider.onGetStarted(context);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.yellow[700],
@@ -82,6 +83,7 @@ class LandingPage extends StatelessWidget {
                       );
                     },
                   ),
+
                   const SizedBox(height: 40),
                 ],
               ),
@@ -91,16 +93,4 @@ class LandingPage extends StatelessWidget {
       ),
     );
   }
-}
-
-// Cấu hình main.dart để chạy ứng dụng
-void main() {
-  runApp(
-    MaterialApp(
-      home: LandingPage(),
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-    ),
-  );
 }

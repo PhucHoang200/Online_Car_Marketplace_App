@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:online_car_marketplace_app/providers/user_provider.dart';
@@ -48,23 +49,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Đăng ký tài khoản'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: _isRegistrationComplete
-                ? _buildVerificationInstructions(userProvider)
-                : _buildRegistrationForm(userProvider),
+        appBar: AppBar(
+          title: const Text('Đăng ký tài khoản'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context),
           ),
         ),
-      )
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: _isRegistrationComplete
+                  ? _buildVerificationInstructions(userProvider)
+                  : _buildRegistrationForm(userProvider),
+            ),
+          ),
+        )
     );
   }
 
@@ -244,9 +245,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             children: [
               const Text('Đã có tài khoản?'),
               TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+                onPressed: () => context.go('/login'),
                 child: const Text('Đăng nhập'),
               ),
             ],
@@ -254,6 +253,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ],
       ),
     );
+  }
+
+
+  Future<void> _register(BuildContext context) async {
+    // Clear any previous errors
+    Provider.of<UserProvider>(context, listen: false).clearError();
+
+    if (_formKey.currentState!.validate()) {
+      final success = await Provider.of<UserProvider>(
+        context,
+        listen: false,
+      ).register(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim(),
+        address: _addressController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      if (success && mounted) {
+        setState(() {
+          _isRegistrationComplete = true;
+        });
+      }
+    }
   }
 
   Widget _buildVerificationInstructions(UserProvider userProvider) {
@@ -353,12 +377,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
         // Return to login button
         OutlinedButton(
-          onPressed: () {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen())
-            );
-          },
+          onPressed: () => context.go('/login'),
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 15),
             shape: RoundedRectangleBorder(
@@ -371,29 +390,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Future<void> _register(BuildContext context) async {
-    // Clear any previous errors
-    Provider.of<UserProvider>(context, listen: false).clearError();
-
-    if (_formKey.currentState!.validate()) {
-      final success = await Provider.of<UserProvider>(
-        context,
-        listen: false,
-      ).register(
-        name: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-        phone: _phoneController.text.trim(),
-        password: _passwordController.text.trim(),
-        address: _addressController.text.trim(),
-      );
-
-      if (success && mounted) {
-        setState(() {
-          _isRegistrationComplete = true;
-        });
-      }
-    }
-  }
 
   Future<void> _checkEmailVerification(BuildContext context) async {
     // Giả lập xác thực thành công (trong thực tế sẽ cần kiểm tra thông qua API)
