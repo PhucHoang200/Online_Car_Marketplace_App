@@ -35,6 +35,7 @@ class UserRepository {
 
     final newUser = User(
       id: nextId,
+      uid: user.uid,
       name: user.name,
       email: user.email,
       phone: user.phone,
@@ -170,9 +171,9 @@ class UserRepository {
         password: password,
       );
 
-      // Tự động lấy UID từ Firebase làm ID người dùng nếu muốn (hoặc dùng auto increment Firestore)
       final newUser = User(
-        id: 0, // Sẽ được gán auto trong addUserAutoIncrement
+        id: 0,
+        uid: authResult.user!.uid,
         name: user.name,
         email: user.email,
         phone: user.phone,

@@ -3,6 +3,7 @@ import 'package:online_car_marketplace_app/utils/validators/user_validator.dart'
 
 class User {
   final int id;
+  final String uid;
   final String name;
   final String email;
   final String phone;
@@ -15,6 +16,7 @@ class User {
 
   User({
     required this.id,
+    required this.uid,
     required String name,
     required this.email,
     required this.phone,
@@ -31,6 +33,7 @@ class User {
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
       id: map['id'],
+      uid: map['uid'] ?? '',
       name: map['name'],
       email: map['email'],
       phone: map['phone'],
@@ -46,6 +49,7 @@ class User {
 
   Map<String, dynamic> toMap() => {
     'id': id,
+    'uid': uid,
     'name': name,
     'email': email,
     'phone': phone,

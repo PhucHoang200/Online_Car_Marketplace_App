@@ -22,23 +22,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // Định nghĩa phương thức getUserData() để lấy dữ liệu người dùng từ Firestore
   Future<Map<String, dynamic>?> getUserData() async {
     try {
-      // Giả sử bạn đang dùng Firebase Firestore
-      final userDoc = await FirebaseFirestore.instance.collection('users').doc(widget.uid).get();
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('uid', isEqualTo: widget.uid) // <-- không cần parse int
+          .get();
 
-      if (userDoc.exists) {
-        // Trả về dữ liệu người dùng dưới dạng Map<String, dynamic>
-        return userDoc.data();
+      if (snapshot.docs.isNotEmpty) {
+        final userData = snapshot.docs.first.data();
+        return userData; // thiếu return ở code cũ
       } else {
-        return null; // Nếu không tìm thấy dữ liệu
+        return null;
       }
     } catch (e) {
       print('Error fetching user data: $e');
-      return null; // Nếu có lỗi, trả về null
+      return null;
     }
   }
 
-  @override
-  @override
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Map<String, dynamic>?>(

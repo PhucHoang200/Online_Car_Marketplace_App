@@ -131,7 +131,8 @@ class UserProvider with ChangeNotifier {
 
     try {
       final newUser = User(
-        id: 0, // this will be auto-incremented by the repository
+        id: 0,
+        uid: '',
         name: name,
         email: email,
         phone: phone,

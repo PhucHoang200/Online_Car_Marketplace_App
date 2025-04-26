@@ -31,15 +31,15 @@ final GoRouter appRouter = GoRouter(
       path: '/buy',
       builder: (context, state) {
         // Lấy tham số từ extra
-        final userId = state.extra as String;  // Truyền qua extra
-        return BuyScreen(uid: userId);  // Truyền userId vào BuyScreen
+        final uId = state.extra as String;  // Truyền qua extra
+        return BuyScreen(uid: uId);  // Truyền userId vào BuyScreen
       },
     ),
     GoRoute(
       path: '/profile',
       builder: (context, state) {
-        final userId = state.extra as String;
-        return ProfileScreen(uid: userId);
+        final uId = state.extra as String;
+        return ProfileScreen(uid: uId);
       },
     ),
     GoRoute(
