@@ -3,15 +3,16 @@ class CarModel {
   final int brandId;
   final int carTypeId;
   final String name;
-
-  CarModel({required this.id, required this.brandId, required this.carTypeId, required this.name});
+  
+  CarModel(
+      {required this.id, required this.brandId, required this.carTypeId, required this.name});
 
   factory CarModel.fromMap(Map<String, dynamic> map) {
     return CarModel(
-      id: map['id'] as int,
-      brandId: map['brandId'] as int,
-      carTypeId: map['carTypeId'] as int,
-      name: map['name'] as String,
+      id: map['id'] is int ? map['id'] : int.parse(map['id'].toString()),
+      brandId: map['brandId'] is int ? map['brandId'] : int.parse(map['brandId'].toString()),
+      name: map['name'] ?? '',
+      carTypeId: map['carTypeId'] is int ? map['carTypeId'] : int.parse(map['carTypeId'].toString()),
     );
   }
 

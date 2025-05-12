@@ -5,9 +5,7 @@ import '../../../providers/user_provider.dart';
 import 'register_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:online_car_marketplace_app/ui/screen/user/reset_password_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';  // Import FirebaseAuth
-
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -23,73 +21,11 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _rememberMe = false;
-
-  // Thêm Firebase Auth
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
 
   @override
   void initState() {
     super.initState();
-    // Kiểm tra xem người dùng có đang trong quá trình đặt lại mật khẩu không
-    _checkPasswordResetAction();
-  }
-
-  // Sửa lại phương thức để kiểm tra deep link
-  Future<void> _checkPasswordResetAction() async {
-    try {
-      // Trong thực tế, bạn cần setup deep link trong Firebase và sử dụng uni_links package
-      // để lắng nghe khi app được mở thông qua deep link
-      // Đây là một ví dụ giả định về cách xử lý
-
-      // Sử dụng uni_links để lắng nghe deep link
-      // Trong thực tế, bạn cần setup như sau:
-      /*
-    final initialLink = await getInitialLink();
-    if (initialLink != null) {
-      final uri = Uri.parse(initialLink);
-      _handleDeepLink(uri);
-    }
-
-    // Lắng nghe các deep link tiếp theo khi app đang chạy
-    _linkSubscription = linkStream.listen((String? link) {
-      if (link != null) {
-        final uri = Uri.parse(link);
-        _handleDeepLink(uri);
-      }
-    }, onError: (err) {
-      // Xử lý lỗi
-    });
-    */
-
-      // Giả sử chúng ta đã nhận được uri từ deep link
-      // Phương thức này nên được gọi khi ứng dụng xử lý deep link
-    } catch (e) {
-      print('Lỗi khi kiểm tra action code: $e');
-    }
-  }
-
-// Thêm method để xử lý deep link
-  void _handleDeepLink(Uri uri) {
-    if (uri.queryParameters.containsKey('oobCode')) {
-      final actionCode = uri.queryParameters['oobCode']!;
-      // Kiểm tra mode
-      final mode = uri.queryParameters['mode'];
-
-      if (mode == 'resetPassword') {
-        // Chuyển người dùng đến màn hình đặt lại mật khẩu
-        _navigateToResetPasswordScreen(actionCode);
-      }
-    }
-  }
-
-// Phương thức để điều hướng đến màn hình đặt lại mật khẩu
-  void _navigateToResetPasswordScreen(String actionCode) {
-    // Xóa stack điều hướng hiện tại và chuyển đến màn hình đặt lại mật khẩu
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => ResetPasswordScreen(actionCode: actionCode),
-      ),
-    );
   }
 
   @override
@@ -289,15 +225,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // Kiểm tra xem firebaseUser có tồn tại không
         if (firebaseUser != null) {
-          final userId = firebaseUser.uid;
-          // Điều hướng đến BuyScreen, truyền userId (uid)
           GoRouter.of(context).go('/buy', extra: firebaseUser.uid);
         }
       }
-
     }
   }
-
 
   void _showForgotPasswordDialog(BuildContext context) {
     final emailController = TextEditingController();
@@ -397,117 +329,6 @@ class _LoginScreenState extends State<LoginScreen> {
             child: const Text('Gửi'),
           ),
         ],
-      ),
-    );
-  }
-
-  // Dialog đặt lại mật khẩu mới (hiển thị khi người dùng nhấp vào link trong email)
-  void _showChangePasswordDialog(BuildContext context, String actionCode) {
-    final newPasswordController = TextEditingController();
-    final confirmPasswordController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-    bool isPasswordVisible = false;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false, // Người dùng không thể đóng dialog bằng cách nhấp bên ngoài
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('Đặt lại mật khẩu'),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Vui lòng nhập mật khẩu mới của bạn'),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: newPasswordController,
-                  obscureText: !isPasswordVisible,
-                  decoration: InputDecoration(
-                    labelText: 'Mật khẩu mới',
-                    border: const OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          isPasswordVisible = !isPasswordVisible;
-                        });
-                      },
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Vui lòng nhập mật khẩu mới';
-                    }
-                    if (value.length < 8) {
-                      return 'Mật khẩu phải có ít nhất 8 ký tự';
-                    }
-                    if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$').hasMatch(value)) {
-                      return 'Mật khẩu phải chứa chữ cái, số và ký tự đặc biệt';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: confirmPasswordController,
-                  obscureText: !isPasswordVisible,
-                  decoration: const InputDecoration(
-                    labelText: 'Xác nhận mật khẩu mới',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Vui lòng xác nhận mật khẩu mới';
-                    }
-                    if (value != newPasswordController.text) {
-                      return 'Mật khẩu không khớp';
-                    }
-                    return null;
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () async {
-                if (formKey.currentState!.validate()) {
-                  try {
-                    // Xác thực action code và cập nhật mật khẩu mới
-                    await _auth.confirmPasswordReset(
-                      code: actionCode,
-                      newPassword: newPasswordController.text,
-                    );
-
-                    // Đóng dialog
-                    Navigator.of(context).pop();
-
-                    // Hiển thị thông báo thành công
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  } catch (e) {
-                    // Hiển thị thông báo lỗi
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Lỗi: $e'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              },
-              child: const Text('Xác nhận'),
-            ),
-          ],
-        ),
       ),
     );
   }

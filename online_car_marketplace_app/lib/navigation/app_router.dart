@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:online_car_marketplace_app/ui/screen/auth/register_screen.dart';
-import 'package:online_car_marketplace_app/ui/screen/user/home_screen.dart';
 import 'package:online_car_marketplace_app/ui/screen/user/sell_screen.dart';
 import 'package:online_car_marketplace_app/ui/screen/user/buy_screen.dart';
 import 'package:online_car_marketplace_app/ui/screen/user/profile_screen.dart';
 import 'package:online_car_marketplace_app/ui/screen/auth/login_user_screen.dart';
-import 'package:online_car_marketplace_app/ui/screen/user/reset_password_screen.dart';
 import 'package:online_car_marketplace_app/ui/screen/user/introduction.dart';
+import 'package:online_car_marketplace_app/ui/screen/user/model_list_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -45,6 +44,17 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/sell',
       builder: (context, state) => const SellScreen(),
+    ),
+    GoRoute(
+      path: '/models',
+      builder: (context, state) {
+        final brandId = state.uri.queryParameters['brandId'];
+        final brandName = state.uri.queryParameters['brandName'];
+        if (brandId == null || brandName == null) {
+          return const Center(child: Text('Error: Missing brandId or brandName'));
+        }
+        return ModelListScreen(brandId: brandId, name: brandName);
+      },
     ),
   ],
 );

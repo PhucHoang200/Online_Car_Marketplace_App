@@ -5,56 +5,21 @@ import 'package:online_car_marketplace_app/providers/user_provider.dart';
 import 'package:online_car_marketplace_app/ui/screen/auth/login_user_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-  final _addressController = TextEditingController();
-
-  bool _isPasswordVisible = false;
-  bool _isConfirmPasswordVisible = false;
-  bool _isRegistrationComplete = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<UserProvider>(context, listen: false).fetchUsers();
-    });
-  }
-
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    _addressController.dispose();
-    super.dispose();
-  }
+   bool _isRegistrationComplete = false;
 
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-
     return Scaffold(
         appBar: AppBar(
           title: const Text('Đăng ký tài khoản'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
-          ),
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -71,7 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildRegistrationForm(UserProvider userProvider) {
     return Form(
-      key: _formKey,
+      key: userProvider.formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -89,10 +54,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 30),
-
           // Name field
           TextFormField(
-            controller: _nameController,
+            controller: userProvider.nameController,
             decoration: InputDecoration(
               labelText: 'Họ và tên',
               border: OutlineInputBorder(
@@ -100,18 +64,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               prefixIcon: const Icon(Icons.person_outline),
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng nhập họ và tên';
-              }
-              return null;
-            },
+            validator: (value) => value == null || value.isEmpty ? 'Vui lòng nhập họ và tên' : null,
           ),
           const SizedBox(height: 20),
-
           // Email field
           TextFormField(
-            controller: _emailController,
+            controller: userProvider.emailController,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               labelText: 'Email',
@@ -121,22 +79,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
               prefixIcon: const Icon(Icons.email_outlined),
             ),
             validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng nhập email';
-              }
-              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                return 'Email không hợp lệ';
-              }
+              if (value == null || value.isEmpty) return 'Vui lòng nhập email';
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) return 'Email không hợp lệ';
               return null;
             },
           ),
           const SizedBox(height: 20),
-
-
           // Password field
           TextFormField(
-            controller: _passwordController,
-            obscureText: !_isPasswordVisible,
+            controller: userProvider.passwordController,
+            obscureText: !userProvider.isPasswordVisible,
             decoration: InputDecoration(
               labelText: 'Mật khẩu',
               helperText: 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ cái, số và ký tự đặc biệt',
@@ -146,35 +98,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
-                icon: Icon(
-                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _isPasswordVisible = !_isPasswordVisible;
-                  });
-                },
+                icon: Icon(userProvider.isPasswordVisible ? Icons.visibility : Icons.visibility_off),
+                onPressed: () => userProvider.isPasswordVisible = !userProvider.isPasswordVisible,
               ),
             ),
             validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng nhập mật khẩu';
-              }
-              if (value.length < 8) {
-                return 'Mật khẩu phải có ít nhất 8 ký tự';
-              }
-              if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$').hasMatch(value)) {
-                return 'Mật khẩu phải chứa chữ cái, số và ký tự đặc biệt';
-              }
+              if (value == null || value.isEmpty) return 'Vui lòng nhập mật khẩu';
+              if (value.length < 8) return 'Mật khẩu phải có ít nhất 8 ký tự';
+              if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$').hasMatch(value)) return 'Mật khẩu phải chứa chữ cái, số và ký tự đặc biệt';
               return null;
             },
           ),
           const SizedBox(height: 20),
-
           // Confirm Password field
           TextFormField(
-            controller: _confirmPasswordController,
-            obscureText: !_isConfirmPasswordVisible,
+            controller: userProvider.confirmPasswordController,
+            obscureText: !userProvider.isConfirmPasswordVisible,
             decoration: InputDecoration(
               labelText: 'Xác nhận mật khẩu',
               border: OutlineInputBorder(
@@ -182,60 +121,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
-                icon: Icon(
-                  _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-                  });
-                },
+                icon: Icon(userProvider.isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off),
+                onPressed: () => userProvider.isConfirmPasswordVisible = !userProvider.isConfirmPasswordVisible,
               ),
             ),
             validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng xác nhận mật khẩu';
-              }
-              if (value != _passwordController.text) {
-                return 'Mật khẩu không khớp';
-              }
+              if (value == null || value.isEmpty) return 'Vui lòng xác nhận mật khẩu';
+              if (value != userProvider.passwordController.text) return 'Mật khẩu không khớp';
               return null;
             },
           ),
           const SizedBox(height: 30),
 
-          // Error message if any
-          if (userProvider.errorMessage != null)
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.red.shade100,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                userProvider.errorMessage!,
-                style: const TextStyle(color: Colors.red),
-              ),
-            ),
-          const SizedBox(height: 20),
-
           // Register button
           ElevatedButton(
             onPressed: userProvider.isLoading
                 ? null
-                : () => _register(context),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: userProvider.isLoading
-                ? const CircularProgressIndicator()
-                : const Text(
-              'Đăng ký',
-              style: TextStyle(fontSize: 16),
-            ),
+                : () async {
+              if (userProvider.formKey.currentState!.validate()) {
+                final success = await userProvider.registerUser(context);
+                if (success && mounted) {
+                  setState(() {
+                    _isRegistrationComplete = true;
+                  });
+                } else if (!success && userProvider.errorMessage != null && mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(userProvider.errorMessage!)),
+                  );
+                }
+              }
+            },
+            child: userProvider.isLoading ? const CircularProgressIndicator() : const Text('Đăng ký'),
           ),
           const SizedBox(height: 20),
 
@@ -255,36 +171,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-
-  Future<void> _register(BuildContext context) async {
-    // Clear any previous errors
-    Provider.of<UserProvider>(context, listen: false).clearError();
-
-    if (_formKey.currentState!.validate()) {
-      final success = await Provider.of<UserProvider>(
-        context,
-        listen: false,
-      ).register(
-        name: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-        phone: _phoneController.text.trim(),
-        address: _addressController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      if (success && mounted) {
-        setState(() {
-          _isRegistrationComplete = true;
-        });
-      }
-    }
-  }
-
   Widget _buildVerificationInstructions(UserProvider userProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Header
         Text(
           'Xác thực email',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -294,7 +184,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         const SizedBox(height: 10),
         Text(
-          'Một link xác thực đã được gửi đến email ${_emailController.text}',
+          'Một link xác thực đã được gửi đến email ${userProvider.emailController.text}',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         const SizedBox(height: 20),
@@ -322,41 +212,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
           ),
         ),
-
-        const SizedBox(height: 30),
-
-        // Error message if any
-        if (userProvider.errorMessage != null)
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.red.shade100,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              userProvider.errorMessage!,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
         const SizedBox(height: 30),
 
         // Check verification button
         ElevatedButton(
           onPressed: userProvider.isLoading
               ? null
-              : () => _checkEmailVerification(context),
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 15),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          child: userProvider.isLoading
-              ? const CircularProgressIndicator()
-              : const Text(
-            'Tôi đã xác thực email',
-            style: TextStyle(fontSize: 16),
-          ),
+              : () async {
+            userProvider.setLoading(true); // Gọi setLoading thông qua userProvider
+            final success = await userProvider.checkEmailVerification(context);
+            userProvider.setLoading(false); // Gọi setLoading thông qua userProvider
+            if (success && mounted) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    (route) => false,
+              );
+            } else if (!success && mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(userProvider.errorMessage ?? "Có lỗi xảy ra trong quá trình xác thực.")),
+              );
+            }
+          },
+          child: userProvider.isLoading ? const CircularProgressIndicator() : const Text('Tôi đã xác thực email'),
         ),
         const SizedBox(height: 20),
 
@@ -368,7 +246,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             TextButton(
               onPressed: userProvider.isLoading
                   ? null
-                  : () => _resendVerificationEmail(context),
+                  : () => userProvider.resendVerificationEmail(context),
               child: const Text('Gửi lại email xác thực'),
             ),
           ],
@@ -388,60 +266,5 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ],
     );
-  }
-
-
-  Future<void> _checkEmailVerification(BuildContext context) async {
-    // Giả lập xác thực thành công (trong thực tế sẽ cần kiểm tra thông qua API)
-    // Hiển thị loading để người dùng biết đang xử lý
-    setState(() {
-      Provider.of<UserProvider>(context, listen: false).setLoading(true);
-    });
-
-    // Giả lập thời gian xử lý
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (mounted) {
-      // Kết thúc loading
-      Provider.of<UserProvider>(context, listen: false).setLoading(false);
-
-      // Hiển thị thông báo đăng ký thành công
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Đăng ký tài khoản thành công!'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ),
-      );
-
-      // Đợi 2s để người dùng đọc thông báo rồi chuyển màn hình
-      await Future.delayed(const Duration(seconds: 2));
-
-      if (mounted) {
-        // Chuyển đến màn hình đăng nhập và xóa tất cả màn hình trước đó (để không quay lại được)
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-              (route) => false,
-        );
-      }
-    }
-  }
-
-  Future<void> _resendVerificationEmail(BuildContext context) async {
-    // Clear any previous errors
-    Provider.of<UserProvider>(context, listen: false).clearError();
-
-    // Resend verification email
-    final success = await Provider.of<UserProvider>(
-      context,
-      listen: false,
-    ).resendVerificationEmail();
-
-    if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email xác thực đã được gửi lại')),
-      );
-    }
   }
 }

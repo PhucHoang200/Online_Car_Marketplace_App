@@ -4,10 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../providers/post_provider.dart';
 import 'package:online_car_marketplace_app/models/post_with_car_and_images.dart';
 import 'package:online_car_marketplace_app/providers/brand_provider.dart';
-import '../../../models/post_model.dart';
-import 'package:online_car_marketplace_app/navigation/app_router.dart';
-import 'package:online_car_marketplace_app/models/user_model.dart';
-import 'package:online_car_marketplace_app/ui/screen/user/profile_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class BuyScreen extends StatefulWidget {

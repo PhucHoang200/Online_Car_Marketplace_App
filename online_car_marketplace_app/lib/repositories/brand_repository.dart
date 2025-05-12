@@ -8,7 +8,7 @@ class BrandRepository {
     await _firestore.doc('brands/${brand.id}').set(brand.toMap());
   }
 
-  // Thêm brand với ID tự động tăng
+  //Thêm brand với ID tự động tăng
   Future<void> addBrandAutoIncrement(Brand brand) async {
     final snapshot = await _firestore
         .collection('brands')

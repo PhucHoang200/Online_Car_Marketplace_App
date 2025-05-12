@@ -1,18 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'dart:math';
-import '../models/user_model.dart';
+import 'package:online_car_marketplace_app/models/user_model.dart';
 
 class UserRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
 
-  // Store OTP codes for verification (in a real app, these would be sent via email)
-  final Map<String, String> _otpCodes = {};
   // Store pending registrations
   final Map<String, User> _pendingRegistrations = {};
-  // Store emails for password reset
-  final Map<String, String> _resetOtpCodes = {};
 
   //Hàm thêm user thủ công
   Future<void> addUser(User user) async {
@@ -91,6 +86,23 @@ class UserRepository {
     }
   }
 
+  Future<String?> getUserDocumentId(String uid) async {
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .where('uid', isEqualTo: uid)
+          .limit(1)
+          .get();
+      if (snapshot.docs.isNotEmpty) {
+        return snapshot.docs.first.id;
+      }
+      return null;
+    } catch (e) {
+      print('Error fetching user document ID: $e');
+      return null;
+    }
+  }
+
   Future<void> updateUser(User user) async {
     await _firestore
         .collection('users')
@@ -147,9 +159,6 @@ class UserRepository {
     }
   }
 
-
-
-  // Đăng xuất
   Future<void> logout() async {
     await _auth.signOut();
   }
@@ -171,22 +180,8 @@ class UserRepository {
         password: password,
       );
 
-      final newUser = User(
-        id: 0,
-        uid: authResult.user!.uid,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        address: user.address,
-        avatarUrl: user.avatarUrl,
-        roleId: user.roleId,
-        status: user.status,
-        creationDate: user.creationDate,
-        updateDate: user.updateDate,
-      );
-
-      // Lưu vào Firestore
-      await addUserAutoIncrement(newUser);
+      // Lưu thông tin người dùng tạm thời để lưu vào Firestore sau khi xác thực email
+      _pendingRegistrations[user.email] = user.copyWith(uid: authResult.user!.uid);
 
       // Gửi email xác thực
       await authResult.user!.sendEmailVerification();
@@ -204,7 +199,6 @@ class UserRepository {
       };
     }
   }
-
 
   Future<Map<String, dynamic>> checkEmailVerification() async {
     try {
@@ -316,5 +310,7 @@ class UserRepository {
 
   // Lắng nghe thay đổi trạng thái xác thực
   Stream<auth.User?> get authStateChanges => _auth.authStateChanges();
+
+
 }
 

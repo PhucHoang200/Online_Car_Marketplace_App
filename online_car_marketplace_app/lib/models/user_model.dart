@@ -60,4 +60,32 @@ class User {
     'creationDate': creationDate,
     'updateDate': updateDate,
   };
+
+  User copyWith({
+    int? id,
+    String? uid,
+    String? name,
+    String? email,
+    String? phone,
+    String? address,
+    String? avatarUrl,
+    int? roleId,
+    String? status,
+    Timestamp? creationDate,
+    Timestamp? updateDate,
+  }) {
+    return User(
+      id: id ?? this.id,
+      uid: uid ?? this.uid,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      address: address ?? this.address,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      roleId: roleId ?? this.roleId,
+      status: status ?? this.status,
+      creationDate: creationDate ?? this.creationDate,
+      updateDate: updateDate ?? this.updateDate,
+    );
+  }
 }

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-import '../../../models/post_model.dart';
-import '../../../providers/post_provider.dart';
-import 'package:online_car_marketplace_app/navigation/app_router.dart';
 import 'package:online_car_marketplace_app/providers/brand_provider.dart';
+
 
 class SellScreen extends StatefulWidget {
   const SellScreen({super.key});
@@ -107,26 +104,39 @@ class _SellScreenState extends State<SellScreen> {
   }
 
   Widget _buildBrandSelector() {
-    return Consumer<BrandProvider>(
-      builder: (context, brandProvider, child) {
-        if (brandProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
+  return Consumer<BrandProvider>(
+    builder: (context, brandProvider, child) {
+      if (brandProvider.isLoading) {
+        return const Center(child: CircularProgressIndicator());
+      }
 
-        final brands = brandProvider.brands;
+      final brands = brandProvider.brands;
 
-        if (brands.isEmpty) {
-          return const Center(child: Text('No brands available'));
-        }
+      if (brands.isEmpty) {
+        return const Center(child: Text('No brands available'));
+      }
 
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: brands.map((brand) {
-              final brandName = brand.name.toUpperCase();
-              final brandAvatarPath = 'assets/brands/${brand.name.toLowerCase()}.png';
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: brands.map((brand) {
+            final brandName = brand.name.toUpperCase();
+            final brandAvatarPath = 'assets/brands/${brand.name.toLowerCase()}.png';
 
-              return Padding(
+            return GestureDetector(
+              onTap: () {
+                debugPrint('Brand clicked: $brandName');
+                // Debug log để kiểm tra giá trị và kiểu dữ liệu của brand.id
+                debugPrint('Brand ID: ${brand.id}, Type: ${brand.id.runtimeType}');
+                debugPrint('Brand Name: $brandName');
+                
+                context.push(
+                  // '/models?brandId=${brand.id}&brandName=${Uri.encodeComponent(brand.name)}',
+                  '/models?brandId=${brand.id.toString()}&brandName=${Uri.encodeComponent(brand.name)}', // Chuyển đổi brand.id thành String
+                );
+
+              },
+              child: Padding(
                 padding: const EdgeInsets.only(right: 16),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -143,13 +153,14 @@ class _SellScreenState extends State<SellScreen> {
                     Text(brandName, style: const TextStyle(fontSize: 12)),
                   ],
                 ),
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
-  }
+              ),
+            );
+          }).toList(),
+        ),
+      );
+    },
+  );
+}
 
 
   Widget _buildBottomNavBar() {
