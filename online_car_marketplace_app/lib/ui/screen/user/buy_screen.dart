@@ -91,9 +91,9 @@ class _BuyScreenState extends State<BuyScreen> {
   }
 
   Widget _buildTopBar() {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: const [
+      children: [
         Icon(Icons.notifications_none),
         CircleAvatar(backgroundColor: Colors.grey, radius: 18),
       ],
@@ -122,35 +122,54 @@ class _BuyScreenState extends State<BuyScreen> {
         final brands = brandProvider.brands;
 
         if (brands.isEmpty) {
-          return const Text('No brands found');
+          return const SizedBox.shrink();
         }
 
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: brands.map((brand) {
+        return SizedBox(
+          height: 90, // Tăng chiều cao để phù hợp với thiết kế
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: brands.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 12), // Khoảng cách giữa các logo
+            itemBuilder: (context, index) {
+              final brand = brands[index];
               final brandName = brand.name.toUpperCase();
               final brandAvatarPath = 'assets/brands/${brand.name.toLowerCase()}.png';
 
-              return Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ClipOval(
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 60, // Tăng kích thước logo
+                    height: 60,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white, // Thêm background trắng cho logo
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3),
+                          spreadRadius: 1,
+                          blurRadius: 3,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0), // Thêm padding cho hình ảnh
                       child: Image.asset(
                         brandAvatarPath,
-                        width: 48,
-                        height: 48,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.contain, // Đảm bảo logo hiển thị đầy đủ
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(brandName, style: const TextStyle(fontSize: 10)),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    brandName,
+                    style: const TextStyle(fontSize: 12), // Tăng kích thước chữ
+                  ),
+                ],
               );
-            }).toList(),
+            },
           ),
         );
       },
@@ -161,34 +180,129 @@ class _BuyScreenState extends State<BuyScreen> {
     return ListView.builder(
       itemCount: posts.length,
       itemBuilder: (context, index) {
-        final post = posts[index];
-        final car = post.car;
-        final imageUrl = post.imageUrls.isNotEmpty ? post.imageUrls.first : null;
+        final postWithDetails = posts[index];
+        final post = postWithDetails.post;
+        final car = postWithDetails.car;
+        final imageUrl = postWithDetails.imageUrls.isNotEmpty ? postWithDetails.imageUrls.first : null;
 
         return Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 4,
           margin: const EdgeInsets.only(bottom: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 1,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (imageUrl != null)
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: Image.network(imageUrl, width: double.infinity, height: 180, fit: BoxFit.cover),
-                ),
               Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
+                padding: const EdgeInsets.only(left: 12, top: 12, right: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(post.post.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                    Text(post.post.description),
+                    Expanded(
+                      child: Text(
+                        post.title,
+                        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     if (car != null)
                       Text(
-                        "${car.year} • ${car.mileage} km • ${car.fuelType} • ${car.price.toStringAsFixed(0)}\$",
-                        style: const TextStyle(color: Colors.grey),
+                        '${car.price.toStringAsFixed(0)} \$',
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent, fontSize: 16),
                       ),
+                  ],
+                ),
+              ),
+              if (imageUrl != null)
+                Padding(
+                  padding: const EdgeInsets.only(left: 12, right: 12, top: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            imageUrl,
+                            width: double.infinity,
+                            height: 120,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 3,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                post.description,
+                                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 8),
+                              if (car != null)
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${car.year} • ${car.mileage} km',
+                                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                    ),
+                                    Text(
+                                      car.fuelType,
+                                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              const Padding(
+                padding: EdgeInsets.only(top: 12),
+                child: Divider(height: 1, color: Colors.grey),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.person_outline, size: 16, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Text(postWithDetails.sellerName ?? 'N/A', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                        if (postWithDetails.sellerPhone != null && postWithDetails.sellerPhone!.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.phone_outlined, size: 16, color: Colors.grey),
+                                const SizedBox(width: 4),
+                                Text(postWithDetails.sellerPhone!, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on_outlined, size: 16, color: Colors.grey),
+                        const SizedBox(width: 4),
+                        Text(postWithDetails.carLocation ?? 'N/A', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -198,6 +312,7 @@ class _BuyScreenState extends State<BuyScreen> {
       },
     );
   }
+
 
   Widget _buildBottomNavBar() {
     return BottomNavigationBar(

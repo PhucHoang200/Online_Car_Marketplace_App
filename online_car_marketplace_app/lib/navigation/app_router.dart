@@ -27,18 +27,18 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const LoginScreen(),
     ),
     GoRoute(
+      path: '/profile',
+      builder: (context, state) {
+        final uId = state.extra as String;
+        return ProfileScreen(uid: uId);
+      },
+    ),
+    GoRoute(
       path: '/buy',
       builder: (context, state) {
         // Lấy tham số từ extra
         final uId = state.extra as String;  // Truyền qua extra
         return BuyScreen(uid: uId);  // Truyền userId vào BuyScreen
-      },
-    ),
-    GoRoute(
-      path: '/profile',
-      builder: (context, state) {
-        final uId = state.extra as String;
-        return ProfileScreen(uid: uId);
       },
     ),
     GoRoute(

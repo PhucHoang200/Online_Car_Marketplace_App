@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_car_marketplace_app/utils/validators/car_validator.dart';
 
 class Car {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:online_car_marketplace_app/providers/brand_provider.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SellScreen extends StatefulWidget {
   const SellScreen({super.key});
@@ -62,11 +62,11 @@ class _SellScreenState extends State<SellScreen> {
         alignment: Alignment.bottomLeft,
         children: [
           Image.asset('assets/images/car mask.png', height: 180, width: double.infinity, fit: BoxFit.cover),
-          Padding(
-            padding: const EdgeInsets.all(12),
+          const Padding(
+            padding: EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text("Sell your car at", style: TextStyle(color: Colors.white, fontSize: 18)),
                 Text("Best price", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22)),
               ],
@@ -94,7 +94,16 @@ class _SellScreenState extends State<SellScreen> {
         Align(
           alignment: Alignment.centerRight,
           child: ElevatedButton(
-            onPressed: () => context.go('/buy'),
+            onPressed: () {
+              // Lấy userId hiện tại (bạn cần có logic để lấy userId này)
+              final String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
+              if (currentUserId != null) {
+                context.go('/buy', extra: currentUserId);
+              } else {
+                // Xử lý trường hợp không có userId (ví dụ: điều hướng mà không có uid)
+                context.go('/buy', extra: ''); // Hoặc một giá trị mặc định, hoặc xử lý khác
+              }
+            },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[300]),
             child: const Text("Switch to Buy", style: TextStyle(color: Colors.black)),
           ),
@@ -104,64 +113,79 @@ class _SellScreenState extends State<SellScreen> {
   }
 
   Widget _buildBrandSelector() {
-  return Consumer<BrandProvider>(
-    builder: (context, brandProvider, child) {
-      if (brandProvider.isLoading) {
-        return const Center(child: CircularProgressIndicator());
-      }
+    return Consumer<BrandProvider>(
+      builder: (context, brandProvider, child) {
+        if (brandProvider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-      final brands = brandProvider.brands;
+        final brands = brandProvider.brands;
 
-      if (brands.isEmpty) {
-        return const Center(child: Text('No brands available'));
-      }
+        if (brands.isEmpty) {
+          return const Center(child: Text('No brands available'));
+        }
 
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: brands.map((brand) {
-            final brandName = brand.name.toUpperCase();
-            final brandAvatarPath = 'assets/brands/${brand.name.toLowerCase()}.png';
+        return SizedBox(
+          height: 90, // Tăng chiều cao để phù hợp với thiết kế
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: brands.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 12), // Khoảng cách giữa các logo
+            itemBuilder: (context, index) {
+              final brand = brands[index];
+              final brandName = brand.name.toUpperCase();
+              final brandAvatarPath = 'assets/brands/${brand.name.toLowerCase()}.png';
 
-            return GestureDetector(
-              onTap: () {
-                debugPrint('Brand clicked: $brandName');
-                // Debug log để kiểm tra giá trị và kiểu dữ liệu của brand.id
-                debugPrint('Brand ID: ${brand.id}, Type: ${brand.id.runtimeType}');
-                debugPrint('Brand Name: $brandName');
-                
-                context.push(
-                  // '/models?brandId=${brand.id}&brandName=${Uri.encodeComponent(brand.name)}',
-                  '/models?brandId=${brand.id.toString()}&brandName=${Uri.encodeComponent(brand.name)}', // Chuyển đổi brand.id thành String
-                );
+              return GestureDetector(
+                onTap: () {
+                  debugPrint('Brand clicked: $brandName');
+                  debugPrint('Brand ID: ${brand.id}, Type: ${brand.id.runtimeType}');
+                  debugPrint('Brand Name: $brandName');
 
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(right: 16),
+                  context.push(
+                    '/models?brandId=${brand.id.toString()}&brandName=${Uri.encodeComponent(brand.name)}', // Chuyển đổi brand.id thành String
+                  );
+                },
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    ClipOval(
-                      child: Image.asset(
-                        brandAvatarPath,
-                        width: 48,
-                        height: 48,
-                        fit: BoxFit.cover,
+                    Container(
+                      width: 60, // Tăng kích thước logo
+                      height: 60,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white, // Thêm background trắng cho logo
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            spreadRadius: 1,
+                            blurRadius: 3,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0), // Thêm padding cho hình ảnh
+                        child: Image.asset(
+                          brandAvatarPath,
+                          fit: BoxFit.contain, // Đảm bảo logo hiển thị đầy đủ
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(brandName, style: const TextStyle(fontSize: 12)),
+                    const SizedBox(height: 6),
+                    Text(
+                      brandName,
+                      style: const TextStyle(fontSize: 12), // Tăng kích thước chữ
+                    ),
                   ],
                 ),
-              ),
-            );
-          }).toList(),
-        ),
-      );
-    },
-  );
-}
-
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
 
   Widget _buildBottomNavBar() {
     return BottomNavigationBar(

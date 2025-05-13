@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/post_model.dart';
 import '../models/car_model.dart';
 
-
 class PostRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -38,7 +37,7 @@ class PostRepository {
         .doc(newPost.id.toString())
         .set(newPost.toMap());
   }
-  
+
   Future<List<Post>> getPosts() async {
     final snapshot = await _firestore.collection('posts').get();
     return snapshot.docs.map((doc) => Post.fromMap(doc.data())).toList();
@@ -47,28 +46,49 @@ class PostRepository {
   /// Lấy danh sách post kèm car và danh sách ảnh (từ carId)
   Future<List<Map<String, dynamic>>> getPostsWithCarAndImages() async {
     final postsSnapshot = await _firestore.collection('posts').get();
-
     List<Map<String, dynamic>> results = [];
 
     for (var doc in postsSnapshot.docs) {
-      final post = Post.fromMap(doc.data());
+      final post = Post.fromMap(doc.data() as Map<String, dynamic>);
+      Car? car;
+      String? sellerName;
+      String? sellerPhone;
+      String? carLocation;
+      List<String> imageUrls = [];
 
-      // Lấy car theo carId
-      final carDoc = await _firestore.collection('cars').doc(post.carId.toString()).get();
-      Car? car = carDoc.exists ? Car.fromMap(carDoc.data()!) : null;
+      // Lấy thông tin xe
+      if (post.carId != null) {
+        final carDoc = await _firestore.collection('cars').doc(post.carId.toString()).get();
+        if (carDoc.exists) {
+          final carData = carDoc.data() as Map<String, dynamic>;
+          car = Car.fromMap(carData);
+          carLocation = carData['location'] as String?;
+        }
+      }
 
-      // Lấy ảnh theo carId
+      // Lấy thông tin người dùng
+      if (post.userId != null) {
+        final userDoc = await _firestore.collection('users').doc(post.userId.toString()).get();
+        if (userDoc.exists) {
+          final userData = userDoc.data() as Map<String, dynamic>;
+          sellerName = userData['name'] as String?;
+          sellerPhone = userData['phone'] as String?;
+        }
+      }
+
+      // Lấy ảnh
       final imagesSnapshot = await _firestore
           .collection('images')
           .where('carId', isEqualTo: post.carId)
           .get();
-      List<String> imageUrls = imagesSnapshot.docs.map((doc) => doc['url'] as String).toList();
-
-      print('Post ID: ${post.id}, Car ID: ${post.carId}, Images: $imageUrls');
+      imageUrls = imagesSnapshot.docs.map((e) => e['url'] as String).toList();
 
       results.add({
         'post': post,
         'car': car,
+        'sellerName': sellerName,
+        'sellerPhone': sellerPhone,
+        'carLocation': carLocation,
         'images': imageUrls,
       });
     }
