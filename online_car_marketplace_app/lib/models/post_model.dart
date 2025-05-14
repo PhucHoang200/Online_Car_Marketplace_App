@@ -7,7 +7,7 @@ class Post {
   final int carId;
   final String title;
   final String description;
-  final String status;
+  // final String status;
   final Timestamp creationDate;
 
   Post({
@@ -16,9 +16,9 @@ class Post {
     required this.carId,
     required this.title,
     required this.description,
-    required String status,
+    // required String status,
     required this.creationDate,
-  }) : status = PostValidator.validateStatus(status) ;
+  }); //: status = PostValidator.validateStatus(status) ;
 
   factory Post.fromMap(Map<String, dynamic> map) {
     return Post(
@@ -27,7 +27,7 @@ class Post {
       carId: map['carId'] as int,
       title: map['title'] as String,
       description: map['description'] as String,
-      status: map['status'] as String,
+      // status: map['status'] as String,
       creationDate: map['creationDate'] as Timestamp,
     );
   }
@@ -38,7 +38,7 @@ class Post {
     'carId': carId,
     'title': title,
     'description': description,
-    'status': status,
+    // 'status': status,
     'creationDate': creationDate,
   };
 }

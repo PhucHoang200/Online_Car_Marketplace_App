@@ -28,7 +28,7 @@ class PostRepository {
       carId: post.carId,
       title: post.title,
       description: post.description,
-      status: post.status,
+      // status: post.status,
       creationDate: post.creationDate,
     );
 
