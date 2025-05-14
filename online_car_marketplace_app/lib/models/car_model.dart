@@ -6,7 +6,6 @@ class Car {
   final String transmission;
   final int year;
   final int mileage;
-  // final String licensePlate;
   final String location;
   final double price;
   final String condition;
@@ -20,12 +19,11 @@ class Car {
     required this.transmission,
     required this.year,
     required this.mileage,
-    // required String licensePlate,
     required this.location,
     required this.price,
     required this.condition,
     required this.origin,
-  }); //: licensePlate = CarValidator.validateLicensePlate(licensePlate);
+  });
 
   factory Car.fromMap(Map<String, dynamic> map) {
     return Car(
@@ -36,7 +34,6 @@ class Car {
       transmission: map['transmission'],
       year: map['year'],
       mileage: map['mileage'],
-      // licensePlate: map['licensePlate'],
       location: map['location'],
       price: (map['price'] as num).toDouble(),
       condition: map['condition'],
@@ -52,7 +49,6 @@ class Car {
     'transmission': transmission,
     'year': year,
     'mileage': mileage,
-    // 'licensePlate': licensePlate,
     'location': location,
     'price': price,
     'condition': condition,

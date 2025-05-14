@@ -1,6 +1,6 @@
 // screens/confirm_post_screen.dart
 import 'dart:io';
-
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -90,7 +90,8 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
       print("userId: $userId");
 
       final car = Car(
-        id: DateTime.now().millisecondsSinceEpoch,
+        // Không gán ID ở đây, để CarRepository xử lý
+        id: 0, // Giá trị tạm thời, sẽ được ghi đè bởi CarRepository
         userId: userId,
         modelId: 1,
         fuelType: widget.fuelType,
@@ -102,22 +103,26 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
         condition: widget.condition,
         origin: widget.origin,
       );
-      print("Đối tượng Car được tạo: ${car.toMap()}");
+      print("Đối tượng Car được tạo (ID tạm thời là 0): ${car.toMap()}");
 
       final carRepository = Provider.of<CarRepository>(context, listen: false);
       print("Đã lấy carRepository");
-      final String carId = await carRepository.addCarAutoIncrement(car);
+      final String carIdString = await carRepository.addCarAutoIncrement(car);
+      final int carId = int.parse(carIdString);
       print("carId sau khi addCarAutoIncrement: $carId");
+      print("widget.title: ${widget.title}");
+      print("widget.description: ${widget.description}");
 
       final post = Post(
-        id: DateTime.now().millisecondsSinceEpoch,
+        // Không gán ID ở đây, để PostRepository xử lý
+        id: 0, // Giá trị tạm thời, sẽ được ghi đè bởi PostRepository
         userId: userId,
-        carId: int.parse(carId),
-        title: widget.title,
-        description: widget.description,
+        carId: carId,
+        title: widget.title ?? "",
+        description: widget.description ?? "",
         creationDate: Timestamp.now(),
       );
-      print("Đối tượng Post được tạo: ${post.toMap()}");
+      print("Đối tượng Post được tạo (ID tạm thời là 0): ${post.toMap()}");
 
       final postRepository = Provider.of<PostRepository>(context, listen: false);
       print("Đã lấy postRepository");
@@ -127,8 +132,9 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
       final imageRepository = Provider.of<ImageRepository>(context, listen: false);
       print("Đã lấy imageRepository");
       final image = ImageModel(
-        id: DateTime.now().millisecondsSinceEpoch,
-        carId: int.parse(carId),
+        // Không gán ID ở đây, để Firestore tự động tạo (nếu cần) hoặc ImageRepository xử lý
+        id: 0,
+        carId: carId,
         url: _imageUrl!,
         creationDate: Timestamp.now(),
       );
@@ -140,9 +146,11 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
         const SnackBar(content: Text('Đăng bài thành công!')),
       );
       print("SnackBar thành công được hiển thị");
+      context.pop();
 
-    } catch (e) {
-      print("Lỗi trong _performPost: $e"); // In ra lỗi
+    } catch (e, stackTrace) { // Thêm tham số stackTrace
+      print("Lỗi trong _performPost: $e");
+      print("Stack Trace:\n$stackTrace"); // In ra stack trace
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Đã có lỗi xảy ra: $e')),
       );

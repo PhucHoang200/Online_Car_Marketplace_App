@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:online_car_marketplace_app/repositories/car_repository.dart';
 import 'package:online_car_marketplace_app/repositories/image_repository.dart';
+import 'package:online_car_marketplace_app/repositories/post_repository.dart';
 import 'package:online_car_marketplace_app/services/storage_service.dart';
 import 'package:provider/provider.dart';
 import 'package:online_car_marketplace_app/providers/post_provider.dart';
@@ -24,6 +25,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => CarProvider()),
         ChangeNotifierProvider(create: (_) => PostProvider()),
+        Provider<PostRepository>(create: (_) => PostRepository()),
         ChangeNotifierProvider(create: (_) => BrandProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ModelProvider()),
