@@ -33,24 +33,24 @@ class CarProvider with ChangeNotifier {
     }
   }
 
-  Future<void> updateCar(Car car) async {
-    try {
-      await _carRepository.updateCar(car);
-      await fetchCars(); // Cập nhật danh sách sau khi sửa
-    } catch (e) {
-      debugPrint('Lỗi khi cập nhật xe: $e');
-    }
-  }
-
-  Future<void> deleteCar(int id) async {
-    try {
-      await _carRepository.deleteCar(id);
-      _cars.removeWhere((car) => car.id == id);
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Lỗi khi xóa xe: $e');
-    }
-  }
+  // Future<void> updateCar(Car car) async {
+  //   try {
+  //     await _carRepository.updateCar(car);
+  //     await fetchCars(); // Cập nhật danh sách sau khi sửa
+  //   } catch (e) {
+  //     debugPrint('Lỗi khi cập nhật xe: $e');
+  //   }
+  // }
+  //
+  // Future<void> deleteCar(int id) async {
+  //   try {
+  //     await _carRepository.deleteCar(id);
+  //     _cars.removeWhere((car) => car.id == id);
+  //     notifyListeners();
+  //   } catch (e) {
+  //     debugPrint('Lỗi khi xóa xe: $e');
+  //   }
+  // }
 
   Car? getCarById(int id) {
     return _cars.firstWhere((car) => car.id == id, orElse: () => null as Car);

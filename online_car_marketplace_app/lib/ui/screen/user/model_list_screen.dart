@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:online_car_marketplace_app/providers/model_provider.dart';
+import 'year_selection_screen.dart';
 
 class ModelListScreen extends StatefulWidget {
   final String brandId;
@@ -57,8 +58,14 @@ class _ModelListScreenState extends State<ModelListScreen> {
         return ListTile(
           title: Text(model.name),
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Selected model: ${model.name}')),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => YearSelectionScreen(
+                  brandId: widget.brandId,
+                  modelName: model.name,
+                ),
+              ),
             );
           },
         );

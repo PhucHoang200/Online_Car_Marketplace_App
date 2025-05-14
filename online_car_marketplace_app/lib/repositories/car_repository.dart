@@ -4,11 +4,7 @@ import '../models/car_model.dart';
 class CarRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> addCar(Car car) async {
-    await _firestore.doc('cars/${car.id}').set(car.toMap());
-  }
-
-  Future<void> addCarAutoIncrement(Car car) async {
+  Future<String> addCarAutoIncrement(Car car) async {
     final snapshot = await _firestore
         .collection('cars')
         .orderBy('id', descending: true)
@@ -27,14 +23,18 @@ class CarRepository {
       modelId: car.modelId,
       year: car.year,
       price: car.price,
-      licensePlate: car.licensePlate,
       transmission: car.transmission,
       mileage: car.mileage,
       fuelType: car.fuelType,
       location: car.location,
+      condition: car.condition,
+      origin: car.origin,
     );
 
-    await _firestore.collection('cars').doc(newCar.id.toString()).set(newCar.toMap());
+    final DocumentReference<Map<String, dynamic>> docRef =
+    _firestore.collection('cars').doc(newCar.id.toString());
+    await docRef.set(newCar.toMap());
+    return docRef.id;
   }
 
   Future<List<Car>> getCars() async {
@@ -50,11 +50,11 @@ class CarRepository {
     return null;
   }
 
-  Future<void> updateCar(Car car) async {
-    await _firestore.collection('cars').doc(car.id.toString()).update(car.toMap());
-  }
-
-  Future<void> deleteCar(int id) async {
-    await _firestore.collection('cars').doc(id.toString()).delete();
-  }
+  // Future<void> updateCar(Car car) async {
+  //   await _firestore.collection('cars').doc(car.id.toString()).update(car.toMap());
+  // }
+  //
+  // Future<void> deleteCar(int id) async {
+  //   await _firestore.collection('cars').doc(id.toString()).delete();
+  // }
 }

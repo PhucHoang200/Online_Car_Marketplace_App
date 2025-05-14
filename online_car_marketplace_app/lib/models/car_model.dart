@@ -1,5 +1,3 @@
-import 'package:online_car_marketplace_app/utils/validators/car_validator.dart';
-
 class Car {
   final int id;
   final int userId;
@@ -8,9 +6,11 @@ class Car {
   final String transmission;
   final int year;
   final int mileage;
-  final String licensePlate;
+  // final String licensePlate;
   final String location;
   final double price;
+  final String condition;
+  final String origin;
 
   Car({
     required this.id,
@@ -20,10 +20,12 @@ class Car {
     required this.transmission,
     required this.year,
     required this.mileage,
-    required String licensePlate,
+    // required String licensePlate,
     required this.location,
     required this.price,
-  }) : licensePlate = CarValidator.validateLicensePlate(licensePlate);
+    required this.condition,
+    required this.origin,
+  }); //: licensePlate = CarValidator.validateLicensePlate(licensePlate);
 
   factory Car.fromMap(Map<String, dynamic> map) {
     return Car(
@@ -34,9 +36,11 @@ class Car {
       transmission: map['transmission'],
       year: map['year'],
       mileage: map['mileage'],
-      licensePlate: map['licensePlate'],
+      // licensePlate: map['licensePlate'],
       location: map['location'],
       price: (map['price'] as num).toDouble(),
+      condition: map['condition'],
+      origin: map['origin'],
     );
   }
 
@@ -48,8 +52,10 @@ class Car {
     'transmission': transmission,
     'year': year,
     'mileage': mileage,
-    'licensePlate': licensePlate,
+    // 'licensePlate': licensePlate,
     'location': location,
     'price': price,
+    'condition': condition,
+    'origin': origin,
   };
 }

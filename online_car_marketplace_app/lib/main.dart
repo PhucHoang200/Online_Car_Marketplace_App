@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:online_car_marketplace_app/repositories/car_repository.dart';
+import 'package:online_car_marketplace_app/repositories/image_repository.dart';
+import 'package:online_car_marketplace_app/services/storage_service.dart';
 import 'package:provider/provider.dart';
 import 'package:online_car_marketplace_app/providers/post_provider.dart';
 import 'package:online_car_marketplace_app/providers/brand_provider.dart';
@@ -7,6 +10,8 @@ import 'package:online_car_marketplace_app/providers/user_provider.dart';
 import 'package:online_car_marketplace_app/services/firebase_options.dart';
 import 'package:online_car_marketplace_app/navigation/app_router.dart';
 import 'package:online_car_marketplace_app/providers/model_provider.dart';
+import 'package:online_car_marketplace_app/providers/car_provider.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,10 +22,14 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => CarProvider()),
         ChangeNotifierProvider(create: (_) => PostProvider()),
         ChangeNotifierProvider(create: (_) => BrandProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ModelProvider()),
+        Provider<StorageService>(create: (_) => StorageService()),
+        Provider<CarRepository>(create: (_) => CarRepository()), // Provide CarRepository
+        Provider<ImageRepository>(create: (_) => ImageRepository()), // Provide ImageRepository
       ],
       child: const MyApp(),
     ),

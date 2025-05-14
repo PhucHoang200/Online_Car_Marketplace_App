@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:online_car_marketplace_app/utils/validators/post_validator.dart';
 
 class Post {
   final int id;
@@ -7,7 +6,6 @@ class Post {
   final int carId;
   final String title;
   final String description;
-  // final String status;
   final Timestamp creationDate;
 
   Post({
@@ -16,9 +14,8 @@ class Post {
     required this.carId,
     required this.title,
     required this.description,
-    // required String status,
     required this.creationDate,
-  }); //: status = PostValidator.validateStatus(status) ;
+  });
 
   factory Post.fromMap(Map<String, dynamic> map) {
     return Post(
@@ -27,7 +24,6 @@ class Post {
       carId: map['carId'] as int,
       title: map['title'] as String,
       description: map['description'] as String,
-      // status: map['status'] as String,
       creationDate: map['creationDate'] as Timestamp,
     );
   }
@@ -38,7 +34,6 @@ class Post {
     'carId': carId,
     'title': title,
     'description': description,
-    // 'status': status,
     'creationDate': creationDate,
   };
 }
