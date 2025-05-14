@@ -209,7 +209,7 @@ class _BuyScreenState extends State<BuyScreen> {
                     const SizedBox(width: 8),
                     if (car != null)
                       Text(
-                        '${car.price.toStringAsFixed(0)} \$',
+                        '${car.price.toStringAsFixed(0)} \Triệu đồng',
                         style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent, fontSize: 16),
                       ),
                   ],

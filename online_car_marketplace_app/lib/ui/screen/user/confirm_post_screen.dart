@@ -1,23 +1,18 @@
 // screens/confirm_post_screen.dart
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:online_car_marketplace_app/models/car_model.dart';
 import 'package:online_car_marketplace_app/models/post_model.dart';
 import 'package:online_car_marketplace_app/models/image_model.dart';
 import 'package:online_car_marketplace_app/repositories/post_repository.dart';
 import 'package:online_car_marketplace_app/repositories/car_repository.dart';
-import 'package:online_car_marketplace_app/services/storage_service.dart'; // Import StorageService
-import 'package:online_car_marketplace_app/repositories/image_repository.dart'; // Import ImageRepository
-
-import 'year_selection_screen.dart';
-import 'condition_origin_screen.dart';
-import 'fuel_transmission_screen.dart';
-import 'price_title_description_screen.dart';
+import 'package:online_car_marketplace_app/services/storage_service.dart';
+import 'package:online_car_marketplace_app/repositories/image_repository.dart';
 
 class ConfirmPostScreen extends StatefulWidget {
   final String brandId;
@@ -86,13 +81,26 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
       _imageUrl = await storageService.uploadImage(_selectedImage!);
       print("_imageUrl sau khi tải lên: $_imageUrl");
 
-      const userId = 123;
-      print("userId: $userId");
+      final User? user = FirebaseAuth.instance.currentUser;
+      final String? userIdString = user?.uid; // Lấy UID dưới dạng String
+      print("Giá trị userIdString: $userIdString");
+
+      if (userIdString == null) {
+        print("Lỗi: Không tìm thấy userId của người dùng.");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Bạn cần đăng nhập để đăng bài.')),
+        );
+        setState(() {
+          _isUploading = false;
+        });
+        return;
+      }
+
 
       final car = Car(
         // Không gán ID ở đây, để CarRepository xử lý
         id: 0, // Giá trị tạm thời, sẽ được ghi đè bởi CarRepository
-        userId: userId,
+        userId: userIdString,
         modelId: 1,
         fuelType: widget.fuelType,
         transmission: widget.transmission,
@@ -116,7 +124,7 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
       final post = Post(
         // Không gán ID ở đây, để PostRepository xử lý
         id: 0, // Giá trị tạm thời, sẽ được ghi đè bởi PostRepository
-        userId: userId,
+        userId: userIdString,
         carId: carId,
         title: widget.title ?? "",
         description: widget.description ?? "",

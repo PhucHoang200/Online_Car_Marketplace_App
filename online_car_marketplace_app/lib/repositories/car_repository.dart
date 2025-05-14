@@ -13,6 +13,7 @@ class CarRepository {
 
     int nextId = 1;
     if (snapshot.docs.isNotEmpty) {
+      print("Kiểu dữ liệu userId từ Firestore: ${snapshot.docs.runtimeType}");
       final lastCar = Car.fromMap(snapshot.docs.first.data());
       nextId = lastCar.id + 1;
     }

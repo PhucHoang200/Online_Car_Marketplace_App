@@ -1,6 +1,6 @@
 class Car {
   final int id;
-  final int userId;
+  final String? userId;
   final int modelId;
   final String fuelType;
   final String transmission;
@@ -28,7 +28,7 @@ class Car {
   factory Car.fromMap(Map<String, dynamic> map) {
     return Car(
       id: map['id'],
-      userId: map['userId'],
+      userId: map['userId'] as String?,
       modelId: map['modelId'],
       fuelType: map['fuelType'],
       transmission: map['transmission'],

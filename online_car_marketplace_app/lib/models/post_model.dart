@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Post {
   final int id;
-  final int userId;
+  final String? userId;
   final int carId;
   final String title;
   final String description;
@@ -20,7 +20,7 @@ class Post {
   factory Post.fromMap(Map<String, dynamic> map) {
     return Post(
       id: map['id'] as int,
-      userId: map['userId'] as int,
+      userId: map['userId'] as String?,
       carId: map['carId'] as int,
       title: map['title'] as String,
       description: map['description'] as String,
