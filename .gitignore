@@ -121,3 +121,4 @@ app.*.symbols
 # Firebase configuration files
 google-services.json
 firebase_options.dart
+storage_service.dart
