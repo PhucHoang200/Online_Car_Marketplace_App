@@ -271,19 +271,40 @@ class _BuyScreenState extends State<BuyScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 if (car != null)
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                  Row(
                                     children: [
-                                      Text(
-                                        '• ${car.transmission}            • ${car.condition} ',
-                                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              '• Số tự động',
+                                              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                                            ),
+                                            Text(
+                                              '• Máy xăng',
+                                              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                      Text(
-                                        '• Máy ${car.fuelType}       • ${car.mileage} km',
-                                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              '• Xe cũ',
+                                              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                                            ),
+                                            Text(
+                                              '• 100.000 km',
+                                              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ],
-                                  ),
+                                  )
                               ],
                             ),
                           ),

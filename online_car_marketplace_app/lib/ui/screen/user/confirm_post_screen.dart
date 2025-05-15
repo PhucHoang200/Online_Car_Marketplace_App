@@ -1,8 +1,8 @@
 // screens/confirm_post_screen.dart
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,6 +13,7 @@ import 'package:online_car_marketplace_app/repositories/post_repository.dart';
 import 'package:online_car_marketplace_app/repositories/car_repository.dart';
 import 'package:online_car_marketplace_app/services/storage_service.dart';
 import 'package:online_car_marketplace_app/repositories/image_repository.dart';
+import 'image_upload_screen.dart'; // Import để quay lại màn hình tải ảnh
 
 class ConfirmPostScreen extends StatefulWidget {
   final String brandId;
@@ -26,6 +27,7 @@ class ConfirmPostScreen extends StatefulWidget {
   final double price;
   final String title;
   final String description;
+  final XFile? selectedImage;
 
   const ConfirmPostScreen({
     super.key,
@@ -40,6 +42,7 @@ class ConfirmPostScreen extends StatefulWidget {
     required this.price,
     required this.title,
     required this.description,
+    this.selectedImage,
   });
 
   @override
@@ -50,6 +53,12 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
   XFile? _selectedImage;
   String? _imageUrl;
   bool _isUploading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedImage = widget.selectedImage; // Khởi tạo ảnh từ tham số
+  }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -98,8 +107,7 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
 
 
       final car = Car(
-        // Không gán ID ở đây, để CarRepository xử lý
-        id: 0, // Giá trị tạm thời, sẽ được ghi đè bởi CarRepository
+        id: 0,
         userId: userIdString,
         modelId: 1,
         fuelType: widget.fuelType,
@@ -122,8 +130,7 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
       print("widget.description: ${widget.description}");
 
       final post = Post(
-        // Không gán ID ở đây, để PostRepository xử lý
-        id: 0, // Giá trị tạm thời, sẽ được ghi đè bởi PostRepository
+        id: 0,
         userId: userIdString,
         carId: carId,
         title: widget.title ?? "",
@@ -140,7 +147,6 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
       final imageRepository = Provider.of<ImageRepository>(context, listen: false);
       print("Đã lấy imageRepository");
       final image = ImageModel(
-        // Không gán ID ở đây, để Firestore tự động tạo (nếu cần) hoặc ImageRepository xử lý
         id: 0,
         carId: carId,
         url: _imageUrl!,
@@ -155,10 +161,9 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
       );
       print("SnackBar thành công được hiển thị");
       context.pop();
-
-    } catch (e, stackTrace) { // Thêm tham số stackTrace
+    } catch (e, stackTrace) {
       print("Lỗi trong _performPost: $e");
-      print("Stack Trace:\n$stackTrace"); // In ra stack trace
+      print("Stack Trace:\n$stackTrace");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Đã có lỗi xảy ra: $e')),
       );
@@ -170,66 +175,26 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
     }
   }
 
-  void _showConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('Xác nhận thông tin'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildInfoRow('Hãng xe:', widget.brandId),
-                _buildInfoRow('Dòng xe:', widget.modelName),
-                _buildInfoRow('Năm sản xuất:', widget.selectedYear),
-                _buildInfoRow('Tình trạng:', widget.condition),
-                _buildInfoRow('Xuất xứ:', widget.origin),
-                if (widget.condition == 'Cũ') _buildInfoRow('Số km đã đi:', '${widget.mileage} km'),
-                _buildInfoRow('Nhiên liệu:', widget.fuelType),
-                _buildInfoRow('Hộp số:', widget.transmission),
-                _buildInfoRow('Giá bán:', '${widget.price} TRIỆU VND'),
-                _buildInfoRow('Tiêu đề:', widget.title),
-                _buildInfoRow('Mô tả:', widget.description),
-                const SizedBox(height: 16),
-                if (_selectedImage != null)
-                  Image.file(
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                    File(_selectedImage!.path),
-                  )
-                else
-                  const Text('Chưa chọn ảnh'),
-              ],
+  Widget _buildInfoRow(String label, String value, VoidCallback? onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Expanded(
+              child: Text(
+                value,
+                textAlign: TextAlign.right,
+                style: const TextStyle(color: Colors.black87),
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Đóng'),
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Đăng bài'),
-              onPressed: !_isUploading ? _performPost : null, // Gọi _performPost khi nhấn đăng bài
-            ),
+            if (onTap != null)
+              const Icon(Icons.edit, size: 16, color: Colors.grey),
           ],
-        );
-      },
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-          Text(value),
-        ],
+        ),
       ),
     );
   }
@@ -237,17 +202,106 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Chọn ảnh & Đăng bài')),
-      body: Padding(
+      appBar: AppBar(
+        title: const Text('Xem lại & Đăng bài'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, _selectedImage);
+          },
+        ),
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Chọn ảnh cho bài đăng:', style: TextStyle(fontSize: 16)),
+            const Text('Thông tin bài đăng:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            Center(
-              child: GestureDetector(
-                onTap: _pickImage,
+            _buildInfoRow('Hãng xe:', widget.brandId, () {
+              // TODO: Navigate back to brand selection screen
+              print('Chỉnh sửa hãng xe');
+              // Ví dụ: Navigator.push(...) đến màn hình chọn hãng xe
+            }),
+            _buildInfoRow('Dòng xe:', widget.modelName, () {
+              // TODO: Navigate back to model selection screen
+              print('Chỉnh sửa dòng xe');
+              // Ví dụ: Navigator.push(...) đến màn hình chọn dòng xe
+            }),
+            _buildInfoRow('Năm sản xuất:', widget.selectedYear, () {
+              // TODO: Navigate back to year selection screen
+              print('Chỉnh sửa năm sản xuất');
+              // Ví dụ: Navigator.push(...) đến màn hình chọn năm sản xuất
+            }),
+            _buildInfoRow('Tình trạng:', widget.condition, () {
+              // TODO: Navigate back to condition selection screen
+              print('Chỉnh sửa tình trạng');
+              // Ví dụ: Navigator.push(...) đến màn hình chọn tình trạng
+            }),
+            _buildInfoRow('Xuất xứ:', widget.origin, () {
+              // TODO: Navigate back to origin selection screen
+              print('Chỉnh sửa xuất xứ');
+              // Ví dụ: Navigator.push(...) đến màn hình chọn xuất xứ
+            }),
+            if (widget.condition == 'Cũ')
+              _buildInfoRow('Số km đã đi:', '${widget.mileage} km', () {
+                // TODO: Navigate back to mileage input screen
+                print('Chỉnh sửa số km đã đi');
+                // Ví dụ: Navigator.push(...) đến màn hình nhập số km
+              }),
+            _buildInfoRow('Nhiên liệu:', widget.fuelType, () {
+              // TODO: Navigate back to fuel type selection screen
+              print('Chỉnh sửa nhiên liệu');
+              // Ví dụ: Navigator.push(...) đến màn hình chọn nhiên liệu
+            }),
+            _buildInfoRow('Hộp số:', widget.transmission, () {
+              // TODO: Navigate back to transmission selection screen
+              print('Chỉnh sửa hộp số');
+              // Ví dụ: Navigator.push(...) đến màn hình chọn hộp số
+            }),
+            _buildInfoRow('Giá bán:', '${widget.price} TRIỆU VND', () {
+              // TODO: Navigate back to price input screen
+              print('Chỉnh sửa giá bán');
+              // Ví dụ: Navigator.push(...) đến màn hình nhập giá
+            }),
+            _buildInfoRow('Tiêu đề:', widget.title, () {
+              // TODO: Navigate back to title input screen
+              print('Chỉnh sửa tiêu đề');
+              // Ví dụ: Navigator.push(...) đến màn hình nhập tiêu đề
+            }),
+            _buildInfoRow('Mô tả:', widget.description, () {
+              // TODO: Navigate back to description input screen
+              print('Chỉnh sửa mô tả');
+              // Ví dụ: Navigator.push(...) đến màn hình nhập mô tả
+            }),
+            const SizedBox(height: 24),
+            const Text('Ảnh đã chọn:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ImageUploadScreen(
+                      brandId: widget.brandId,
+                      modelName: widget.modelName,
+                      selectedYear: widget.selectedYear,
+                      condition: widget.condition,
+                      origin: widget.origin,
+                      mileage: widget.mileage,
+                      fuelType: widget.fuelType,
+                      transmission: widget.transmission,
+                      price: widget.price,
+                      title: widget.title,
+                      description: widget.description,
+                      initialImage: _selectedImage,
+                    ),
+                  ),
+                );
+              },
+              child: Center(
                 child: Container(
                   width: 150,
                   height: 150,
@@ -256,26 +310,25 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
                   ),
                   child: _selectedImage != null
                       ? Image.file(File(_selectedImage!.path), fit: BoxFit.cover)
-                      : const Center(child: Icon(Icons.add_a_photo, size: 48, color: Colors.grey)),
+                      : const Center(
+                      child: Icon(Icons.add_a_photo,
+                          size: 48, color: Colors.grey)),
                 ),
               ),
             ),
             const SizedBox(height: 24),
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                  _showConfirmationDialog(context);
-                },
-                child: const Text('Xem lại thông tin & Đăng bài'),
+                onPressed: !_isUploading ? _performPost : null,
+                child: _isUploading
+                    ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+                    : const Text('Đăng bài'),
               ),
             ),
-            if (_isUploading)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.only(top: 16.0),
-                  child: CircularProgressIndicator(),
-                ),
-              ),
           ],
         ),
       ),

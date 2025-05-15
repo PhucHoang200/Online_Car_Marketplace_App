@@ -35,44 +35,44 @@ class _ModelListScreenState extends State<ModelListScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('Models of ${widget.name}')),
       body: FutureBuilder<void>(
-  future: _fetchFuture,
-  builder: (context, snapshot) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (snapshot.hasError) {
-      return Center(child: Text('Error: ${snapshot.error}'));
-    }
+        future: _fetchFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
 
-    final models = modelProvider.models;
-    debugPrint('Models in provider: $models');
+          final models = modelProvider.models;
+          debugPrint('Models in provider: $models');
 
-    if (models.isEmpty) {
-      return const Center(child: Text('No models found.'));
-    }
+          if (models.isEmpty) {
+            return const Center(child: Text('No models found.'));
+          }
 
-    return ListView.builder(
-      itemCount: models.length,
-      itemBuilder: (context, index) {
-        final model = models[index];
-        return ListTile(
-          title: Text(model.name),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => YearSelectionScreen(
-                  brandId: widget.brandId,
-                  modelName: model.name,
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  },
-),
+          return ListView.builder(
+            itemCount: models.length,
+            itemBuilder: (context, index) {
+              final model = models[index];
+              return ListTile(
+                title: Text(model.name),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => YearSelectionScreen(
+                        brandId: widget.brandId,
+                        modelName: model.name,
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

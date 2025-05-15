@@ -1,6 +1,9 @@
 // screens/image_upload_screen.dart
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'confirm_post_screen.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ImageUploadScreen extends StatefulWidget {
   final String brandId;
@@ -14,6 +17,7 @@ class ImageUploadScreen extends StatefulWidget {
   final double price;
   final String title;
   final String description;
+  final XFile? initialImage;
 
   const ImageUploadScreen({
     super.key,
@@ -28,6 +32,7 @@ class ImageUploadScreen extends StatefulWidget {
     required this.price,
     required this.title,
     required this.description,
+    this.initialImage,
   });
 
   @override
@@ -35,21 +40,56 @@ class ImageUploadScreen extends StatefulWidget {
 }
 
 class _ImageUploadScreenState extends State<ImageUploadScreen> {
+  XFile? _selectedImage;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedImage = widget.initialImage; // Khởi tạo ảnh nếu có
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      _selectedImage = pickedFile;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tải ảnh lên')),
+      appBar: AppBar(
+          title: const Text('Tải ảnh lên'),
+          leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () {
+            Navigator.pop(context, _selectedImage); // Trả về ảnh khi đóng
+          },
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             const Text('Chọn ảnh từ máy của bạn để tải lên'),
             const SizedBox(height: 20),
+            GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                ),
+                child: _selectedImage != null
+                    ? Image.file(File(_selectedImage!.path), fit: BoxFit.cover)
+                    : const Center(child: Icon(Icons.add_a_photo, size: 48, color: Colors.grey)),
+              ),
+            ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // TODO: Implement logic to pick images from device
-                // After picking, you would typically update the UI to show the selected image.
-                // For now, we'll just navigate to the confirmation screen.
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -65,6 +105,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
                       price: widget.price,
                       title: widget.title,
                       description: widget.description,
+                      selectedImage: _selectedImage,
                     ),
                   ),
                 );
