@@ -19,7 +19,13 @@ class PostProvider with ChangeNotifier {
 
     try {
       final rawData = await _postRepository.getPostsWithCarAndImages();
+      print("--- Dữ liệu thô từ Repository (Post Provider) ---");
+      print(rawData);
       _posts = rawData.map((item) {
+        print("--- Xử lý một item (Post Provider) ---");
+        print("Tên người bán (Provider): ${item['sellerName']}");
+        print("Số điện thoại người bán (Provider): ${item['sellerPhone']}");
+        print("Địa chỉ người bán (Provider): ${item['sellerAddress']}");
         return PostWithCarAndImages(
           post: item['post'],
           car: item['car'],
@@ -32,6 +38,8 @@ class PostProvider with ChangeNotifier {
     } catch (error) {
       _errorMessage = error.toString();
       _posts = [];
+      print("--- Lỗi trong Post Provider ---");
+      print(error);
     } finally {
       _isLoading = false;
       notifyListeners();

@@ -84,7 +84,7 @@ class UserProvider with ChangeNotifier {
 
   Future<void> addUser(User user) async {
     try {
-      await _userRepository.addUserAutoIncrement(user);
+      await _userRepository.addUserWithAutoIncrementAndUid(user);
       await fetchUsers();
     } catch (e) {
       print('Error adding user: $e');

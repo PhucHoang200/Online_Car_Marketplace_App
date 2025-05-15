@@ -14,17 +14,18 @@ class UserRepository {
     await _firestore.doc('users/${user.id}').set(user.toMap());
   }
 
-  Future<void> addUserAutoIncrement(User user) async {
-    // Lấy user cuối cùng theo id giảm dần
-    final snapshot = await _firestore
-        .collection('users')
+  Future<void> addUserWithAutoIncrementAndUid(User user) async {
+    final CollectionReference usersRef = _firestore.collection('users');
+
+    // Lấy user cuối cùng theo id giảm dần để tạo id tự tăng
+    final snapshot = await usersRef
         .orderBy('id', descending: true)
         .limit(1)
         .get();
 
     int nextId = 1;
     if (snapshot.docs.isNotEmpty) {
-      final lastUser = User.fromMap(snapshot.docs.first.data());
+      final lastUser = User.fromMap(snapshot.docs.first.data() as Map<String, dynamic>);
       nextId = lastUser.id + 1;
     }
 
@@ -42,10 +43,12 @@ class UserRepository {
       updateDate: user.updateDate,
     );
 
-    await _firestore
-        .collection('users')
-        .doc(newUser.id.toString())
-        .set(newUser.toMap());
+    // Sử dụng uid làm ID của document
+    await usersRef.doc(newUser.uid).set(newUser.toMap());
+
+    // Nếu bạn vẫn muốn lưu trữ id tự tăng (có thể cho mục đích khác),
+    // bạn có thể cập nhật nó vào document vừa tạo.
+    await usersRef.doc(newUser.uid).update({'id': newUser.id});
   }
 
   Future<List<User>> getUsers() async {
@@ -223,7 +226,7 @@ class UserRepository {
       // Email đã được xác thực, lưu người dùng vào Firestore
       if (_pendingRegistrations.containsKey(currentUser.email)) {
         final user = _pendingRegistrations[currentUser.email]!;
-        await addUserAutoIncrement(user);
+        await addUserWithAutoIncrementAndUid(user);
 
         // Xóa khỏi danh sách chờ
         _pendingRegistrations.remove(currentUser.email);

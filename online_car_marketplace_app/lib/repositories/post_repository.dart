@@ -47,6 +47,7 @@ class PostRepository {
   Future<List<Map<String, dynamic>>> getPostsWithCarAndImages() async {
     final postsSnapshot = await _firestore.collection('posts').get();
     List<Map<String, dynamic>> results = [];
+    print("--- Bắt đầu lấy dữ liệu bài đăng (Repository) ---");
 
     for (var doc in postsSnapshot.docs) {
       final post = Post.fromMap(doc.data() as Map<String, dynamic>);
@@ -55,6 +56,8 @@ class PostRepository {
       String? sellerPhone;
       String? carLocation;
       List<String> imageUrls = [];
+      print("--- Xử lý bài đăng ID: ${post.id} ---");
+      print("User ID của bài đăng: ${post.userId}");
 
       // Lấy thông tin xe
       if (post.carId != null) {
@@ -66,14 +69,34 @@ class PostRepository {
         }
       }
 
+
       // Lấy thông tin người dùng
       if (post.userId != null) {
-        final userDoc = await _firestore.collection('users').doc(post.userId.toString()).get();
-        if (userDoc.exists) {
-          final userData = userDoc.data() as Map<String, dynamic>;
-          sellerName = userData['name'] as String?;
-          sellerPhone = userData['phone'] as String?;
+        final String userId = post.userId!; // Ép kiểu String vì đã kiểm tra null
+        print("Tìm kiếm thông tin người dùng với UID: $userId");
+        try {
+          final userDoc = await _firestore.collection('users').doc(userId).get();
+          if (userDoc.exists) {
+            final userData = userDoc.data() as Map<String, dynamic>;
+            sellerName = userData['name'] as String?;
+            sellerPhone = userData['phone'] as String?;
+            print("Đã lấy thông tin người dùng cho UID $userId:");
+            print("  Tên: $sellerName");
+            print("  Số điện thoại: $sellerPhone");
+          } else {
+            print("Không tìm thấy thông tin người dùng cho UID: $userId");
+            sellerName = null; // Đặt giá trị mặc định nếu không tìm thấy
+            sellerPhone = null; // Đặt giá trị mặc định nếu không tìm thấy
+          }
+        } catch (e) {
+          print("Lỗi khi lấy thông tin người dùng cho UID $userId: $e");
+          sellerName = null;
+          sellerPhone = null;
         }
+      } else {
+        print("User ID của bài đăng là null.");
+        sellerName = null; // Đặt giá trị mặc định nếu null
+        sellerPhone = null; // Đặt giá trị mặc định nếu null
       }
 
       // Lấy ảnh
@@ -92,7 +115,10 @@ class PostRepository {
         'images': imageUrls,
       });
     }
+    print("--- Kết thúc lấy dữ liệu bài đăng (Repository) ---");
+    print("Kết quả trả về từ Repository: $results");
 
     return results;
   }
+
 }

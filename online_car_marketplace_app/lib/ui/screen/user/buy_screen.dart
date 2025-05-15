@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:online_car_marketplace_app/ui/screen/user/post_detail_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../../providers/post_provider.dart';
@@ -38,10 +39,8 @@ class _BuyScreenState extends State<BuyScreen> {
       // Đang ở Buy, không cần đi đâu
         break;
       case 1:
-      // TODO: Điều hướng sang FavoriteScreen (chưa có thì để sau)
         break;
       case 2:
-      // TODO: Điều hướng sang ChatScreen (chưa có thì để sau)
         break;
       case 3:
         final firebaseUser = FirebaseAuth.instance.currentUser;
@@ -185,128 +184,144 @@ class _BuyScreenState extends State<BuyScreen> {
         final car = postWithDetails.car;
         final imageUrl = postWithDetails.imageUrls.isNotEmpty ? postWithDetails.imageUrls.first : null;
 
+        print("--- Bài đăng thứ $index ---");
+        print("Tên người bán (BuyScreen): ${postWithDetails.sellerName}");
+        print("Số điện thoại người bán (BuyScreen): ${postWithDetails.sellerPhone}");
+        print("Địa chỉ người bán (BuyScreen): ${postWithDetails.carLocation}");
+        print("User ID của bài đăng (BuyScreen): ${post.userId}");
+
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           elevation: 1,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 12, top: 12, right: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        post.title,
-                        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (car != null)
-                      Text(
-                        '${car.price.toStringAsFixed(0)} \Triệu đồng',
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent, fontSize: 16),
-                      ),
-                  ],
+          child: InkWell( // Sử dụng InkWell để có hiệu ứng khi chạm
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PostDetailScreen(postWithDetails: postWithDetails),
                 ),
-              ),
-              if (imageUrl != null)
+              );
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Padding(
-                  padding: const EdgeInsets.only(left: 12, right: 12, top: 8),
+                  padding: const EdgeInsets.only(left: 12, top: 12, right: 12),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        flex: 2,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            imageUrl,
-                            width: double.infinity,
-                            height: 120,
-                            fit: BoxFit.cover,
-                          ),
+                        child: Text(
+                          post.title,
+                          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 3,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                post.description,
-                                style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 8),
-                              if (car != null)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${car.year} • ${car.mileage} km',
-                                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                                    ),
-                                    Text(
-                                      car.fuelType,
-                                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                                    ),
-                                  ],
-                                ),
-                            ],
+                      const SizedBox(width: 8),
+                      if (car != null)
+                        Text(
+                          '${car.price.toStringAsFixed(0)} \Triệu đồng',
+                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent, fontSize: 16),
+                        ),
+                    ],
+                  ),
+                ),
+                if (imageUrl != null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12, right: 12, top: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              imageUrl,
+                              width: double.infinity,
+                              height: 120,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 3,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  post.description,
+                                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                                if (car != null)
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${car.year} • ${car.mileage} km',
+                                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                      ),
+                                      Text(
+                                        car.fuelType,
+                                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 12),
+                  child: Divider(height: 1, color: Colors.grey),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.person_outline, size: 16, color: Colors.grey),
+                          const SizedBox(width: 4),
+                          Text(postWithDetails.sellerName ?? 'N/A', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          if (postWithDetails.sellerPhone != null && postWithDetails.sellerPhone!.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.phone_outlined, size: 16, color: Colors.grey),
+                                  const SizedBox(width: 4),
+                                  Text(postWithDetails.sellerPhone!, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on_outlined, size: 16, color: Colors.grey),
+                          const SizedBox(width: 4),
+                          Text(postWithDetails.carLocation ?? 'N/A', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                        ],
                       ),
                     ],
                   ),
                 ),
-              const Padding(
-                padding: EdgeInsets.only(top: 12),
-                child: Divider(height: 1, color: Colors.grey),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.person_outline, size: 16, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Text(postWithDetails.sellerName ?? 'N/A', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                        if (postWithDetails.sellerPhone != null && postWithDetails.sellerPhone!.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.phone_outlined, size: 16, color: Colors.grey),
-                                const SizedBox(width: 4),
-                                Text(postWithDetails.sellerPhone!, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        const Icon(Icons.location_on_outlined, size: 16, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Text(postWithDetails.carLocation ?? 'N/A', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
