@@ -89,29 +89,15 @@ class UserRepository {
     }
   }
 
-  Future<String?> getUserDocumentId(String uid) async {
+  Future<void> updateUser(User user) async {
     try {
-      final snapshot = await _firestore
-          .collection('users')
-          .where('uid', isEqualTo: uid)
-          .limit(1)
-          .get();
-      if (snapshot.docs.isNotEmpty) {
-        return snapshot.docs.first.id;
-      }
-      return null;
+      await _firestore.collection('users').doc(user.uid).update(user.toMap());
     } catch (e) {
-      print('Error fetching user document ID: $e');
-      return null;
+      print('Error updating user: $e');
+      throw e;
     }
   }
 
-  Future<void> updateUser(User user) async {
-    await _firestore
-        .collection('users')
-        .doc(user.id.toString())
-        .update(user.toMap());
-  }
 
   Future<void> deleteUser(int id) async {
     await _firestore.collection('users').doc(id.toString()).delete();

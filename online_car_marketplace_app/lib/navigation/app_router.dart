@@ -8,6 +8,8 @@ import 'package:online_car_marketplace_app/ui/screen/auth/login_user_screen.dart
 import 'package:online_car_marketplace_app/ui/screen/user/introduction.dart';
 import 'package:online_car_marketplace_app/ui/screen/user/model_list_screen.dart';
 
+import '../ui/screen/auth/register_success_screen.dart';
+
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter appRouter = GoRouter(
@@ -21,6 +23,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/register',
       builder: (context, state) => const RegisterScreen(),
+    ),
+    GoRoute(
+      path: '/register-success',
+      builder: (BuildContext context, GoRouterState state) => const RegisterSuccessScreen(),
     ),
     GoRoute(
       path: '/login',

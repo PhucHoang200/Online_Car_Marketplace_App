@@ -18,6 +18,12 @@ class UserProvider with ChangeNotifier {
   bool get isAuthenticated => _isAuthenticated;
   auth.User? _authUser;
   auth.User? get authUser => _authUser;
+  String? _selectedProvince;
+  String? get selectedProvince => _selectedProvince;
+  set selectedProvince(String? value) {
+    _selectedProvince = value;
+    notifyListeners();
+  }
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   GlobalKey<FormState> get formKey => _formKey;
@@ -45,6 +51,21 @@ class UserProvider with ChangeNotifier {
   bool get isConfirmPasswordVisible => _isConfirmPasswordVisible;
   set isConfirmPasswordVisible(bool value) {
     _isConfirmPasswordVisible = value;
+    notifyListeners();
+  }
+
+  // Trạng thái và thông báo cho việc gửi lại email xác thực
+  bool _isLoadingResendEmail = false;
+  bool get isLoadingResendEmail => _isLoadingResendEmail;
+  set isLoadingResendEmail(bool value) {
+    _isLoadingResendEmail = value;
+    notifyListeners();
+  }
+
+  String? _resendEmailMessage;
+  String? get resendEmailMessage => _resendEmailMessage;
+  set resendEmailMessage(String? value) {
+    _resendEmailMessage = value;
     notifyListeners();
   }
 
@@ -182,7 +203,7 @@ class UserProvider with ChangeNotifier {
           name: _nameController.text.trim(),
           email: _emailController.text.trim(),
           phone: _phoneController.text.trim(),
-          address: _addressController.text.trim(),
+          address: _selectedProvince!,
           avatarUrl: null,
           roleId: 1,
           status: 'Hoạt động',
@@ -195,13 +216,13 @@ class UserProvider with ChangeNotifier {
 
       if (result['success']) {
         // Đăng ký thành công, hiển thị thông báo yêu cầu xác thực email
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đăng ký thành công! Vui lòng kiểm tra email để xác thực.'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 5),
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //     content: Text('Đăng ký thành công! Vui lòng kiểm tra email để xác thực.'),
+        //     backgroundColor: Colors.green,
+        //     duration: Duration(seconds: 5),
+        //   ),
+        // );
         return true; // Trả về true để UI có thể chuyển sang trạng thái chờ xác thực
       } else {
         _errorMessage = result['message'];
@@ -212,7 +233,7 @@ class UserProvider with ChangeNotifier {
     return false;
   }
 
-  Future<bool> checkEmailVerification(BuildContext context) async {
+  Future<Map<String, dynamic>> checkEmailVerification(BuildContext context) async {
     setLoading(true);
     final result = await _userRepository.checkEmailVerification();
     setLoading(false);
@@ -221,20 +242,28 @@ class UserProvider with ChangeNotifier {
       _errorMessage = result['message'];
       notifyListeners();
     }
-    return result['success'];
+    return result; // Trả về toàn bộ map kết quả
   }
 
-  Future<bool> resendVerificationEmail(BuildContext context) async {
+  Future<void> resendVerificationEmail(BuildContext context) async {
     clearError();
-    setLoading(true);
+    setLoadingResendEmail(true);
+    _resendEmailMessage = null;
     final result = await _userRepository.resendVerificationEmail();
-    setLoading(false);
+    setLoadingResendEmail(false);
 
-    if (!result['success']) {
+    if (result['success']) {
+      _resendEmailMessage = result['message'];
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_resendEmailMessage!)),
+      );
+    } else {
       _errorMessage = result['message'];
-      notifyListeners();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_errorMessage!)),
+      );
     }
-    return result['success'];
+    notifyListeners();
   }
 
   void clearError() {
@@ -251,24 +280,20 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void setLoadingResendEmail(bool value) {
+    _isLoadingResendEmail = value;
+    notifyListeners();
+  }
+
+
   Future<void> updateUserProfile(BuildContext context, User user) async {
     setLoading(true);
     clearError();
     try {
-      // Fetch the document ID based on the user's UID
-      final docId = await _userRepository.getUserDocumentId(user.uid);
-      if (docId != null) {
-        final userWithId = user.copyWith(id: int.parse(docId)); // Assuming doc ID can be parsed to int
-        await _userRepository.updateUser(userWithId);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully!')),
-        );
-      } else {
-        _errorMessage = 'Could not find user ID to update.';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_errorMessage!)),
-        );
-      }
+      await _userRepository.updateUser(user);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile updated successfully!')),
+      );
     } catch (e) {
       print('Error updating user profile in provider: $e');
       _errorMessage = 'Failed to update profile: $e';
@@ -279,4 +304,5 @@ class UserProvider with ChangeNotifier {
       setLoading(false);
     }
   }
+
 }

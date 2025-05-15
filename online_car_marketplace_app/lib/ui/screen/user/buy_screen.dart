@@ -6,6 +6,7 @@ import '../../../providers/post_provider.dart';
 import 'package:online_car_marketplace_app/models/post_with_car_and_images.dart';
 import 'package:online_car_marketplace_app/providers/brand_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 class BuyScreen extends StatefulWidget {
   final String uid;
@@ -36,7 +37,6 @@ class _BuyScreenState extends State<BuyScreen> {
 
     switch (index) {
       case 0:
-      // Đang ở Buy, không cần đi đâu
         break;
       case 1:
         break;
@@ -65,7 +65,7 @@ class _BuyScreenState extends State<BuyScreen> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              _buildTopBar(),
+              // _buildTopBar(),
               const SizedBox(height: 16),
               _buildSearchBar(),
               const SizedBox(height: 10),
@@ -89,15 +89,15 @@ class _BuyScreenState extends State<BuyScreen> {
     );
   }
 
-  Widget _buildTopBar() {
-    return const Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Icon(Icons.notifications_none),
-        CircleAvatar(backgroundColor: Colors.grey, radius: 18),
-      ],
-    );
-  }
+  // Widget _buildTopBar() {
+  //   return const Row(
+  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //     children: [
+  //       Icon(Icons.notifications_none),
+  //       CircleAvatar(backgroundColor: Colors.grey, radius: 18),
+  //     ],
+  //   );
+  // }
 
   Widget _buildSearchBar() {
     return TextField(
@@ -175,6 +175,14 @@ class _BuyScreenState extends State<BuyScreen> {
     );
   }
 
+  String _truncateText(String text, int maxLength) {
+    if (text.length <= maxLength) {
+      return text;
+    } else {
+      return '${text.substring(0, maxLength)}...';
+    }
+  }
+
   Widget _buildPostList(List<PostWithCarAndImages> posts) {
     return ListView.builder(
       itemCount: posts.length,
@@ -214,8 +222,8 @@ class _BuyScreenState extends State<BuyScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          post.title,
-                          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                          _truncateText(post.title, 25),
+                          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: Colors.blueAccent),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -223,7 +231,7 @@ class _BuyScreenState extends State<BuyScreen> {
                       const SizedBox(width: 8),
                       if (car != null)
                         Text(
-                          '${car.price.toStringAsFixed(0)} \Triệu đồng',
+                          '${car.price.toStringAsFixed(0)} \Triệu',
                           style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent, fontSize: 16),
                         ),
                     ],
@@ -242,7 +250,7 @@ class _BuyScreenState extends State<BuyScreen> {
                             child: Image.network(
                               imageUrl,
                               width: double.infinity,
-                              height: 120,
+                              height: 70,
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -256,8 +264,8 @@ class _BuyScreenState extends State<BuyScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  post.description,
-                                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                                  _truncateText(post.description, 50),
+                                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
                                   maxLines: 3,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -267,12 +275,12 @@ class _BuyScreenState extends State<BuyScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        '${car.year} • ${car.mileage} km',
-                                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                        '• ${car.transmission}            • ${car.condition} ',
+                                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
                                       ),
                                       Text(
-                                        car.fuelType,
-                                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                        '• Máy ${car.fuelType}       • ${car.mileage} km',
+                                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
                                       ),
                                     ],
                                   ),
@@ -344,4 +352,5 @@ class _BuyScreenState extends State<BuyScreen> {
       ],
     );
   }
+
 }

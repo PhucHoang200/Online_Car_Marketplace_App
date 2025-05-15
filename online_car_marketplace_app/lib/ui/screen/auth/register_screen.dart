@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:online_car_marketplace_app/ui/screen/auth/register_success_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:online_car_marketplace_app/providers/user_provider.dart';
 import 'package:online_car_marketplace_app/ui/screen/auth/login_user_screen.dart';
@@ -12,7 +13,22 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  bool _navigationInProgress = false;
    bool _isRegistrationComplete = false;
+   String? _selectedProvince; // Biến để lưu trữ tỉnh thành đã chọn
+   final List<String> _provinces = [
+     'An Giang', 'Bà Rịa - Vũng Tàu', 'Bạc Liêu', 'Bắc Giang', 'Bắc Kạn', 'Bắc Ninh',
+     'Bến Tre', 'Bình Định', 'Bình Dương', 'Bình Phước', 'Bình Thuận', 'Cà Mau',
+     'Cao Bằng', 'Cần Thơ', 'Đà Nẵng', 'Đắk Lắk', 'Đắk Nông', 'Điện Biên',
+     'Đồng Nai', 'Đồng Tháp', 'Gia Lai', 'Hà Giang', 'Hà Nam', 'Hà Nội',
+     'Hà Tĩnh', 'Hải Dương', 'Hải Phòng', 'Hậu Giang', 'Hòa Bình', 'Hưng Yên',
+     'Khánh Hòa', 'Kiên Giang', 'Kon Tum', 'Lai Châu', 'Lạng Sơn', 'Lào Cai',
+     'Lâm Đồng', 'Long An', 'Nam Định', 'Nghệ An', 'Ninh Bình', 'Ninh Thuận',
+     'Phú Thọ', 'Phú Yên', 'Quảng Bình', 'Quảng Nam', 'Quảng Ngãi', 'Quảng Ninh',
+     'Quảng Trị', 'Sóc Trăng', 'Sơn La', 'Tây Ninh', 'Thái Bình', 'Thái Nguyên',
+     'Thanh Hóa', 'Thừa Thiên Huế', 'Tiền Giang', 'Trà Vinh', 'Tuyên Quang',
+     'Vĩnh Long', 'Vĩnh Phúc', 'Yên Bái', 'Phú Quốc', 'Bắc Giang', 'Bắc Ninh',
+   ];
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +42,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: _isRegistrationComplete
-                  ? _buildVerificationInstructions(userProvider)
+                  ? const RegisterSuccessScreen()
                   : _buildRegistrationForm(userProvider),
             ),
           ),
@@ -81,6 +97,58 @@ class _RegisterScreenState extends State<RegisterScreen> {
             validator: (value) {
               if (value == null || value.isEmpty) return 'Vui lòng nhập email';
               if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) return 'Email không hợp lệ';
+              return null;
+            },
+          ),
+          const SizedBox(height: 20),
+          // Phone number field
+          TextFormField(
+            controller: userProvider.phoneController,
+            keyboardType: TextInputType.phone,
+            decoration: InputDecoration(
+              labelText: 'Số điện thoại',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              prefixIcon: const Icon(Icons.phone_outlined),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Vui lòng nhập số điện thoại';
+              }
+              if (!RegExp(r'^0\d{9}$').hasMatch(value)) {
+                return 'Số điện thoại không hợp lệ (phải bắt đầu bằng 0 và có 10 số)';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 20),
+          // Address (Province) dropdown
+          DropdownButtonFormField<String>(
+            decoration: InputDecoration(
+              labelText: 'Địa chỉ',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              prefixIcon: const Icon(Icons.location_on_outlined),
+            ),
+            value: _selectedProvince,
+            items: _provinces.map((province) {
+              return DropdownMenuItem<String>(
+                value: province,
+                child: Text(province),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedProvince = value;
+              });
+              userProvider.selectedProvince = value;
+            },
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Vui lòng chọn địa chỉ';
+              }
               return null;
             },
           ),
@@ -141,9 +209,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               if (userProvider.formKey.currentState!.validate()) {
                 final success = await userProvider.registerUser(context);
                 if (success && mounted) {
-                  setState(() {
-                    _isRegistrationComplete = true;
-                  });
+                  // Chuyển sang màn hình RegisterSuccessScreen ngay sau khi đăng ký thành công
+                  context.go('/register-success');
                 } else if (!success && userProvider.errorMessage != null && mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(userProvider.errorMessage!)),
@@ -171,100 +238,5 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildVerificationInstructions(UserProvider userProvider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          'Xác thực email',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).primaryColor,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          'Một link xác thực đã được gửi đến email ${userProvider.emailController.text}',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: 20),
 
-        const Card(
-          elevation: 2,
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Icon(Icons.email_outlined, size: 50, color: Colors.blue),
-                SizedBox(height: 16),
-                Text(
-                  'Vui lòng kiểm tra hộp thư của bạn và nhấp vào liên kết xác thực để hoàn tất đăng ký.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Nếu không tìm thấy email trong hộp thư đến, vui lòng kiểm tra thư mục spam.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 30),
-
-        // Check verification button
-        ElevatedButton(
-          onPressed: userProvider.isLoading
-              ? null
-              : () async {
-            userProvider.setLoading(true); // Gọi setLoading thông qua userProvider
-            final success = await userProvider.checkEmailVerification(context);
-            userProvider.setLoading(false); // Gọi setLoading thông qua userProvider
-            if (success && mounted) {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-                    (route) => false,
-              );
-            } else if (!success && mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(userProvider.errorMessage ?? "Có lỗi xảy ra trong quá trình xác thực.")),
-              );
-            }
-          },
-          child: userProvider.isLoading ? const CircularProgressIndicator() : const Text('Tôi đã xác thực email'),
-        ),
-        const SizedBox(height: 20),
-
-        // Resend verification email link
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Không nhận được email?'),
-            TextButton(
-              onPressed: userProvider.isLoading
-                  ? null
-                  : () => userProvider.resendVerificationEmail(context),
-              child: const Text('Gửi lại email xác thực'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-
-        // Return to login button
-        OutlinedButton(
-          onPressed: () => context.go('/login'),
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 15),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          child: const Text('Quay lại đăng nhập'),
-        ),
-      ],
-    );
-  }
 }
