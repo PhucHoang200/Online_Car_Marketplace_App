@@ -1,10 +1,15 @@
-  import 'package:flutter/material.dart';
+  import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import '../models/car_model.dart';
 import '../models/favorite_model.dart';
+import '../models/post_model.dart';
 import '../models/post_with_car_and_images.dart';
 import '../repositories/favorite_repository.dart';
+import '../repositories/post_repository.dart';
 
 class FavoriteProvider extends ChangeNotifier {
   final FavoriteRepository _favoriteRepository = FavoriteRepository();
+  final PostRepository _postRepository = PostRepository();
 
   List<Favorite> _favorites = [];
   List<Favorite> get favorites => _favorites;
@@ -31,30 +36,65 @@ class FavoriteProvider extends ChangeNotifier {
   Future<void> fetchFavoritePosts(String userId) async {
     _isLoading = true;
     notifyListeners();
-    _favoritePostsWithDetails.clear(); // Clear danh sách cũ trước khi tải mới
+    _favoritePostsWithDetails.clear();
+    print("--- fetchFavoritePosts bắt đầu cho User ID: $userId ---");
     try {
       final favoriteList = await _favoriteRepository.getFavoritesByUserId(userId);
+      print("--- Số lượng favorites lấy được: ${favoriteList.length} ---");
       for (final favorite in favoriteList) {
-        final postSnapshot = await _favoriteRepository.getPostDetails(favorite.postId as String);
-        if (postSnapshot.exists) {
-          final postData = postSnapshot.data()!;
-          final carData = postData['car'] as Map<String, dynamic>?;
-          final imageUrls = await _favoriteRepository.getPostImageUrls(favorite.postId as String);
-          final sellerName = postData['sellerName'] as String?;
-          final sellerPhone = postData['sellerPhone'] as String?;
-          final carLocation = postData['location'] as String?; // Đảm bảo tên trường đúng
+        print("--- Đang xử lý Favorite ID: ${favorite.id}, Post ID: ${favorite.postId} ---");
+        final postDoc = await _postRepository.getPostDetails(favorite.postId.toString()); // Sử dụng PostRepository
+        print("--- Post ID: ${favorite.postId}, Post Snapshot tồn tại: ${postDoc.exists} ---");
+        print("--- Post ID: ${favorite.postId}, Dữ liệu Post Snapshot: ${postDoc.data()} ---");
 
-          if (carData != null) {
-            final postWithDetails = PostWithCarAndImages.fromJson({
-              'post': postData,
-              'car': carData,
-              'imageUrls': imageUrls,
-              'sellerName': sellerName,
-              'sellerPhone': sellerPhone,
-              'carLocation': carLocation,
-            });
-            _favoritePostsWithDetails.add(postWithDetails);
+        if (postDoc.exists) {
+          final post = Post.fromMap(postDoc.data() as Map<String, dynamic>);
+          Car? car;
+          String? sellerName;
+          String? sellerPhone;
+          String? carLocation;
+          List<String> imageUrls = [];
+
+          // Lấy thông tin xe
+          if (post.carId != null) {
+            final carDoc = await _postRepository.getCarDetails(post.carId.toString()); // Sử dụng PostRepository
+            if (carDoc.exists) {
+              final carData = carDoc.data() as Map<String, dynamic>;
+              car = Car.fromMap(carData);
+              carLocation = carData['location'] as String?;
+
+              // Lấy ảnh theo carId (tương tự PostRepository)
+              final imagesSnapshot = await FirebaseFirestore.instance
+                  .collection('images')
+                  .where('carId', isEqualTo: post.carId)
+                  .get();
+              imageUrls = imagesSnapshot.docs.map((e) => e['url'] as String).toList();
+            }
           }
+
+          // Lấy thông tin người dùng (tương tự PostRepository)
+          if (post.userId != null) {
+            final String sellerId = post.userId!;
+            final userDoc = await FirebaseFirestore.instance.collection('users').doc(sellerId).get();
+            if (userDoc.exists) {
+              final userData = userDoc.data() as Map<String, dynamic>;
+              sellerName = userData['name'] as String?;
+              sellerPhone = userData['phone'] as String?;
+            }
+          }
+
+          final postWithDetails = PostWithCarAndImages(
+            post: post,
+            car: car,
+            sellerName: sellerName,
+            sellerPhone: sellerPhone,
+            carLocation: carLocation,
+            imageUrls: imageUrls,
+          );
+          _favoritePostsWithDetails.add(postWithDetails);
+          print("--- Đã thêm bài đăng yêu thích với ID: ${post.id} ---");
+        } else {
+          print("--- Không tìm thấy bài đăng với ID: ${favorite.postId} ---");
         }
       }
     } catch (e) {
@@ -62,6 +102,18 @@ class FavoriteProvider extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+      print("--- Hoàn thành fetchFavoritePosts. Số lượng bài đăng yêu thích: ${_favoritePostsWithDetails.length} ---");
+    }
+  }
+
+  Future<void> removeFavorite(String userId, int postId) async {
+    try {
+      await _favoriteRepository.removeFavorite(userId, postId);
+      _favoritePostsWithDetails.removeWhere((item) => item.post.id == postId);
+      notifyListeners();
+      print("--- Đã xóa bài đăng với ID: $postId khỏi yêu thích của người dùng: $userId ---");
+    } catch (e) {
+      print("--- Lỗi khi xóa bài đăng với ID: $postId khỏi yêu thích của người dùng: $userId: $e ---");
     }
   }
 
@@ -77,28 +129,27 @@ class FavoriteProvider extends ChangeNotifier {
 
   // Gọi phương thức addFavoriteAutoIncrement từ repository
   Future<void> addFavoriteAutoIncrement(Favorite favorite) async {
+    print("--- Bên trong addFavoriteAutoIncrement ---");
     try {
       await _favoriteRepository.addFavoriteAutoIncrement(favorite);
       _favorites.add(favorite);
       notifyListeners();
+      print("--- Thêm vào yêu thích thành công trong Provider ---");
     } catch (e) {
       print('Error adding favorite with auto-increment ID: $e');
     }
   }
 
-  Future<void> removeFavorite(String userId, int postId) async { // Changed postId to int
+  Future<bool> isPostFavorite(String userId, int postId) async {
     try {
-      // Tìm item yêu thích để xóa dựa trên userId và postId
-      final favoriteToRemove = _favorites.firstWhere((fav) => fav.userId == userId && fav.postId == postId, orElse: () => Favorite(id: 0, userId: '', postId: 0)); // Changed default values to match int
-      if (favoriteToRemove.id != 0) { // Changed comparison to int
-        await _favoriteRepository.removeFavorite(favoriteToRemove.id); // Assuming you have a removeFavorite method in your repository that takes the favorite id.
-        _favorites.removeWhere((fav) => fav.userId == userId && fav.postId == postId);
-        _favoritePostsWithDetails.removeWhere((item) => item.post.id == postId.toString()); // Keep postId as String here
-        notifyListeners();
-      }
+      final favoriteList = await _favoriteRepository.getFavoritesByUserIdAndPostId(userId, postId);
+      return favoriteList.isNotEmpty;
     } catch (e) {
-      print('Error removing favorite: $e');
+      print('Error checking if post is favorite: $e');
+      return false;
     }
   }
+
+
 
 }

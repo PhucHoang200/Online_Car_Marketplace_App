@@ -54,6 +54,7 @@ class PostRepository {
       Car? car;
       String? sellerName;
       String? sellerPhone;
+      String? sellerAddress;
       String? carLocation;
       List<String> imageUrls = [];
       print("--- Xử lý bài đăng ID: ${post.id} ---");
@@ -80,6 +81,7 @@ class PostRepository {
             final userData = userDoc.data() as Map<String, dynamic>;
             sellerName = userData['name'] as String?;
             sellerPhone = userData['phone'] as String?;
+            sellerAddress = userData['address'] as String?;
             print("Đã lấy thông tin người dùng cho UID $userId:");
             print("  Tên: $sellerName");
             print("  Số điện thoại: $sellerPhone");
@@ -111,6 +113,7 @@ class PostRepository {
         'car': car,
         'sellerName': sellerName,
         'sellerPhone': sellerPhone,
+        'sellerAddress': sellerAddress,
         'carLocation': carLocation,
         'images': imageUrls,
       });
@@ -121,4 +124,13 @@ class PostRepository {
     return results;
   }
 
+  // Phương thức lấy thông tin chi tiết của một bài post dựa trên postId
+  Future<DocumentSnapshot<Map<String, dynamic>>> getPostDetails(String postId) async {
+    return await _firestore.collection('posts').doc(postId).get();
+  }
+
+  // Phương thức lấy thông tin chi tiết của một chiếc xe dựa trên carId
+  Future<DocumentSnapshot<Map<String, dynamic>>> getCarDetails(String carId) async {
+    return await _firestore.collection('cars').doc(carId).get();
+  }
 }

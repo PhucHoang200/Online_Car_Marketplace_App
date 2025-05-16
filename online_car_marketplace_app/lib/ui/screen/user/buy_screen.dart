@@ -100,16 +100,6 @@ class _BuyScreenState extends State<BuyScreen> {
     );
   }
 
-  // Widget _buildTopBar() {
-  //   return const Row(
-  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //     children: [
-  //       Icon(Icons.notifications_none),
-  //       CircleAvatar(backgroundColor: Colors.grey, radius: 18),
-  //     ],
-  //   );
-  // }
-
   Widget _buildSearchBar() {
     return TextField(
       decoration: InputDecoration(
@@ -202,6 +192,9 @@ class _BuyScreenState extends State<BuyScreen> {
         final post = postWithDetails.post;
         final car = postWithDetails.car;
         final imageUrl = postWithDetails.imageUrls.isNotEmpty ? postWithDetails.imageUrls.first : null;
+        final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
+        final currentUser = FirebaseAuth.instance.currentUser;
+
 
         print("--- Bài đăng thứ $index ---");
         print("Tên người bán (BuyScreen): ${postWithDetails.sellerName}");
@@ -332,21 +325,23 @@ class _BuyScreenState extends State<BuyScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      Column( // Đổi Row thành Column
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.person_outline, size: 16, color: Colors.grey),
-                          const SizedBox(width: 4),
-                          Text(postWithDetails.sellerName ?? 'N/A', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          Row(
+                            children: [
+                              const Icon(Icons.person_outline, size: 16, color: Colors.grey),
+                              const SizedBox(width: 4),
+                              Text(postWithDetails.sellerName ?? 'N/A', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                            ],
+                          ),
                           if (postWithDetails.sellerPhone != null && postWithDetails.sellerPhone!.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.phone_outlined, size: 16, color: Colors.grey),
-                                  const SizedBox(width: 4),
-                                  Text(postWithDetails.sellerPhone!, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                                ],
-                              ),
+                            Row(
+                              children: [
+                                const Icon(Icons.phone_outlined, size: 16, color: Colors.grey),
+                                const SizedBox(width: 4),
+                                Text(postWithDetails.sellerPhone!, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                              ],
                             ),
                         ],
                       ),
@@ -354,31 +349,47 @@ class _BuyScreenState extends State<BuyScreen> {
                         children: [
                           const Icon(Icons.location_on_outlined, size: 16, color: Colors.grey),
                           const SizedBox(width: 4),
-                          Text(postWithDetails.carLocation ?? 'N/A', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          Text(postWithDetails.sellerAddress ?? 'N/A', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                         ],
                       ),
                       // Thêm icon yêu thích
-                      IconButton(
-                        icon: const Icon(Icons.bookmark_border),
-                        onPressed: () async {
-                          final user = FirebaseAuth.instance.currentUser;
-                          if (user != null) {
-                            final userId = user.uid;
-                            final favorite = Favorite(
-                              id: 0, // ID sẽ được tự động tạo bởi Firestore
-                              userId: userId,
-                              postId: post.id,
-                            );
-                            final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
-                            await favoriteProvider.addFavoriteAutoIncrement(favorite);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Đã thêm vào yêu thích!')),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Bạn cần đăng nhập để thêm vào yêu thích.')),
-                            );
-                          }
+                      FutureBuilder<bool>(
+                        future: currentUser != null
+                            ? favoriteProvider.isPostFavorite(currentUser.uid, post.id)
+                            : Future.value(false),
+                        builder: (context, snapshot) {
+                          final isFavorite = snapshot.data ?? false;
+                          return IconButton(
+                            icon: Icon(isFavorite ? Icons.bookmark : Icons.bookmark_border),
+                            onPressed: () async {
+                              if (currentUser != null) {
+                                final userId = currentUser.uid;
+                                if (isFavorite) {
+                                  // Nếu đã là yêu thích, thực hiện xóa
+                                  await favoriteProvider.removeFavorite(userId, post.id);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Đã xóa khỏi mục đã lưu.')),
+                                  );
+                                } else {
+                                  // Nếu chưa là yêu thích, thực hiện thêm
+                                  final favorite = Favorite(
+                                    id: 0,
+                                    userId: userId,
+                                    postId: post.id,
+                                  );
+                                  await favoriteProvider.addFavoriteAutoIncrement(favorite);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Đã thêm vào yêu thích!')),
+                                  );
+                                }
+                                setState(() {}); // Cập nhật giao diện
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Bạn cần đăng nhập để thêm vào yêu thích.')),
+                                );
+                              }
+                            },
+                          );
                         },
                       ),
                     ],

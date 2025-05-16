@@ -7,6 +7,7 @@ class PostWithCarAndImages {
   final List<String> imageUrls;
   final String? sellerName;
   final String? sellerPhone;
+  final String? sellerAddress;
   final String? carLocation;
 
   PostWithCarAndImages({
@@ -15,6 +16,7 @@ class PostWithCarAndImages {
     required this.imageUrls,
     this.sellerName,
     this.sellerPhone,
+    this.sellerAddress,
     this.carLocation,
   });
 
@@ -25,6 +27,7 @@ class PostWithCarAndImages {
       imageUrls: (map['imageUrls'] as List<dynamic>?)?.cast<String>() ?? [],
       sellerName: map['sellerName'] as String?,
       sellerPhone: map['sellerPhone'] as String?,
+      sellerAddress: map['sellerAddress'] as String?,
       carLocation: map['carLocation'] as String?,
     );
   }

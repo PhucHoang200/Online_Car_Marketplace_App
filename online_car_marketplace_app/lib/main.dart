@@ -12,6 +12,7 @@ import 'package:online_car_marketplace_app/services/firebase_options.dart';
 import 'package:online_car_marketplace_app/navigation/app_router.dart';
 import 'package:online_car_marketplace_app/providers/model_provider.dart';
 import 'package:online_car_marketplace_app/providers/car_provider.dart';
+import 'package:online_car_marketplace_app/providers/favorite_provider.dart';
 
 
 void main() async {
@@ -23,6 +24,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => FavoriteProvider()),
         ChangeNotifierProvider(create: (_) => CarProvider()),
         ChangeNotifierProvider(create: (_) => PostProvider()),
         Provider<PostRepository>(create: (_) => PostRepository()),

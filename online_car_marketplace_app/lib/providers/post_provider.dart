@@ -31,6 +31,7 @@ class PostProvider with ChangeNotifier {
           car: item['car'],
           sellerName: item['sellerName'] as String?,
           sellerPhone: item['sellerPhone'] as String?,
+          sellerAddress: item['sellerAddress'] as String?,
           carLocation: item['carLocation'] as String?,
           imageUrls: List<String>.from(item['images']),
         );
