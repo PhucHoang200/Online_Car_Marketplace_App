@@ -15,7 +15,15 @@ class YearSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Chọn năm sản xuất')),
+      appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              Navigator.pop(context); // Đóng màn hình và không trả về giá trị
+            },
+          ),
+          title: const Text('Chọn năm sản xuất')
+      ),
       body: ListView.builder(
         itemCount: 2025 - 1990 + 1,
         itemBuilder: (context, index) {

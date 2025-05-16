@@ -65,7 +65,7 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
        path: '/favorites',
-      builder: (context, state) => const FavoritePostsScreen(),
+      builder: (context, state) => const FavoritePostsScreen(uid: '',),
     ),
   ],
 );

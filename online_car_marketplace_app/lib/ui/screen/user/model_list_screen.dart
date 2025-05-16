@@ -6,11 +6,13 @@ import 'year_selection_screen.dart';
 class ModelListScreen extends StatefulWidget {
   final String brandId;
   final String name;
+  final String? selectedModel;
 
   const ModelListScreen({
     super.key,
     required this.brandId,
     required this.name,
+    this.selectedModel,
   });
 
   @override
@@ -19,6 +21,7 @@ class ModelListScreen extends StatefulWidget {
 
 class _ModelListScreenState extends State<ModelListScreen> {
   late Future<void> _fetchFuture;
+  String? _highlightedModel;
 
   @override
   void initState() {
@@ -33,7 +36,15 @@ class _ModelListScreenState extends State<ModelListScreen> {
     final modelProvider = Provider.of<ModelProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Models of ${widget.name}')),
+      appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              Navigator.pop(context); // Đóng màn hình và không trả về giá trị
+            },
+          ),
+          title: Text('Chọn dòng xe')
+      ),
       body: FutureBuilder<void>(
         future: _fetchFuture,
         builder: (context, snapshot) {
@@ -55,9 +66,20 @@ class _ModelListScreenState extends State<ModelListScreen> {
             itemCount: models.length,
             itemBuilder: (context, index) {
               final model = models[index];
+              final isHighlighted = model.name == _highlightedModel;
+
               return ListTile(
-                title: Text(model.name),
+                title: Text(
+                  model.name,
+                  style: TextStyle(
+                    fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
+                    color: isHighlighted ? Theme.of(context).primaryColor : null,
+                  ),
+                ),
                 onTap: () {
+                  setState(() {
+                    _highlightedModel = model.name; // Cập nhật model được highlight
+                  });
                   Navigator.push(
                     context,
                     MaterialPageRoute(

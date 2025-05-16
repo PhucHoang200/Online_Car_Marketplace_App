@@ -13,7 +13,8 @@ import 'package:online_car_marketplace_app/repositories/post_repository.dart';
 import 'package:online_car_marketplace_app/repositories/car_repository.dart';
 import 'package:online_car_marketplace_app/services/storage_service.dart';
 import 'package:online_car_marketplace_app/repositories/image_repository.dart';
-import 'image_upload_screen.dart'; // Import để quay lại màn hình tải ảnh
+import 'image_upload_screen.dart';
+import 'model_list_screen.dart'; // Import để quay lại màn hình tải ảnh
 
 class ConfirmPostScreen extends StatefulWidget {
   final String brandId;
@@ -53,11 +54,14 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
   XFile? _selectedImage;
   String? _imageUrl;
   bool _isUploading = false;
+  late String _modelName;
 
   @override
   void initState() {
     super.initState();
     _selectedImage = widget.selectedImage; // Khởi tạo ảnh từ tham số
+    _modelName = widget.modelName;
+
   }
 
   Future<void> _pickImage() async {
@@ -224,10 +228,23 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
               print('Chỉnh sửa hãng xe');
               // Ví dụ: Navigator.push(...) đến màn hình chọn hãng xe
             }),
-            _buildInfoRow('Dòng xe:', widget.modelName, () {
-              // TODO: Navigate back to model selection screen
-              print('Chỉnh sửa dòng xe');
-              // Ví dụ: Navigator.push(...) đến màn hình chọn dòng xe
+            _buildInfoRow('Dòng xe:', _modelName, () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ModelListScreen(
+                    brandId: widget.brandId,
+                    name: _modelName,
+                    selectedModel: _modelName,
+                  ),
+                ),
+              );
+              if (result != null && result is String) {
+                setState(() {
+                  // Sửa: Cập nhật biến trạng thái _modelName
+                  _modelName = result;
+                });
+              }
             }),
             _buildInfoRow('Năm sản xuất:', widget.selectedYear, () {
               // TODO: Navigate back to year selection screen

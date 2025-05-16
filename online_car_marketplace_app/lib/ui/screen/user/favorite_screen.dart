@@ -8,7 +8,8 @@ import 'package:online_car_marketplace_app/models/post_with_car_and_images.dart'
 import 'post_detail_screen.dart';
 
 class FavoritePostsScreen extends StatefulWidget {
-  const FavoritePostsScreen({super.key});
+  final String uid;
+  const FavoritePostsScreen({super.key, required this.uid});
 
   @override
   State<FavoritePostsScreen> createState() => _FavoritePostsScreenState();
@@ -16,9 +17,11 @@ class FavoritePostsScreen extends StatefulWidget {
 
 class _FavoritePostsScreenState extends State<FavoritePostsScreen> {
   late String userId;
+
   @override
   void initState() {
     super.initState();
+    userId = widget.uid;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
       final currentUser = FirebaseAuth.instance.currentUser;
