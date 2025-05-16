@@ -9,6 +9,7 @@ import 'package:online_car_marketplace_app/ui/screen/user/introduction.dart';
 import 'package:online_car_marketplace_app/ui/screen/user/model_list_screen.dart';
 
 import '../ui/screen/auth/register_success_screen.dart';
+import '../ui/screen/user/favorite_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -61,6 +62,10 @@ final GoRouter appRouter = GoRouter(
         }
         return ModelListScreen(brandId: brandId, name: brandName);
       },
+    ),
+    GoRoute(
+       path: '/favorites',
+      builder: (context, state) => const FavoritePostsScreen(),
     ),
   ],
 );

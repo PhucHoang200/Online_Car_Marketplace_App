@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:online_car_marketplace_app/ui/screen/user/post_detail_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../../../models/favorite_model.dart';
+import '../../../providers/favorite_provider.dart';
 import '../../../providers/post_provider.dart';
 import 'package:online_car_marketplace_app/models/post_with_car_and_images.dart';
 import 'package:online_car_marketplace_app/providers/brand_provider.dart';
@@ -39,6 +41,15 @@ class _BuyScreenState extends State<BuyScreen> {
       case 0:
         break;
       case 1:
+        final firebaseUser = FirebaseAuth.instance.currentUser;
+        if (firebaseUser != null) {
+          GoRouter.of(context).go('/favorites');
+        } else {
+          // Xử lý trường hợp người dùng chưa đăng nhập nếu cần
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Bạn cần đăng nhập để xem bài đăng đã lưu.')),
+          );
+        }
         break;
       case 2:
         break;
@@ -278,11 +289,11 @@ class _BuyScreenState extends State<BuyScreen> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              '• Số tự động',
+                                              '• ${car.transmission}',
                                               style: TextStyle(color: Colors.grey[600], fontSize: 14),
                                             ),
                                             Text(
-                                              '• Máy xăng',
+                                              '• Máy ${car.fuelType}',
                                               style: TextStyle(color: Colors.grey[600], fontSize: 14),
                                             ),
                                           ],
@@ -293,11 +304,11 @@ class _BuyScreenState extends State<BuyScreen> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              '• Xe cũ',
+                                              '• ${car.condition}',
                                               style: TextStyle(color: Colors.grey[600], fontSize: 14),
                                             ),
                                             Text(
-                                              '• 100.000 km',
+                                              '• ${car.mileage} km',
                                               style: TextStyle(color: Colors.grey[600], fontSize: 14),
                                             ),
                                           ],
@@ -346,6 +357,30 @@ class _BuyScreenState extends State<BuyScreen> {
                           Text(postWithDetails.carLocation ?? 'N/A', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                         ],
                       ),
+                      // Thêm icon yêu thích
+                      IconButton(
+                        icon: const Icon(Icons.bookmark_border),
+                        onPressed: () async {
+                          final user = FirebaseAuth.instance.currentUser;
+                          if (user != null) {
+                            final userId = user.uid;
+                            final favorite = Favorite(
+                              id: 0, // ID sẽ được tự động tạo bởi Firestore
+                              userId: userId,
+                              postId: post.id,
+                            );
+                            final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
+                            await favoriteProvider.addFavoriteAutoIncrement(favorite);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Đã thêm vào yêu thích!')),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Bạn cần đăng nhập để thêm vào yêu thích.')),
+                            );
+                          }
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -367,7 +402,7 @@ class _BuyScreenState extends State<BuyScreen> {
       onTap: _onItemTapped,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.directions_car), label: 'Buy'),
-        BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'Favorite'),
+        BottomNavigationBarItem(icon: Icon(Icons.bookmark_border), label: 'Favorite'),
         BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Chat'),
         BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
       ],

@@ -7,7 +7,7 @@ class LandingProvider with ChangeNotifier {
   void onGetStarted(BuildContext context) {
     // Xử lý khi nhấn nút "Get Started"
     print("Get Started button pressed");
-    context.go('/register');
+    context.go('/login');
   }
 }
 
@@ -24,7 +24,7 @@ class LandingPage extends StatelessWidget {
           children: [
             // Hình nền
             Image.asset(
-              'assets/images/cars-1638594_1920.jpg', // Thay bằng URL hình ảnh thực tế
+              'assets/images/cars-1638594_1920.jpg',
               fit: BoxFit.cover,
               color: Colors.black.withOpacity(0.3),
               colorBlendMode: BlendMode.darken,

@@ -17,4 +17,15 @@ class PostWithCarAndImages {
     this.sellerPhone,
     this.carLocation,
   });
+
+  factory PostWithCarAndImages.fromJson(Map<String, dynamic> map) {
+    return PostWithCarAndImages(
+      post: Post.fromMap(map['post'] as Map<String, dynamic>),
+      car: map['car'] != null ? Car.fromMap(map['car'] as Map<String, dynamic>) : null,
+      imageUrls: (map['imageUrls'] as List<dynamic>?)?.cast<String>() ?? [],
+      sellerName: map['sellerName'] as String?,
+      sellerPhone: map['sellerPhone'] as String?,
+      carLocation: map['carLocation'] as String?,
+    );
+  }
 }

@@ -15,7 +15,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   bool _navigationInProgress = false;
    bool _isRegistrationComplete = false;
-   String? _selectedProvince; // Biến để lưu trữ tỉnh thành đã chọn
+   String? _selectedProvince;
    final List<String> _provinces = [
      'An Giang', 'Bà Rịa - Vũng Tàu', 'Bạc Liêu', 'Bắc Giang', 'Bắc Kạn', 'Bắc Ninh',
      'Bến Tre', 'Bình Định', 'Bình Dương', 'Bình Phước', 'Bình Thuận', 'Cà Mau',

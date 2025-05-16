@@ -12,34 +12,34 @@ class RegisterSuccessScreen extends StatefulWidget {
 }
 
 class _RegisterSuccessScreenState extends State<RegisterSuccessScreen> {
-  int _countdown = 60; // Đếm ngược 1 phút (60 giây)
-  Timer? _timer;
+  // int _countdown = 60; // Đếm ngược 1 phút (60 giây)
+  // Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _startTimer();
+    // _startTimer();
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    // _timer?.cancel();
     super.dispose();
   }
 
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_countdown > 0) {
-        setState(() {
-          _countdown--;
-        });
-      } else {
-        _timer?.cancel();
-        // Sau khi hết thời gian, nếu người dùng chưa xác thực, vẫn ở màn hình này
-        // Bạn có thể hiển thị thêm thông báo hoặc nút để gửi lại email
-      }
-    });
-  }
+  // void _startTimer() {
+  //   _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+  //     if (_countdown > 0) {
+  //       setState(() {
+  //         _countdown--;
+  //       });
+  //     } else {
+  //       _timer?.cancel();
+  //       // Sau khi hết thời gian, nếu người dùng chưa xác thực, vẫn ở màn hình này
+  //       // Bạn có thể hiển thị thêm thông báo hoặc nút để gửi lại email
+  //     }
+  //   });
+  // }
 
   Future<void> _checkVerificationAndNavigate(BuildContext context, UserProvider userProvider) async {
     final verificationResult = await userProvider.checkEmailVerification(context);
@@ -89,16 +89,16 @@ class _RegisterSuccessScreenState extends State<RegisterSuccessScreen> {
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
-            Text(
-              'Tự động chuyển đến trang đăng nhập sau: $_countdown giây',
-              style: const TextStyle(fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
+            // const SizedBox(height: 20),
+            // Text(
+            //   'Tự động chuyển đến trang đăng nhập sau: $_countdown giây',
+            //   style: const TextStyle(fontSize: 16),
+            //   textAlign: TextAlign.center,
+            // ),
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () async {
-                _timer?.cancel(); // Hủy timer khi người dùng nhấn nút
+                // _timer?.cancel(); // Hủy timer khi người dùng nhấn nút
                 await _checkVerificationAndNavigate(context, userProvider);
               },
               child: const Text('Tiếp tục đăng nhập'),
@@ -114,10 +114,10 @@ class _RegisterSuccessScreenState extends State<RegisterSuccessScreen> {
                     SnackBar(content: Text(userProvider.resendEmailMessage!)),
                   );
                   // Reset countdown sau khi gửi lại email
-                  setState(() {
-                    _countdown = 60;
-                  });
-                  _startTimer();
+                  // setState(() {
+                  //   _countdown = 60;
+                  // });
+                  // _startTimer();
                 }
               },
               child: userProvider.isLoadingResendEmail
