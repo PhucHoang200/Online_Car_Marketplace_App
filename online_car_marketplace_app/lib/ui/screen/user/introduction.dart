@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:online_car_marketplace_app/providers/post_provider.dart';
+import 'package:online_car_marketplace_app/providers/brand_provider.dart';
 
 // Provider để quản lý trạng thái
 class LandingProvider with ChangeNotifier {
@@ -10,8 +12,22 @@ class LandingProvider with ChangeNotifier {
   }
 }
 
-class LandingPage extends StatelessWidget {
+class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
+
+  @override
+  State<LandingPage> createState() => _LandingPageState();
+}
+
+class _LandingPageState extends State<LandingPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<PostProvider>(context, listen: false).fetchPosts();
+      Provider.of<BrandProvider>(context, listen: false).fetchBrands();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

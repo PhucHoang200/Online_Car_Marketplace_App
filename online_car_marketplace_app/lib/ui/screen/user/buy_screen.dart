@@ -28,6 +28,11 @@ class _BuyScreenState extends State<BuyScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<PostProvider>(context, listen: false).fetchPosts();
       Provider.of<BrandProvider>(context, listen: false).fetchBrands();
+      final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        favoriteProvider.fetchFavoritePosts(currentUser.uid);
+      }
     });
   }
 
