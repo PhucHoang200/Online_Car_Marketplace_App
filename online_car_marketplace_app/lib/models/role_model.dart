@@ -1,5 +1,3 @@
-
-
 class Role {
   final int id;
   final String name;

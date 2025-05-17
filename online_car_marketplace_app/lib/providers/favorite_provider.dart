@@ -37,15 +37,10 @@ class FavoriteProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     _favoritePostsWithDetails.clear();
-    print("--- fetchFavoritePosts bắt đầu cho User ID: $userId ---");
     try {
       final favoriteList = await _favoriteRepository.getFavoritesByUserId(userId);
-      print("--- Số lượng favorites lấy được: ${favoriteList.length} ---");
       for (final favorite in favoriteList) {
-        print("--- Đang xử lý Favorite ID: ${favorite.id}, Post ID: ${favorite.postId} ---");
         final postDoc = await _postRepository.getPostDetails(favorite.postId.toString()); // Sử dụng PostRepository
-        print("--- Post ID: ${favorite.postId}, Post Snapshot tồn tại: ${postDoc.exists} ---");
-        print("--- Post ID: ${favorite.postId}, Dữ liệu Post Snapshot: ${postDoc.data()} ---");
 
         if (postDoc.exists) {
           final post = Post.fromMap(postDoc.data() as Map<String, dynamic>);
@@ -56,20 +51,18 @@ class FavoriteProvider extends ChangeNotifier {
           List<String> imageUrls = [];
 
           // Lấy thông tin xe
-          if (post.carId != null) {
-            final carDoc = await _postRepository.getCarDetails(post.carId.toString()); // Sử dụng PostRepository
-            if (carDoc.exists) {
-              final carData = carDoc.data() as Map<String, dynamic>;
-              car = Car.fromMap(carData);
-              carLocation = carData['location'] as String?;
+          final carDoc = await _postRepository.getCarDetails(post.carId.toString()); // Sử dụng PostRepository
+          if (carDoc.exists) {
+            final carData = carDoc.data() as Map<String, dynamic>;
+            car = Car.fromMap(carData);
+            carLocation = carData['location'] as String?;
 
-              // Lấy ảnh theo carId (tương tự PostRepository)
-              final imagesSnapshot = await FirebaseFirestore.instance
-                  .collection('images')
-                  .where('carId', isEqualTo: post.carId)
-                  .get();
-              imageUrls = imagesSnapshot.docs.map((e) => e['url'] as String).toList();
-            }
+            // Lấy ảnh theo carId (tương tự PostRepository)
+            final imagesSnapshot = await FirebaseFirestore.instance
+                .collection('images')
+                .where('carId', isEqualTo: post.carId)
+                .get();
+            imageUrls = imagesSnapshot.docs.map((e) => e['url'] as String).toList();
           }
 
           // Lấy thông tin người dùng (tương tự PostRepository)
@@ -92,9 +85,7 @@ class FavoriteProvider extends ChangeNotifier {
             imageUrls: imageUrls,
           );
           _favoritePostsWithDetails.add(postWithDetails);
-          print("--- Đã thêm bài đăng yêu thích với ID: ${post.id} ---");
         } else {
-          print("--- Không tìm thấy bài đăng với ID: ${favorite.postId} ---");
         }
       }
     } catch (e) {
@@ -102,7 +93,6 @@ class FavoriteProvider extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
-      print("--- Hoàn thành fetchFavoritePosts. Số lượng bài đăng yêu thích: ${_favoritePostsWithDetails.length} ---");
     }
   }
 
@@ -111,9 +101,8 @@ class FavoriteProvider extends ChangeNotifier {
       await _favoriteRepository.removeFavorite(userId, postId);
       _favoritePostsWithDetails.removeWhere((item) => item.post.id == postId);
       notifyListeners();
-      print("--- Đã xóa bài đăng với ID: $postId khỏi yêu thích của người dùng: $userId ---");
     } catch (e) {
-      print("--- Lỗi khi xóa bài đăng với ID: $postId khỏi yêu thích của người dùng: $userId: $e ---");
+      print('Error removing favorite: $e');
     }
   }
 
@@ -129,12 +118,10 @@ class FavoriteProvider extends ChangeNotifier {
 
   // Gọi phương thức addFavoriteAutoIncrement từ repository
   Future<void> addFavoriteAutoIncrement(Favorite favorite) async {
-    print("--- Bên trong addFavoriteAutoIncrement ---");
     try {
       await _favoriteRepository.addFavoriteAutoIncrement(favorite);
       _favorites.add(favorite);
       notifyListeners();
-      print("--- Thêm vào yêu thích thành công trong Provider ---");
     } catch (e) {
       print('Error adding favorite with auto-increment ID: $e');
     }
@@ -145,7 +132,6 @@ class FavoriteProvider extends ChangeNotifier {
       final favoriteList = await _favoriteRepository.getFavoritesByUserIdAndPostId(userId, postId);
       return favoriteList.isNotEmpty;
     } catch (e) {
-      print('Error checking if post is favorite: $e');
       return false;
     }
   }

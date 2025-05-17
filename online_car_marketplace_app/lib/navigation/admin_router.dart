@@ -1,11 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../ui/screen/admin/login_admin_screen.dart';
-import '../ui/screen/admin/dashboard_screen.dart';
-import '../../ui/screen/admin/overview_screen.dart';
-import '../../ui/screen/admin/user_management_screen.dart';
-import '../../ui/screen/admin/post_management_screen.dart';
-import '../../ui/screen/admin/category_management_screen.dart';
+import 'package:online_car_marketplace_app/ui/screen/admin/login_admin_screen.dart';
+import 'package:online_car_marketplace_app/ui/screen/admin/dashboard_screen.dart';
+import 'package:online_car_marketplace_app/ui/screen/admin/overview_screen.dart';
+import 'package:online_car_marketplace_app/ui/screen/admin/user_management_screen.dart';
+import 'package:online_car_marketplace_app/ui/screen/admin/post_management_screen.dart';
+import 'package:online_car_marketplace_app/ui/screen/admin/category_management_screen.dart';
 
 final adminRouter = GoRouter(
   routes: [

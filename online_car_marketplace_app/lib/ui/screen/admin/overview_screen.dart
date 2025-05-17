@@ -8,8 +8,8 @@ class OverviewScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: SfCartesianChart(
-        title: ChartTitle(text: "Số lượng bài đăng theo tháng"),
-        primaryXAxis: CategoryAxis(),
+        title: const ChartTitle(text: "Số lượng bài đăng theo tháng"),
+        primaryXAxis: const CategoryAxis(),
         series: <CartesianSeries>[
           ColumnSeries<ChartData, String>(
             dataSource: [

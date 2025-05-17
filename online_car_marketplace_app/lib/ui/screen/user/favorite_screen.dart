@@ -1,4 +1,3 @@
-// screens/favorite_posts_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -77,7 +76,7 @@ class _FavoritePostsScreenState extends State<FavoritePostsScreen> {
                   const SizedBox(width: 8),
                   if (car != null)
                     Text(
-                      '${car.price?.toStringAsFixed(0)} \Triệu', // Thêm ? để tránh lỗi nếu price là null
+                      '${car.price?.toStringAsFixed(0)} \Triệu',
                       style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent, fontSize: 16),
                     ),
                 ],

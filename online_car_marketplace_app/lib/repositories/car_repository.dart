@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/car_model.dart';
+import 'package:online_car_marketplace_app/models/car_model.dart';
 
 class CarRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -13,7 +13,6 @@ class CarRepository {
 
     int nextId = 1;
     if (snapshot.docs.isNotEmpty) {
-      print("Kiểu dữ liệu userId từ Firestore: ${snapshot.docs.runtimeType}");
       final lastCar = Car.fromMap(snapshot.docs.first.data());
       nextId = lastCar.id + 1;
     }
@@ -51,11 +50,4 @@ class CarRepository {
     return null;
   }
 
-  // Future<void> updateCar(Car car) async {
-  //   await _firestore.collection('cars').doc(car.id.toString()).update(car.toMap());
-  // }
-  //
-  // Future<void> deleteCar(int id) async {
-  //   await _firestore.collection('cars').doc(id.toString()).delete();
-  // }
 }

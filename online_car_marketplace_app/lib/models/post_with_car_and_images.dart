@@ -1,5 +1,5 @@
-import '../models/post_model.dart';
-import '../models/car_model.dart';
+import 'package:online_car_marketplace_app/models/post_model.dart';
+import 'package:online_car_marketplace_app/models/car_model.dart';
 
 class PostWithCarAndImages {
   final Post post;

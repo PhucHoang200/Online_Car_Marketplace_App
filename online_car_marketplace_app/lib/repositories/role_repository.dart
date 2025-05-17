@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/role_model.dart';
+import 'package:online_car_marketplace_app/models/role_model.dart';
 
 class RoleRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

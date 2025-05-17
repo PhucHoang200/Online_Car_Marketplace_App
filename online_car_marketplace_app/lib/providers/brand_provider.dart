@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/brand_model.dart';
-import '../repositories/brand_repository.dart';
+import 'package:online_car_marketplace_app/models/brand_model.dart';
+import 'package:online_car_marketplace_app/repositories/brand_repository.dart';
 
 class BrandProvider extends ChangeNotifier {
   final BrandRepository _brandRepository = BrandRepository();
@@ -17,19 +17,16 @@ class BrandProvider extends ChangeNotifier {
 
     try {
       final fetchedBrands = await _brandRepository.getBrands();
-      // Sử dụng Future.microtask để đảm bảo cập nhật UI sau khi build xong.
       Future.microtask(() {
         _brands = fetchedBrands;
         _isLoading = false;
         notifyListeners();
       });
     } catch (e) {
-      // Tương tự, cập nhật trong microtask nếu có lỗi.
       Future.microtask(() {
         _isLoading = false;
         notifyListeners();
       });
-      print('Error fetching brands: $e');
     }
   }
 
@@ -39,7 +36,7 @@ class BrandProvider extends ChangeNotifier {
       _brands.add(brand);
       notifyListeners();
     } catch (e) {
-      print('Error adding brand: $e');
+      // Handle error
     }
   }
 }

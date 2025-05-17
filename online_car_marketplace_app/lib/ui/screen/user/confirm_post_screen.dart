@@ -50,7 +50,6 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
   XFile? _selectedImage;
   String? _imageUrl;
   bool _isUploading = false;
-  bool _postSuccessful = false;
   late String _modelName;
   late String _selectedYear;
   late String _condition;
@@ -85,16 +84,6 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImage = pickedFile;
-      });
-    }
-  }
 
   Future<void> _performPost() async {
     if (_isUploading) return;
@@ -172,13 +161,10 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
         const SnackBar(content: Text('Đăng bài thành công!')),
       );
       setState(() {
-        _postSuccessful = true;
       }); //set post successful
       context.go('/sell'); // Navigate on success
 
     } catch (e) {
-      // Log the error!  This is crucial for debugging.
-      print("Error posting: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Đã có lỗi xảy ra: $e')),
       );

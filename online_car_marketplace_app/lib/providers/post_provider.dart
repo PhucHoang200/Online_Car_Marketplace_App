@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/post_model.dart';
-import '../repositories/post_repository.dart';
+import 'package:online_car_marketplace_app/models/post_model.dart';
+import 'package:online_car_marketplace_app/repositories/post_repository.dart';
 import 'package:online_car_marketplace_app/models/post_with_car_and_images.dart';
 
 class PostProvider with ChangeNotifier {
@@ -19,13 +19,7 @@ class PostProvider with ChangeNotifier {
 
     try {
       final rawData = await _postRepository.getPostsWithCarAndImages();
-      print("--- Dữ liệu thô từ Repository (Post Provider) ---");
-      print(rawData);
       _posts = rawData.map((item) {
-        print("--- Xử lý một item (Post Provider) ---");
-        print("Tên người bán (Provider): ${item['sellerName']}");
-        print("Số điện thoại người bán (Provider): ${item['sellerPhone']}");
-        print("Địa chỉ người bán (Provider): ${item['sellerAddress']}");
         return PostWithCarAndImages(
           post: item['post'],
           car: item['car'],
@@ -39,8 +33,6 @@ class PostProvider with ChangeNotifier {
     } catch (error) {
       _errorMessage = error.toString();
       _posts = [];
-      print("--- Lỗi trong Post Provider ---");
-      print(error);
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -49,7 +41,7 @@ class PostProvider with ChangeNotifier {
 
   Future<void> addPostAutoIncrement(Post post) async {
     await _postRepository.addPostAutoIncrement(post);
-    await fetchPosts(); // Cập nhật lại danh sách sau khi thêm
+    await fetchPosts();
   }
 
   void clearPosts() {

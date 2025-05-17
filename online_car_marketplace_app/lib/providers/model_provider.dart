@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/model_model.dart';
-import '../repositories/model_repository.dart';
+import 'package:online_car_marketplace_app/models/model_model.dart';
+import 'package:online_car_marketplace_app/repositories/model_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ModelProvider with ChangeNotifier {
@@ -34,7 +34,7 @@ class ModelProvider with ChangeNotifier {
 
     try {
       final QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
-          .collection('models') // Thay 'models' bằng tên collection chứa model của bạn
+          .collection('models')
           .where('brandId', isEqualTo: int.parse(brandId)) // Lọc theo brandId
           .get();
 

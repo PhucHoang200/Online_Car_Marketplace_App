@@ -29,7 +29,6 @@ class _SellScreenState extends State<SellScreen> {
 
     switch (index) {
       case 0:
-      // Đang ở Buy, không cần đi đâu
         break;
       case 1:
         break;

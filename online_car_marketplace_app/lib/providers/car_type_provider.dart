@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/car_type_model.dart';
-import '../repositories/car_type_repository.dart';
+import 'package:online_car_marketplace_app/models/car_type_model.dart';
+import 'package:online_car_marketplace_app/repositories/car_type_repository.dart';
 
 class CarTypeProvider extends ChangeNotifier {
   final CarTypeRepository _carTypeRepository = CarTypeRepository();

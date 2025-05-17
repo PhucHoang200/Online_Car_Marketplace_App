@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:online_car_marketplace_app/ui/screen/user/post_detail_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import '../../../models/favorite_model.dart';
-import '../../../providers/favorite_provider.dart';
-import '../../../providers/post_provider.dart';
+import 'package:online_car_marketplace_app/models/favorite_model.dart';
+import 'package:online_car_marketplace_app/providers/favorite_provider.dart';
+import 'package:online_car_marketplace_app/providers/post_provider.dart';
 import 'package:online_car_marketplace_app/models/post_with_car_and_images.dart';
+import 'package:online_car_marketplace_app/ui/screen/user/post_detail_screen.dart';
 import 'package:online_car_marketplace_app/providers/brand_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:intl/intl.dart';
 
 class BuyScreen extends StatefulWidget {
   final String uid;
@@ -21,7 +20,7 @@ class BuyScreen extends StatefulWidget {
 class _BuyScreenState extends State<BuyScreen> {
   late String userId;
   int _selectedIndex = 0;
-  late Future<void> _initialDataFuture;
+  late Future<List<void>> _initialDataFuture;
 
   @override
   void initState() {
@@ -31,22 +30,22 @@ class _BuyScreenState extends State<BuyScreen> {
   }
 
   // Load initial data
-  Future<void> _loadInitialData() async {
-    try {
-      // Fetch posts and brands
-      await Provider.of<PostProvider>(context, listen: false).fetchPosts();
-      await Provider.of<BrandProvider>(context, listen: false).fetchBrands();
-    } catch (error) {
-      // Handle errors during data fetching
-      print("Error fetching data in BuyScreen: $error");
-      // Show error message to user if needed
+  Future<List<void>> _loadInitialData() async {
+    final postProvider = Provider.of<PostProvider>(context, listen: false);
+    final brandProvider = Provider.of<BrandProvider>(context, listen: false);
+
+    return Future.wait([
+      postProvider.fetchPosts(),
+      brandProvider.fetchBrands(),
+    ]).catchError((error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to load data: $error')),
         );
       }
-      // Consider navigating to an error screen
-    }
+      // Re-throw the error to let FutureBuilder handle the error state
+      throw error;
+    });
   }
 
   void _onItemTapped(int index) {
@@ -75,8 +74,7 @@ class _BuyScreenState extends State<BuyScreen> {
 
         // Kiểm tra xem firebaseUser có tồn tại không
         if (firebaseUser != null) {
-          final userId = firebaseUser.uid;
-          // Điều hướng đến BuyScreen, truyền userId (uid)
+
           GoRouter.of(context).go('/profile', extra: firebaseUser.uid);
         }
         break;
@@ -234,13 +232,6 @@ class _BuyScreenState extends State<BuyScreen> {
         final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
         final currentUser = FirebaseAuth.instance.currentUser;
 
-
-        print("--- Bài đăng thứ $index ---");
-        print("Tên người bán (BuyScreen): ${postWithDetails.sellerName}");
-        print("Số điện thoại người bán (BuyScreen): ${postWithDetails.sellerPhone}");
-        print("Địa chỉ người bán (BuyScreen): ${postWithDetails.carLocation}");
-        print("User ID của bài đăng (BuyScreen): ${post.userId}");
-
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -274,7 +265,7 @@ class _BuyScreenState extends State<BuyScreen> {
                       const SizedBox(width: 8),
                       if (car != null)
                         Text(
-                          '${car.price.toStringAsFixed(0)} \Triệu',
+                          '${car.price.toStringAsFixed(0)} Triệu',
                           style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent, fontSize: 16),
                         ),
                     ],

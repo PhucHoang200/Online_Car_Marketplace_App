@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/message_model.dart';
-import '../repositories/message_repository.dart';
+import 'package:online_car_marketplace_app/models/message_model.dart';
+import 'package:online_car_marketplace_app/repositories/message_repository.dart';
 
 class MessageProvider with ChangeNotifier {
   final MessageRepository _messageRepository = MessageRepository();

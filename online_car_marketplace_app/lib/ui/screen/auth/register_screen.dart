@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:online_car_marketplace_app/ui/screen/auth/register_success_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:online_car_marketplace_app/providers/user_provider.dart';
-import 'package:online_car_marketplace_app/ui/screen/auth/login_user_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -13,7 +12,6 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  bool _navigationInProgress = false;
    bool _isRegistrationComplete = false;
    String? _selectedProvince;
    final List<String> _provinces = [

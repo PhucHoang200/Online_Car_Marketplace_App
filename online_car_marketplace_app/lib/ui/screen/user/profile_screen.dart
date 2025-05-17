@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
@@ -7,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:online_car_marketplace_app/providers/user_provider.dart';
 import 'package:online_car_marketplace_app/models/user_model.dart';
-import 'package:online_car_marketplace_app/services/storage_service.dart'; // Đã đổi tên thành StorageService
+import 'package:online_car_marketplace_app/services/storage_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String uid;
@@ -46,7 +45,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _emailController = TextEditingController(text: userData['email'] ?? '');
         _addressController = TextEditingController(text: userData['address'] ?? '');
         _avatarUrl = userData['avatarUrl'];
-        print(userData['avatarUrl']);
       });
     }
   }
@@ -64,7 +62,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return null;
       }
     } catch (e) {
-      print('Error fetching user data: $e');
       return null;
     }
   }
@@ -108,7 +105,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
 
       await userProvider.updateUserProfile(context, updatedUser);
-      // Optionally, reload user data after saving
       _loadUserData();
     }
   }
@@ -233,12 +229,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       )
                           : _buildUserInfoRow(Icons.home, userData['address'] ?? 'No address'),
                       const SizedBox(height: 20),
-                      // Nút Save Changes chỉ hiển thị khi đang chỉnh sửa
-                      // if (_isEditing)
-                      //   ElevatedButton(
-                      //     onPressed: () => _saveChanges(userProvider),
-                      //     child: const Text('Save Changes'),
-                      //   ),
                     ],
                   ),
                 ),

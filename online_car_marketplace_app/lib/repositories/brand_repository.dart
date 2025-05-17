@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/brand_model.dart';
+import 'package:online_car_marketplace_app/models/brand_model.dart';
 
 class BrandRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

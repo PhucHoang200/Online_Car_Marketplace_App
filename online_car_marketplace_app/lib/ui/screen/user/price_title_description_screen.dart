@@ -1,4 +1,3 @@
-// screens/price_title_description_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -107,11 +106,7 @@ class _PriceTitleDescriptionScreenState extends State<PriceTitleDescriptionScree
             ElevatedButton(
               onPressed: priceController.text.isNotEmpty &&
                   titleController.text.isNotEmpty &&
-                  descriptionController.text.isNotEmpty &&
-                  widget.condition != null &&
-                  widget.origin != null &&
-                  widget.fuelType != null &&
-                  widget.transmission != null
+                  descriptionController.text.isNotEmpty
                   ? () {
                 double? price =
                 double.tryParse(priceController.text);

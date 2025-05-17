@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
-import '../services/storage_service.dart';
-import '../models/image_model.dart';
+import 'package:online_car_marketplace_app/services/storage_service.dart';
+import 'package:online_car_marketplace_app/models/image_model.dart';
 
 class ImageRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/user_model.dart';
-import '../repositories/user_repository.dart';
+import 'package:online_car_marketplace_app/models/user_model.dart';
+import 'package:online_car_marketplace_app/repositories/user_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 
@@ -95,7 +95,6 @@ class UserProvider with ChangeNotifier {
     try {
       _users = await _userRepository.getUsers();
     } catch (e) {
-      print('Error fetching users: $e');
       _errorMessage = 'Lỗi khi tải danh sách người dùng: $e';
     }
 
@@ -108,7 +107,6 @@ class UserProvider with ChangeNotifier {
       await _userRepository.addUserWithAutoIncrementAndUid(user);
       await fetchUsers();
     } catch (e) {
-      print('Error adding user: $e');
       _errorMessage = 'Lỗi khi thêm người dùng: $e';
     }
   }
@@ -118,7 +116,6 @@ class UserProvider with ChangeNotifier {
       await _userRepository.updateUser(user);
       await fetchUsers();
     } catch (e) {
-      print('Error updating user: $e');
       _errorMessage = 'Lỗi khi cập nhật người dùng: $e';
     }
   }
@@ -129,7 +126,6 @@ class UserProvider with ChangeNotifier {
       _users.removeWhere((u) => u.id == id);
       notifyListeners();
     } catch (e) {
-      print('Error deleting user: $e');
       _errorMessage = 'Lỗi khi xóa người dùng: $e';
     }
   }
@@ -137,21 +133,17 @@ class UserProvider with ChangeNotifier {
   Future<bool> login(String email, String password) async {
     _isLoading = true;
     _errorMessage = null;
-    notifyListeners();
 
     try {
       final result = await _userRepository.login(email, password);
+      _isLoading = false;
 
       if (result['success']) {
         _currentUser = result['user'];
         _isAuthenticated = true;
-
-        notifyListeners();
       } else {
         _errorMessage = result['message'];
       }
-
-      _isLoading = false;
       notifyListeners();
       return result['success'];
     } catch (e) {
@@ -295,7 +287,6 @@ class UserProvider with ChangeNotifier {
         const SnackBar(content: Text('Profile updated successfully!')),
       );
     } catch (e) {
-      print('Error updating user profile in provider: $e');
       _errorMessage = 'Failed to update profile: $e';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(_errorMessage!)),

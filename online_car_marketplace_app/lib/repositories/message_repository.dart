@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/message_model.dart';
+import 'package:online_car_marketplace_app/models/message_model.dart';
 
 class MessageRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

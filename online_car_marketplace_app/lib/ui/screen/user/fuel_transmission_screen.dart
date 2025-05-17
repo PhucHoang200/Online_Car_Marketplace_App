@@ -1,4 +1,3 @@
-// screens/fuel_transmission_screen.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -96,9 +95,7 @@ class _FuelTransmissionScreenState extends State<FuelTransmissionScreen> {
             const SizedBox(height: 32),
             ElevatedButton(
               onPressed: fuelType != null &&
-                  transmission != null &&
-                  widget.condition != null &&
-                  widget.origin != null
+                  transmission != null
                   ? () {
                 context.go(
                   '/sell/price-title-description',

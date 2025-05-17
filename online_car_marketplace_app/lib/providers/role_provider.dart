@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/role_model.dart';
-import '../repositories/role_repository.dart';
+import 'package:online_car_marketplace_app/models/role_model.dart';
+import 'package:online_car_marketplace_app/repositories/role_repository.dart';
 
 class RoleProvider with ChangeNotifier {
   final RoleRepository _roleRepository = RoleRepository();

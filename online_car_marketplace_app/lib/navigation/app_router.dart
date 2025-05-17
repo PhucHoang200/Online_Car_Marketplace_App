@@ -10,16 +10,16 @@ import 'package:online_car_marketplace_app/ui/screen/user/introduction.dart';
 import 'package:online_car_marketplace_app/ui/screen/user/model_list_screen.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/brand_provider.dart';
-import '../providers/model_provider.dart';
-import '../ui/screen/auth/register_success_screen.dart';
-import '../ui/screen/user/condition_origin_screen.dart';
-import '../ui/screen/user/confirm_post_screen.dart';
-import '../ui/screen/user/favorite_screen.dart';
-import '../ui/screen/user/fuel_transmission_screen.dart';
-import '../ui/screen/user/image_upload_screen.dart';
-import '../ui/screen/user/price_title_description_screen.dart';
-import '../ui/screen/user/year_selection_screen.dart';
+import 'package:online_car_marketplace_app/providers/brand_provider.dart';
+import 'package:online_car_marketplace_app/providers/model_provider.dart';
+import 'package:online_car_marketplace_app/ui/screen/auth/register_success_screen.dart';
+import 'package:online_car_marketplace_app/ui/screen/user/condition_origin_screen.dart';
+import 'package:online_car_marketplace_app/ui/screen/user/confirm_post_screen.dart';
+import 'package:online_car_marketplace_app/ui/screen/user/favorite_screen.dart';
+import 'package:online_car_marketplace_app/ui/screen/user/fuel_transmission_screen.dart';
+import 'package:online_car_marketplace_app/ui/screen/user/image_upload_screen.dart';
+import 'package:online_car_marketplace_app/ui/screen/user/price_title_description_screen.dart';
+import 'package:online_car_marketplace_app/ui/screen/user/year_selection_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 

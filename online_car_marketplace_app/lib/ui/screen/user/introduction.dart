@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 class LandingProvider with ChangeNotifier {
   void onGetStarted(BuildContext context) {
     // Xử lý khi nhấn nút "Get Started"
-    print("Get Started button pressed");
     context.go('/login');
   }
 }
