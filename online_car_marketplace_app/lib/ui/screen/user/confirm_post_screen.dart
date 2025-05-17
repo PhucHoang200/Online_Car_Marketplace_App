@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -84,7 +85,6 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
     super.dispose();
   }
 
-
   Future<void> _performPost() async {
     if (_isUploading) return;
     if (_selectedImage == null) {
@@ -116,15 +116,14 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
       }
 
       final car = Car(
-        id: 0, // Temporary ID, will be replaced by Firestore
+        id: 0,
         userId: userId,
-        modelId: 1, // You might have a different way to get this
+        modelId: 1,
         fuelType: _fuelType,
         transmission: _transmission,
         year: int.parse(_selectedYear),
         mileage: _mileage,
-        location:
-        'Vietnam', //  You might want to allow users to select this.
+        location: 'Vietnam',
         price: _price,
         condition: _condition,
         origin: _origin,
@@ -132,23 +131,20 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
 
       final carRepository = Provider.of<CarRepository>(context, listen: false);
       final String carIdString = await carRepository.addCarAutoIncrement(car);
-      final int carId =
-      int.parse(carIdString); // Parse the ID as integer.
+      final int carId = int.parse(carIdString);
 
       final post = Post(
-        id: 0, // Temporary ID
+        id: 0,
         userId: userId,
         carId: carId,
         title: _title,
         description: _description,
         creationDate: Timestamp.now(),
       );
-      final postRepository =
-      Provider.of<PostRepository>(context, listen: false);
+      final postRepository = Provider.of<PostRepository>(context, listen: false);
       await postRepository.addPostAutoIncrement(post);
 
-      final imageRepository =
-      Provider.of<ImageRepository>(context, listen: false);
+      final imageRepository = Provider.of<ImageRepository>(context, listen: false);
       final image = ImageModel(
         id: 0,
         carId: carId,
@@ -160,9 +156,8 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Đăng bài thành công!')),
       );
-      setState(() {
-      }); //set post successful
-      context.go('/sell'); // Navigate on success
+      setState(() {});
+      context.go('/sell');
 
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -170,7 +165,6 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
       );
       setState(() {
         _isUploading = false;
-        //_errorMessage = e.toString(); // Optionally set error message
       });
     } finally {
       setState(() {
@@ -179,25 +173,29 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
     }
   }
 
-  Widget _buildInfoRow(String label, String value, VoidCallback? onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-            Expanded(
-              child: Text(
-                value,
-                textAlign: TextAlign.right,
-                style: const TextStyle(color: Colors.black87),
+  Widget _buildDetailCard({required String title, required String value, VoidCallback? onTap, Widget? trailing}) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8.0),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0)),
+                  const SizedBox(height: 4.0),
+                  Text(value, style: const TextStyle(fontSize: 14.0, color: Colors.black87)),
+                ],
               ),
-            ),
-            if (onTap != null)
-              const Icon(Icons.edit, size: 16, color: Colors.grey),
-          ],
+              if (trailing != null) trailing,
+            ],
+          ),
         ),
       ),
     );
@@ -207,92 +205,86 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Xác nhận bài đăng'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(), // Sử dụng context.pop() để quay lại
+          onPressed: () => context.pop(),
         ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildInfoRow('Hãng xe:', widget.brandId, () {}),
-            _buildInfoRow('Dòng xe:', _modelName, () {
-              context.push('/sell/models', extra: {
-                'brandId': _brandId,
-                'brandName': _modelName, // Correct key name
-                'selectedModel': _modelName,
-                'initialData': {
-                  'selectedYear': _selectedYear,
-                  'condition': _condition,
-                  'origin': _origin,
-                  'mileage': _mileage,
-                  'fuelType': _fuelType,
-                  'transmission': _transmission,
-                  'price': _price,
-                  'title': _title,
-                  'description': _description,
-                  'selectedImage': _selectedImage,
-                }
-              });
-            }),
-            _buildInfoRow('Năm sản xuất:', _selectedYear, () {
-              context.push('/sell/year', extra: {
-                'brandId': _brandId,
-                'modelName': _modelName,
-                'initialYear': _selectedYear,
-                'initialData': {
-                  'condition': _condition,
-                  'origin': _origin,
-                  'mileage': _mileage,
-                  'fuelType': _fuelType,
-                  'transmission': _transmission,
-                  'price': _price,
-                  'title': _title,
-                  'description': _description,
-                  'selectedImage': _selectedImage,
-                }
-              });
-            }),
-            _buildInfoRow('Tình trạng:', _condition, () {
-              context.push('/sell/condition-origin', extra: {
-                'brandId': _brandId,
-                'modelName': _modelName,
-                'selectedYear': _selectedYear,
-                'initialCondition': _condition,
-                'initialOrigin': _origin,
-                'initialMileage': _mileage,
-                'initialData': {
-                  'fuelType': _fuelType,
-                  'transmission': _transmission,
-                  'price': _price,
-                  'title': _title,
-                  'description': _description,
-                  'selectedImage': _selectedImage,
-                }
-              });
-            }),
-            _buildInfoRow('Xuất xứ:', _origin, () {
-              context.push('/sell/condition-origin', extra: {
-                'brandId': _brandId,
-                'modelName': _modelName,
-                'selectedYear': _selectedYear,
-                'initialCondition': _condition,
-                'initialOrigin': _origin,
-                'initialMileage': _mileage,
-                'initialData': {
-                  'fuelType': _fuelType,
-                  'transmission': _transmission,
-                  'price': _price,
-                  'title': _title,
-                  'description': _description,
-                  'selectedImage': _selectedImage,
-                }
-              });
-            }),
-            if (_condition == 'Cũ')
-              _buildInfoRow('Số km đã đi:', '$_mileage km', () {
+            if (_selectedImage != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: SizedBox(
+                  height: 150,
+                  width: double.infinity,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image.file(
+                      File(_selectedImage!.path),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+            _buildDetailCard(
+              title: 'Hãng xe',
+              value: widget.brandId,
+              onTap: () {}, // Logic vẫn giữ nguyên ở các màn hình khác
+            ),
+            _buildDetailCard(
+              title: 'Dòng xe',
+              value: _modelName,
+              onTap: () {
+                context.push('/sell/models', extra: {
+                  'brandId': _brandId,
+                  'brandName': _modelName,
+                  'selectedModel': _modelName,
+                  'initialData': {
+                    'selectedYear': _selectedYear,
+                    'condition': _condition,
+                    'origin': _origin,
+                    'mileage': _mileage,
+                    'fuelType': _fuelType,
+                    'transmission': _transmission,
+                    'price': _price,
+                    'title': _title,
+                    'description': _description,
+                    'selectedImage': _selectedImage,
+                  }
+                });
+              },
+            ),
+            _buildDetailCard(
+              title: 'Năm sản xuất',
+              value: _selectedYear,
+              onTap: () {
+                context.push('/sell/year', extra: {
+                  'brandId': _brandId,
+                  'modelName': _modelName,
+                  'initialYear': _selectedYear,
+                  'initialData': {
+                    'condition': _condition,
+                    'origin': _origin,
+                    'mileage': _mileage,
+                    'fuelType': _fuelType,
+                    'transmission': _transmission,
+                    'price': _price,
+                    'title': _title,
+                    'description': _description,
+                    'selectedImage': _selectedImage,
+                  }
+                });
+              },
+            ),
+            _buildDetailCard(
+              title: 'Tình trạng',
+              value: _condition,
+              onTap: () {
                 context.push('/sell/condition-origin', extra: {
                   'brandId': _brandId,
                   'modelName': _modelName,
@@ -309,131 +301,179 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
                     'selectedImage': _selectedImage,
                   }
                 });
-              }),
-            _buildInfoRow('Nhiên liệu:', _fuelType, () {
-              context.push('/sell/fuel-transmission', extra: {
-                'brandId': _brandId,
-                'modelName': _modelName,
-                'selectedYear': _selectedYear,
-                'condition': _condition,
-                'origin': _origin,
-                'mileage': _mileage,
-                'initialFuelType': _fuelType,
-                'initialTransmission': _transmission,
-                'initialData': {
-                  'price': _price,
-                  'title': _title,
-                  'description': _description,
-                  'selectedImage': _selectedImage,
-                }
-              });
-            }),
-            _buildInfoRow('Hộp số:', _transmission, () {
-              context.push('/sell/fuel-transmission', extra: {
-                'brandId': _brandId,
-                'modelName': _modelName,
-                'selectedYear': _selectedYear,
-                'condition': _condition,
-                'origin': _origin,
-                'mileage': _mileage,
-                'initialFuelType': _fuelType,
-                'initialTransmission': _transmission,
-                'initialData': {
-                  'price': _price,
-                  'title': _title,
-                  'description': _description,
-                  'selectedImage': _selectedImage,
-                }
-              });
-            }),
-            _buildInfoRow('Giá bán:', '$_price TRIỆU VND', () {
-              context.push('/sell/price-title-description', extra: {
-                'brandId': _brandId,
-                'modelName': _modelName,
-                'selectedYear': _selectedYear,
-                'condition': _condition,
-                'origin': _origin,
-                'mileage': _mileage,
-                'fuelType': _fuelType,
-                'transmission': _transmission,
-                'initialPrice': _price,
-                'initialData': {
-                  'title': _title,
-                  'description': _description,
-                  'selectedImage': _selectedImage,
-                }
-              });
-            }),
-            _buildInfoRow('Tiêu đề:', _title, () {
-              context.push('/sell/price-title-description', extra: {
-                'brandId': _brandId,
-                'modelName': _modelName,
-                'selectedYear': _selectedYear,
-                'condition': _condition,
-                'origin': _origin,
-                'mileage': _mileage,
-                'fuelType': _fuelType,
-                'transmission': _transmission,
-                'initialPrice': _price,
-                'initialTitle': _title,
-                'initialData': {
-                  'description': _description,
-                  'selectedImage': _selectedImage,
-                }
-              });
-            }),
-            _buildInfoRow('Mô tả:', _description, () {
-              context.push('/sell/price-title-description', extra: {
-                'brandId': _brandId,
-                'modelName': _modelName,
-                'selectedYear': _selectedYear,
-                'condition': _condition,
-                'origin': _origin,
-                'mileage': _mileage,
-                'fuelType': _fuelType,
-                'transmission': _transmission,
-                'initialPrice': _price,
-                'initialTitle': _title,
-                'initialDescription': _description,
-                'initialData': {
-                  'selectedImage': _selectedImage,
-                }
-              });
-            }),
-            const SizedBox(height: 24),
-            _buildInfoRow(
-                'Ảnh đã chọn:',
-                _selectedImage != null ? 'Đã chọn' : 'Chưa chọn', () {
-              context.push('/sell/image-upload', extra: {
-                'brandId': _brandId,
-                'modelName': _modelName,
-                'selectedYear': _selectedYear,
-                'condition': _condition,
-                'origin': _origin,
-                'mileage': _mileage,
-                'fuelType': _fuelType,
-                'transmission': _transmission,
-                'price': _price,
-                'title': _title,
-                'description': _description,
-                'initialImage': _selectedImage,
-              });
-            }),
-            const SizedBox(height: 24),
-            Center(
-              child: ElevatedButton(
-                onPressed:
-                !_isUploading ? _performPost : null, // Disable during upload
-                child: _isUploading
-                    ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                      strokeWidth:
-                      2), // Show indicator during upload
-                )
-                    : const Text('Đăng bài'),
+              },
+            ),
+            _buildDetailCard(
+              title: 'Xuất xứ',
+              value: _origin,
+              onTap: () {
+                context.push('/sell/condition-origin', extra: {
+                  'brandId': _brandId,
+                  'modelName': _modelName,
+                  'selectedYear': _selectedYear,
+                  'initialCondition': _condition,
+                  'initialOrigin': _origin,
+                  'initialMileage': _mileage,
+                  'initialData': {
+                    'fuelType': _fuelType,
+                    'transmission': _transmission,
+                    'price': _price,
+                    'title': _title,
+                    'description': _description,
+                    'selectedImage': _selectedImage,
+                  }
+                });
+              },
+            ),
+            if (_condition == 'Cũ')
+              _buildDetailCard(
+                title: 'Số km đã đi',
+                value: '$_mileage km',
+                onTap: () {
+                  context.push('/sell/condition-origin', extra: {
+                    'brandId': _brandId,
+                    'modelName': _modelName,
+                    'selectedYear': _selectedYear,
+                    'initialCondition': _condition,
+                    'initialOrigin': _origin,
+                    'initialMileage': _mileage,
+                    'initialData': {
+                      'fuelType': _fuelType,
+                      'transmission': _transmission,
+                      'price': _price,
+                      'title': _title,
+                      'description': _description,
+                      'selectedImage': _selectedImage,
+                    }
+                  });
+                },
               ),
+            _buildDetailCard(
+              title: 'Nhiên liệu',
+              value: _fuelType,
+              onTap: () {
+                context.push('/sell/fuel-transmission', extra: {
+                  'brandId': _brandId,
+                  'modelName': _modelName,
+                  'selectedYear': _selectedYear,
+                  'condition': _condition,
+                  'origin': _origin,
+                  'mileage': _mileage,
+                  'initialFuelType': _fuelType,
+                  'initialTransmission': _transmission,
+                  'initialData': {
+                    'price': _price,
+                    'title': _title,
+                    'description': _description,
+                    'selectedImage': _selectedImage,
+                  }
+                });
+              },
+            ),
+            _buildDetailCard(
+              title: 'Hộp số',
+              value: _transmission,
+              onTap: () {
+                context.push('/sell/fuel-transmission', extra: {
+                  'brandId': _brandId,
+                  'modelName': _modelName,
+                  'selectedYear': _selectedYear,
+                  'condition': _condition,
+                  'origin': _origin,
+                  'mileage': _mileage,
+                  'initialFuelType': _fuelType,
+                  'initialTransmission': _transmission,
+                  'initialData': {
+                    'price': _price,
+                    'title': _title,
+                    'description': _description,
+                    'selectedImage': _selectedImage,
+                  }
+                });
+              },
+            ),
+            _buildDetailCard(
+              title: 'Giá bán',
+              value: '$_price TRIỆU VND',
+              onTap: () {
+                context.push('/sell/price-title-description', extra: {
+                  'brandId': _brandId,
+                  'modelName': _modelName,
+                  'selectedYear': _selectedYear,
+                  'condition': _condition,
+                  'origin': _origin,
+                  'mileage': _mileage,
+                  'fuelType': _fuelType,
+                  'transmission': _transmission,
+                  'initialPrice': _price,
+                  'initialData': {
+                    'title': _title,
+                    'description': _description,
+                    'selectedImage': _selectedImage,
+                  }
+                });
+              },
+            ),
+            _buildDetailCard(
+              title: 'Tiêu đề',
+              value: _title,
+              onTap: () {
+                context.push('/sell/price-title-description', extra: {
+                  'brandId': _brandId,
+                  'modelName': _modelName,
+                  'selectedYear': _selectedYear,
+                  'condition': _condition,
+                  'origin': _origin,
+                  'mileage': _mileage,
+                  'fuelType': _fuelType,
+                  'transmission': _transmission,
+                  'initialPrice': _price,
+                  'initialTitle': _title,
+                  'initialData': {
+                    'description': _description,
+                    'selectedImage': _selectedImage,
+                  }
+                });
+              },
+            ),
+            _buildDetailCard(
+              title: 'Mô tả',
+              value: _description,
+              onTap: () {
+                context.push('/sell/price-title-description', extra: {
+                  'brandId': _brandId,
+                  'modelName': _modelName,
+                  'selectedYear': _selectedYear,
+                  'condition': _condition,
+                  'origin': _origin,
+                  'mileage': _mileage,
+                  'fuelType': _fuelType,
+                  'transmission': _transmission,
+                  'initialPrice': _price,
+                  'initialTitle': _title,
+                  'initialDescription': _description,
+                  'initialData': {
+                    'selectedImage': _selectedImage,
+                  }
+                });
+              },
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: !_isUploading ? _performPost : null,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+                backgroundColor: Theme.of(context).primaryColor,
+                textStyle: const TextStyle(fontSize: 16.0),
+              ),
+              child: _isUploading
+                  ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+              )
+                  : const Text('Đăng bài', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

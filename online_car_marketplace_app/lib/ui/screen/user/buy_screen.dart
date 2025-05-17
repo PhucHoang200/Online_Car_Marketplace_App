@@ -112,18 +112,18 @@ class _BuyScreenState extends State<BuyScreen> {
                   Container(
                     width: 60, // Tăng kích thước logo
                     height: 60,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white, // Thêm background trắng cho logo
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.3),
-                          spreadRadius: 1,
-                          blurRadius: 3,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
+                    // decoration: BoxDecoration(
+                    //   shape: BoxShape.circle,
+                    //   color: Colors.white, // Thêm background trắng cho logo
+                    //   boxShadow: [
+                    //     BoxShadow(
+                    //       color: Colors.grey.withOpacity(0.3),
+                    //       spreadRadius: 1,
+                    //       blurRadius: 3,
+                    //       offset: const Offset(0, 2),
+                    //     ),
+                    //   ],
+                    // ),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0), // Thêm padding cho hình ảnh
                       child: Image.asset(
