@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:online_car_marketplace_app/providers/favorite_provider.dart';
@@ -221,13 +220,6 @@ class _FavoritePostsScreenState extends State<FavoritePostsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/buy', extra: userId),
-        ),
-        title: const Text('Bài đăng đã lưu'),
-      ),
       body: Consumer<FavoriteProvider>(
         builder: (context, favoriteProvider, child) {
           if (favoriteProvider.isLoading) {

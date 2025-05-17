@@ -3,9 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:online_car_marketplace_app/providers/brand_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:online_car_marketplace_app/ui/widgets/user/main_bottom_navigation_bar.dart';
 
 class SellScreen extends StatefulWidget {
-
   const SellScreen({super.key});
 
   @override
@@ -14,48 +14,16 @@ class SellScreen extends StatefulWidget {
 
 class _SellScreenState extends State<SellScreen> {
   late String userId;
-  int _selectedIndex = 0;
-  final carNumberController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        break;
-      case 1:
-        break;
-      case 2:
-        break;
-      case 3:
-        final firebaseUser = FirebaseAuth.instance.currentUser;
-
-        // Kiểm tra xem firebaseUser có tồn tại không
-        if (firebaseUser != null) {
-          final userId = firebaseUser.uid;
-          // Điều hướng đến BuyScreen, truyền userId (uid)
-          GoRouter.of(context).go('/profile', extra: firebaseUser.uid);
-        }
-        break;
-    }
-  }
-  @override
-  void dispose() {
-    carNumberController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: _buildBottomNavBar(),
+      bottomNavigationBar: const MainBottomNavigationBar(currentIndex: 0),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -81,16 +49,6 @@ class _SellScreenState extends State<SellScreen> {
                     ),
                   ),
               const SizedBox(height: 30),
-              // _buildCarNumberInput(),
-              // const SizedBox(height: 16),
-              // ElevatedButton(
-              //   style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              //   onPressed: () {}, //
-              //   child: const Text('Get a price'),
-              // ),
-              // const SizedBox(height: 16),
-              // const Center(child: Text("Or", style: TextStyle(fontWeight: FontWeight.bold))),
-              // const SizedBox(height: 16),
               _buildBrandSelector(),
             ],
           ),
@@ -221,22 +179,6 @@ class _SellScreenState extends State<SellScreen> {
           ],
         );
       },
-    );
-  }
-
-  Widget _buildBottomNavBar() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      currentIndex: _selectedIndex,
-      selectedItemColor: Colors.orange,
-      unselectedItemColor: Colors.grey,
-      onTap: _onItemTapped,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.directions_car), label: 'Buy'),
-        BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'Favorite'),
-        BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Chat'),
-        BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
-      ],
     );
   }
 

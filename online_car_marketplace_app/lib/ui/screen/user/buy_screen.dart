@@ -8,6 +8,7 @@ import 'package:online_car_marketplace_app/models/post_with_car_and_images.dart'
 import 'package:online_car_marketplace_app/ui/screen/user/post_detail_screen.dart';
 import 'package:online_car_marketplace_app/providers/brand_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:online_car_marketplace_app/ui/widgets/user/main_bottom_navigation_bar.dart';
 
 class BuyScreen extends StatefulWidget {
   final String uid;
@@ -19,121 +20,48 @@ class BuyScreen extends StatefulWidget {
 
 class _BuyScreenState extends State<BuyScreen> {
   late String userId;
-  int _selectedIndex = 0;
-  late Future<List<void>> _initialDataFuture;
 
   @override
   void initState() {
     super.initState();
     userId = widget.uid;
-    _initialDataFuture = _loadInitialData();
-  }
-
-  // Load initial data
-  Future<List<void>> _loadInitialData() async {
-    final postProvider = Provider.of<PostProvider>(context, listen: false);
-    final brandProvider = Provider.of<BrandProvider>(context, listen: false);
-
-    return Future.wait([
-      postProvider.fetchPosts(),
-      brandProvider.fetchBrands(),
-    ]).catchError((error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load data: $error')),
-        );
-      }
-      // Re-throw the error to let FutureBuilder handle the error state
-      throw error;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<PostProvider>(context, listen: false).fetchPosts();
+      Provider.of<BrandProvider>(context, listen: false).fetchBrands();
     });
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        break;
-      case 1:
-        final firebaseUser = FirebaseAuth.instance.currentUser;
-        if (firebaseUser != null) {
-          GoRouter.of(context).go('/favorites');
-        } else {
-          // Xử lý trường hợp người dùng chưa đăng nhập nếu cần
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Bạn cần đăng nhập để xem bài đăng đã lưu.')),
-          );
-        }
-        break;
-      case 2:
-        break;
-      case 3:
-        final firebaseUser = FirebaseAuth.instance.currentUser;
-
-        // Kiểm tra xem firebaseUser có tồn tại không
-        if (firebaseUser != null) {
-
-          GoRouter.of(context).go('/profile', extra: firebaseUser.uid);
-        }
-        break;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Wrap the entire body in a FutureBuilder
-    return FutureBuilder(
-      future: _initialDataFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          // Show a loading indicator while data is being fetched
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        } else if (snapshot.hasError) {
-          // Show an error message if data fetching failed.
-          return Scaffold(
-            body: Center(
-              child: Text('Error: ${snapshot.error}'),
-            ),
-          );
-        } else {
-          // Data has been loaded successfully, build the UI.
-          final posts = Provider.of<PostProvider>(context).posts;
+    final posts = Provider.of<PostProvider>(context).posts;
 
-          return Scaffold(
-            body: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    // _buildTopBar(),
-                    const SizedBox(height: 16),
-                    _buildSearchBar(),
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton(
-                        onPressed: () => context.go('/sell'),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange),
-                        child: const Text('Switch to Sell'),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    _buildBrandSelector(),
-                    const SizedBox(height: 16),
-                    Expanded(child: _buildPostList(posts)),
-                  ],
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              // _buildTopBar(),
+              const SizedBox(height: 16),
+              _buildSearchBar(),
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton(
+                  onPressed: () => context.go('/sell'),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                  child: const Text('Switch to Sell'),
                 ),
               ),
-            ),
-            bottomNavigationBar: _buildBottomNavBar(),
-          );
-        }
-      },
+              const SizedBox(height: 10),
+              _buildBrandSelector(),
+              const SizedBox(height: 16),
+              Expanded(child: _buildPostList(posts)),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: const MainBottomNavigationBar(currentIndex: 0),
     );
   }
 
@@ -430,23 +358,6 @@ class _BuyScreenState extends State<BuyScreen> {
           ),
         );
       },
-    );
-  }
-
-
-  Widget _buildBottomNavBar() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      currentIndex: _selectedIndex,
-      selectedItemColor: Colors.orange,
-      unselectedItemColor: Colors.grey,
-      onTap: _onItemTapped,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.directions_car), label: 'Buy'),
-        BottomNavigationBarItem(icon: Icon(Icons.bookmark_border), label: 'Favorite'),
-        BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Chat'),
-        BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
-      ],
     );
   }
 

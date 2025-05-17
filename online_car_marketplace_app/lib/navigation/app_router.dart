@@ -21,6 +21,8 @@ import 'package:online_car_marketplace_app/ui/screen/user/image_upload_screen.da
 import 'package:online_car_marketplace_app/ui/screen/user/price_title_description_screen.dart';
 import 'package:online_car_marketplace_app/ui/screen/user/year_selection_screen.dart';
 
+import '../ui/widgets/user/main_app_screen.dart';
+
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter appRouter = GoRouter(
@@ -255,8 +257,9 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
     GoRoute(
-       path: '/favorites',
-      builder: (context, state) => const FavoritePostsScreen(uid: '',),
+      path: '/favorites',
+      builder: (context, state) =>
+      const MainAppScreen(currentIndex: 1, child: FavoritePostsScreen(uid: '')),
     ),
   ],
 );
