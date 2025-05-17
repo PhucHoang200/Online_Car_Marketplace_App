@@ -21,15 +21,32 @@ class BuyScreen extends StatefulWidget {
 class _BuyScreenState extends State<BuyScreen> {
   late String userId;
   int _selectedIndex = 0;
+  late Future<void> _initialDataFuture;
 
   @override
   void initState() {
     super.initState();
     userId = widget.uid;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<PostProvider>(context, listen: false).fetchPosts();
-      Provider.of<BrandProvider>(context, listen: false).fetchBrands();
-    });
+    _initialDataFuture = _loadInitialData();
+  }
+
+  // Load initial data
+  Future<void> _loadInitialData() async {
+    try {
+      // Fetch posts and brands
+      await Provider.of<PostProvider>(context, listen: false).fetchPosts();
+      await Provider.of<BrandProvider>(context, listen: false).fetchBrands();
+    } catch (error) {
+      // Handle errors during data fetching
+      print("Error fetching data in BuyScreen: $error");
+      // Show error message to user if needed
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load data: $error')),
+        );
+      }
+      // Consider navigating to an error screen
+    }
   }
 
   void _onItemTapped(int index) {
@@ -68,35 +85,57 @@ class _BuyScreenState extends State<BuyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final posts = Provider.of<PostProvider>(context).posts;
+    // Wrap the entire body in a FutureBuilder
+    return FutureBuilder(
+      future: _initialDataFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // Show a loading indicator while data is being fetched
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (snapshot.hasError) {
+          // Show an error message if data fetching failed.
+          return Scaffold(
+            body: Center(
+              child: Text('Error: ${snapshot.error}'),
+            ),
+          );
+        } else {
+          // Data has been loaded successfully, build the UI.
+          final posts = Provider.of<PostProvider>(context).posts;
 
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              // _buildTopBar(),
-              const SizedBox(height: 16),
-              _buildSearchBar(),
-              const SizedBox(height: 10),
-              Align(
-                alignment: Alignment.centerRight,
-                child: ElevatedButton(
-                  onPressed: () => context.go('/sell'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                  child: const Text('Switch to Sell'),
+          return Scaffold(
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // _buildTopBar(),
+                    const SizedBox(height: 16),
+                    _buildSearchBar(),
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ElevatedButton(
+                        onPressed: () => context.go('/sell'),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange),
+                        child: const Text('Switch to Sell'),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _buildBrandSelector(),
+                    const SizedBox(height: 16),
+                    Expanded(child: _buildPostList(posts)),
+                  ],
                 ),
               ),
-              const SizedBox(height: 10),
-              _buildBrandSelector(),
-              const SizedBox(height: 16),
-              Expanded(child: _buildPostList(posts)),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: _buildBottomNavBar(),
+            ),
+            bottomNavigationBar: _buildBottomNavBar(),
+          );
+        }
+      },
     );
   }
 

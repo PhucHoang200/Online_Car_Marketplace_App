@@ -1,45 +1,67 @@
 // screens/year_selection_screen.dart
 import 'package:flutter/material.dart';
-import 'condition_origin_screen.dart'; // Import màn hình chọn tình trạng và xuất xứ
+import 'package:go_router/go_router.dart';
 
-class YearSelectionScreen extends StatelessWidget {
+class YearSelectionScreen extends StatefulWidget {
   final String brandId;
   final String modelName;
+  final String? initialYear;
+  final Map<String, dynamic>? initialData;
 
   const YearSelectionScreen({
     super.key,
     required this.brandId,
     required this.modelName,
+    this.initialYear,
+    this.initialData,
   });
+
+  @override
+  State<YearSelectionScreen> createState() => _YearSelectionScreenState();
+}
+
+class _YearSelectionScreenState extends State<YearSelectionScreen> {
+  String? _selectedYear;
+  final List<String> _years = List.generate(50, (index) => (DateTime.now().year - index).toString());
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedYear = widget.initialYear;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              Navigator.pop(context); // Đóng màn hình và không trả về giá trị
-            },
-          ),
-          title: const Text('Chọn năm sản xuất')
+        title: const Text('Chọn năm sản xuất'),
       ),
       body: ListView.builder(
-        itemCount: 2025 - 1990 + 1,
+        itemCount: _years.length,
         itemBuilder: (context, index) {
-          final year = (1990 + index).toString();
+          final year = _years[index];
+          final isSelected = year == _selectedYear;
           return ListTile(
-            title: Text(year),
+            title: Text(
+              year,
+              style: TextStyle(
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? Theme.of(context).primaryColor : null,
+              ),
+            ),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ConditionOriginScreen(
-                    brandId: brandId,
-                    modelName: modelName,
-                    selectedYear: year, // Truyền năm đã chọn
-                  ),
-                ),
+              setState(() {
+                _selectedYear = year;
+              });
+              // Navigate to the next screen, passing all data
+              context.push(
+                '/sell/condition-origin',
+                extra: {
+                  'brandId': widget.brandId,
+                  'modelName': widget.modelName,
+                  'selectedYear': year,
+                  'initialData': widget.initialData,
+                },
               );
             },
           );

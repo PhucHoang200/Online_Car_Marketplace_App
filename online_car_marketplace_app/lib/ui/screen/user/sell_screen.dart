@@ -20,7 +20,6 @@ class _SellScreenState extends State<SellScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<BrandProvider>(context, listen: false).fetchBrands();
   }
 
   void _onItemTapped(int index) {
@@ -123,41 +122,6 @@ class _SellScreenState extends State<SellScreen> {
     );
   }
 
-  // Widget _buildCarNumberInput() {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       const Text("Enter your car number"),
-  //       const SizedBox(height: 6),
-  //       TextField(
-  //         controller: carNumberController,
-  //         decoration: InputDecoration(
-  //           hintText: "e.g. DL45 VC 4321",
-  //           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-  //         ),
-  //       ),
-  //       const SizedBox(height: 10),
-  //       Align(
-  //         alignment: Alignment.centerRight,
-  //         child: ElevatedButton(
-  //           onPressed: () {
-  //             // Lấy userId hiện tại (bạn cần có logic để lấy userId này)
-  //             final String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
-  //             if (currentUserId != null) {
-  //               context.go('/buy', extra: currentUserId);
-  //             } else {
-  //               // Xử lý trường hợp không có userId (ví dụ: điều hướng mà không có uid)
-  //               context.go('/buy', extra: ''); // Hoặc một giá trị mặc định, hoặc xử lý khác
-  //             }
-  //           },
-  //           style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[300]),
-  //           child: const Text("Switch to Buy", style: TextStyle(color: Colors.black)),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
-
   Widget _buildBrandSelector() {
     return Consumer<BrandProvider>(
       builder: (context, brandProvider, child) {
@@ -208,7 +172,11 @@ class _SellScreenState extends State<SellScreen> {
                     debugPrint('Brand Name: $brandName');
 
                     context.push(
-                      '/models?brandId=${brand.id.toString()}&brandName=${Uri.encodeComponent(brand.name)}', // Chuyển đổi brand.id thành String
+                      '/sell/models',
+                      extra: {
+                        'brandId': brand.id.toString(), // Truyền brand.id dưới dạng String qua extra
+                        'brandName': brand.name,
+                      },
                     );
                   },
                   child: Container(

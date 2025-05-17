@@ -1,6 +1,6 @@
 // screens/price_title_description_screen.dart
 import 'package:flutter/material.dart';
-import 'image_upload_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class PriceTitleDescriptionScreen extends StatefulWidget {
   final String brandId;
@@ -11,6 +11,10 @@ class PriceTitleDescriptionScreen extends StatefulWidget {
   final int mileage;
   final String fuelType;
   final String transmission;
+  final Map<String, dynamic>? initialData;
+  final double? initialPrice;
+  final String? initialTitle;
+  final String? initialDescription;
 
   const PriceTitleDescriptionScreen({
     super.key,
@@ -22,6 +26,10 @@ class PriceTitleDescriptionScreen extends StatefulWidget {
     required this.mileage,
     required this.fuelType,
     required this.transmission,
+    this.initialData,
+    this.initialPrice,
+    this.initialTitle,
+    this.initialDescription,
   });
 
   @override
@@ -32,6 +40,24 @@ class _PriceTitleDescriptionScreenState extends State<PriceTitleDescriptionScree
   TextEditingController priceController = TextEditingController();
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialPrice != null) {
+      priceController.text = widget.initialPrice!.toStringAsFixed(0);
+    }
+    titleController.text = widget.initialTitle ?? '';
+    descriptionController.text = widget.initialDescription ?? '';
+  }
+
+  @override
+  void dispose() {
+    priceController.dispose();
+    titleController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,25 +107,47 @@ class _PriceTitleDescriptionScreenState extends State<PriceTitleDescriptionScree
             ElevatedButton(
               onPressed: priceController.text.isNotEmpty &&
                   titleController.text.isNotEmpty &&
-                  descriptionController.text.isNotEmpty
+                  descriptionController.text.isNotEmpty &&
+                  widget.condition != null &&
+                  widget.origin != null &&
+                  widget.fuelType != null &&
+                  widget.transmission != null
                   ? () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ImageUploadScreen(
-                      brandId: widget.brandId,
-                      modelName: widget.modelName,
-                      selectedYear: widget.selectedYear,
-                      condition: widget.condition,
-                      origin: widget.origin,
-                      mileage: widget.mileage,
-                      fuelType: widget.fuelType,
-                      transmission: widget.transmission,
-                      price: double.parse(priceController.text),
-                      title: titleController.text,
-                      description: descriptionController.text,
+                double? price =
+                double.tryParse(priceController.text);
+                if (price == null) {
+                  // Show error message using SnackBar
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Giá không hợp lệ'),
+                      duration: Duration(seconds: 2),
                     ),
-                  ),
+                  );
+                  return; // Stop navigation
+                }
+
+                context.go(
+                  '/sell/image-upload',
+                  extra: {
+                    'brandId': widget.brandId,
+                    'modelName': widget.modelName,
+                    'selectedYear': widget.selectedYear,
+                    'condition': widget.condition,
+                    'origin': widget.origin,
+                    'mileage': widget.mileage,
+                    'fuelType': widget.fuelType,
+                    'transmission': widget.transmission,
+                    'price': price,
+                    'title': titleController.text,
+                    'description': descriptionController.text,
+                    'initialData': {
+                      ...widget.initialData ?? {},
+                      'price': price,
+                      'title': titleController.text,
+                      'description': descriptionController.text,
+                    },
+                    'initialImage': widget.initialData?['selectedImage'],
+                  },
                 );
               }
                   : null,

@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:online_car_marketplace_app/providers/model_provider.dart';
-import 'year_selection_screen.dart';
 
 class ModelListScreen extends StatefulWidget {
   final String brandId;
   final String name;
   final String? selectedModel;
+  final Map<String, dynamic>? initialData;
 
   const ModelListScreen({
-    super.key,
+    Key? key,
     required this.brandId,
     required this.name,
     this.selectedModel,
-  });
+    required this.initialData,
+  }) : super(key: key);
 
   @override
   State<ModelListScreen> createState() => _ModelListScreenState();
@@ -26,9 +28,19 @@ class _ModelListScreenState extends State<ModelListScreen> {
   @override
   void initState() {
     super.initState();
-    // Khởi tạo _fetchFuture bằng future từ ModelProvider
+    _highlightedModel = widget.selectedModel;
     _fetchFuture = Provider.of<ModelProvider>(context, listen: false)
         .fetchModelsByBrandId(widget.brandId);
+  }
+
+  @override
+  void didUpdateWidget(covariant ModelListScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.brandId != widget.brandId) {
+      // Nếu brandId thay đổi, fetch lại data
+      _fetchFuture = Provider.of<ModelProvider>(context, listen: false)
+          .fetchModelsByBrandId(widget.brandId);
+    }
   }
 
   @override
@@ -37,13 +49,7 @@ class _ModelListScreenState extends State<ModelListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () {
-              Navigator.pop(context); // Đóng màn hình và không trả về giá trị
-            },
-          ),
-          title: Text('Chọn dòng xe')
+        title: Text('Chọn dòng xe'),
       ),
       body: FutureBuilder<void>(
         future: _fetchFuture,
@@ -77,17 +83,15 @@ class _ModelListScreenState extends State<ModelListScreen> {
                   ),
                 ),
                 onTap: () {
-                  setState(() {
-                    _highlightedModel = model.name; // Cập nhật model được highlight
-                  });
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => YearSelectionScreen(
-                        brandId: widget.brandId,
-                        modelName: model.name,
-                      ),
-                    ),
+                  print('Selected Model: ${model.name}, Brand ID: ${widget.brandId}');
+                  context.push(
+                    '/sell/year',
+                    extra: {
+                      'brandId': widget.brandId,
+                      'modelName': model.name,
+                      'initialYear': widget.initialData?['selectedYear'],
+                      'initialData': widget.initialData,
+                    },
                   );
                 },
               );

@@ -1,8 +1,7 @@
 // screens/image_upload_screen.dart
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'confirm_post_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImageUploadScreen extends StatefulWidget {
@@ -18,6 +17,7 @@ class ImageUploadScreen extends StatefulWidget {
   final String title;
   final String description;
   final XFile? initialImage;
+  final Map<String, dynamic>? initialData;
 
   const ImageUploadScreen({
     super.key,
@@ -33,6 +33,7 @@ class ImageUploadScreen extends StatefulWidget {
     required this.title,
     required this.description,
     this.initialImage,
+    this.initialData,
   });
 
   @override
@@ -45,28 +46,24 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedImage = widget.initialImage; // Khởi tạo ảnh nếu có
+    _selectedImage = widget.initialImage;
   }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    setState(() {
-      _selectedImage = pickedFile;
-    });
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = pickedFile;
+      });
+    }
   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
           title: const Text('Tải ảnh lên'),
-          leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () {
-            Navigator.pop(context, _selectedImage); // Trả về ảnh khi đóng
-          },
-        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -89,28 +86,35 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ConfirmPostScreen(
-                      brandId: widget.brandId,
-                      modelName: widget.modelName,
-                      selectedYear: widget.selectedYear,
-                      condition: widget.condition,
-                      origin: widget.origin,
-                      mileage: widget.mileage,
-                      fuelType: widget.fuelType,
-                      transmission: widget.transmission,
-                      price: widget.price,
-                      title: widget.title,
-                      description: widget.description,
-                      selectedImage: _selectedImage,
+              onPressed: () { // Remove the conditions from here
+                if (_selectedImage == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Vui lòng chọn một ảnh trước khi tiếp tục.'),
+                      duration: Duration(seconds: 2),
                     ),
-                  ),
+                  );
+                  return; // Stop, if no image.
+                }
+                context.go(
+                  '/sell/confirm-post',
+                  extra: {
+                    'brandId': widget.brandId,
+                    'modelName': widget.modelName,
+                    'selectedYear': widget.selectedYear,
+                    'condition': widget.condition, // Ép kiểu an toàn vì đã kiểm tra null
+                    'origin': widget.origin,       // Ép kiểu an toàn vì đã kiểm tra null
+                    'mileage': widget.mileage,
+                    'fuelType': widget.fuelType,   // Ép kiểu an toàn vì đã kiểm tra null
+                    'transmission': widget.transmission, // Ép kiểu an toàn vì đã kiểm tra null
+                    'price': widget.price,
+                    'title': widget.title,         // Ép kiểu an toàn vì đã kiểm tra null
+                    'description': widget.description!, // Ép kiểu an toàn vì đã kiểm tra null
+                    'selectedImage': _selectedImage,
+                  },
                 );
               },
-              child: const Text('Chọn ảnh & Tiếp tục'),
+              child: const Text('Tiếp tục'),
             ),
             const SizedBox(height: 20),
             const Text('Sau khi chọn ảnh, bạn sẽ được xem lại toàn bộ thông tin trước khi đăng bài.'),

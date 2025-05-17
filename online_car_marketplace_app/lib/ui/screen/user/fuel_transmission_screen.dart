@@ -1,6 +1,6 @@
 // screens/fuel_transmission_screen.dart
 import 'package:flutter/material.dart';
-import 'price_title_description_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class FuelTransmissionScreen extends StatefulWidget {
   final String brandId;
@@ -9,6 +9,9 @@ class FuelTransmissionScreen extends StatefulWidget {
   final String condition;
   final String origin;
   final int mileage;
+  final Map<String, dynamic>? initialData;
+  final String? initialFuelType;
+  final String? initialTransmission;
 
   const FuelTransmissionScreen({
     super.key,
@@ -18,6 +21,9 @@ class FuelTransmissionScreen extends StatefulWidget {
     required this.condition,
     required this.origin,
     required this.mileage,
+    this.initialData,
+    this.initialFuelType,
+    this.initialTransmission,
   });
 
   @override
@@ -27,6 +33,13 @@ class FuelTransmissionScreen extends StatefulWidget {
 class _FuelTransmissionScreenState extends State<FuelTransmissionScreen> {
   String? fuelType;
   String? transmission;
+
+  @override
+  void initState() {
+    super.initState();
+    fuelType = widget.initialFuelType;
+    transmission = widget.initialTransmission;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,9 +64,11 @@ class _FuelTransmissionScreenState extends State<FuelTransmissionScreen> {
                 );
               }).toList(),
               onChanged: (value) {
-                setState(() {
-                  fuelType = value;
-                });
+                if (value != null) {
+                  setState(() {
+                    fuelType = value;
+                  });
+                }
               },
             ),
             const SizedBox(height: 24),
@@ -71,29 +86,40 @@ class _FuelTransmissionScreenState extends State<FuelTransmissionScreen> {
                 );
               }).toList(),
               onChanged: (value) {
-                setState(() {
-                  transmission = value;
-                });
+                if (value != null) {
+                  setState(() {
+                    transmission = value;
+                  });
+                }
               },
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: fuelType != null && transmission != null
+              onPressed: fuelType != null &&
+                  transmission != null &&
+                  widget.condition != null &&
+                  widget.origin != null
                   ? () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PriceTitleDescriptionScreen(
-                      brandId: widget.brandId,
-                      modelName: widget.modelName,
-                      selectedYear: widget.selectedYear,
-                      condition: widget.condition,
-                      origin: widget.origin,
-                      mileage: widget.mileage,
-                      fuelType: fuelType!,
-                      transmission: transmission!,
-                    ),
-                  ),
+                context.go(
+                  '/sell/price-title-description',
+                  extra: {
+                    'brandId': widget.brandId,
+                    'modelName': widget.modelName,
+                    'selectedYear': widget.selectedYear,
+                    'condition': widget.condition,
+                    'origin': widget.origin,
+                    'mileage': widget.mileage,
+                    'fuelType': fuelType!,
+                    'transmission': transmission!,
+                    'initialData': {
+                      ...widget.initialData ?? {},
+                      'fuelType': fuelType,
+                      'transmission': transmission,
+                    },
+                    'initialPrice': widget.initialData?['price'],
+                    'initialTitle': widget.initialData?['title'],
+                    'initialDescription': widget.initialData?['description'],
+                  },
                 );
               }
                   : null,

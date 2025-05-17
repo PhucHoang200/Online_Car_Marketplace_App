@@ -16,12 +16,20 @@ class BrandProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _brands = await _brandRepository.getBrands();
+      final fetchedBrands = await _brandRepository.getBrands();
+      // Sử dụng Future.microtask để đảm bảo cập nhật UI sau khi build xong.
+      Future.microtask(() {
+        _brands = fetchedBrands;
+        _isLoading = false;
+        notifyListeners();
+      });
     } catch (e) {
+      // Tương tự, cập nhật trong microtask nếu có lỗi.
+      Future.microtask(() {
+        _isLoading = false;
+        notifyListeners();
+      });
       print('Error fetching brands: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
   }
 
