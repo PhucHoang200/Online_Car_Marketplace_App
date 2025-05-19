@@ -284,12 +284,24 @@ class UserProvider with ChangeNotifier {
     try {
       await _userRepository.updateUser(user);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully!')),
+        const SnackBar(
+          content: Text(
+            'Lưu thông tin thành công!',
+            style: TextStyle(color: Colors.white), // Chữ màu trắng
+          ),
+          backgroundColor: Colors.grey, // Màu xám nhạt
+        ),
       );
     } catch (e) {
-      _errorMessage = 'Failed to update profile: $e';
+      _errorMessage = 'Lỗi khi lưu thông tin: $e';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_errorMessage!)),
+        SnackBar(
+          content: Text(
+            _errorMessage!,
+            style: const TextStyle(color: Colors.white), // Chữ màu trắng
+          ),
+          backgroundColor: Colors.grey, // Màu xám nhạt
+        ),
       );
     } finally {
       setLoading(false);

@@ -1,11 +1,11 @@
-  import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../models/car_model.dart';
-import '../models/favorite_model.dart';
-import '../models/post_model.dart';
-import '../models/post_with_car_and_images.dart';
-import '../repositories/favorite_repository.dart';
-import '../repositories/post_repository.dart';
+import 'package:online_car_marketplace_app/models/car_model.dart';
+import 'package:online_car_marketplace_app/models/favorite_model.dart';
+import 'package:online_car_marketplace_app/models/post_model.dart';
+import 'package:online_car_marketplace_app/models/post_with_car_and_images.dart';
+import 'package:online_car_marketplace_app/repositories/favorite_repository.dart';
+import 'package:online_car_marketplace_app/repositories/post_repository.dart';
 
 class FavoriteProvider extends ChangeNotifier {
   final FavoriteRepository _favoriteRepository = FavoriteRepository();
@@ -18,6 +18,20 @@ class FavoriteProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+
+  // Map để theo dõi trạng thái yêu thích cục bộ (không cần gọi API ngay)
+  final Map<int, bool> _localFavoriteStatus = {};
+
+  // Lấy trạng thái yêu thích cục bộ
+  bool isPostLocallyFavorite(int postId) {
+    return _localFavoriteStatus[postId] ?? false;
+  }
+
+  // Thay đổi trạng thái yêu thích cục bộ
+  void toggleFavoriteLocal(int postId) {
+    _localFavoriteStatus[postId] = !isPostLocallyFavorite(postId);
+    notifyListeners(); // Báo cho các widget đang lắng nghe biết trạng thái đã thay đổi
+  }
 
   Future<void> fetchFavorites() async {
     _isLoading = true;
@@ -135,7 +149,5 @@ class FavoriteProvider extends ChangeNotifier {
       return false;
     }
   }
-
-
 
 }

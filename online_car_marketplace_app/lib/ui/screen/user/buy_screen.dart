@@ -8,7 +8,7 @@ import 'package:online_car_marketplace_app/models/post_with_car_and_images.dart'
 import 'package:online_car_marketplace_app/ui/screen/user/post_detail_screen.dart';
 import 'package:online_car_marketplace_app/providers/brand_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:online_car_marketplace_app/ui/widgets/user/main_bottom_navigation_bar.dart';
+import 'package:online_car_marketplace_app/ui/widgets/user/buy_bottom_navigation_bar.dart';
 
 class BuyScreen extends StatefulWidget {
   final String uid;
@@ -26,13 +26,13 @@ class _BuyScreenState extends State<BuyScreen> {
     super.initState();
     userId = widget.uid;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<PostProvider>(context, listen: false).fetchPosts();
-      Provider.of<BrandProvider>(context, listen: false).fetchBrands();
       final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null) {
         favoriteProvider.fetchFavoritePosts(currentUser.uid);
       }
+      Provider.of<PostProvider>(context, listen: false).fetchPosts();
+      Provider.of<BrandProvider>(context, listen: false).fetchBrands();
     });
   }
 
@@ -66,7 +66,7 @@ class _BuyScreenState extends State<BuyScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: const MainBottomNavigationBar(currentIndex: 0),
+      bottomNavigationBar: const BuyBottomNavigationBar(currentIndex: 0),
     );
   }
 
@@ -316,41 +316,39 @@ class _BuyScreenState extends State<BuyScreen> {
                         ],
                       ),
                       // Thêm icon yêu thích
-                      FutureBuilder<bool>(
-                        future: currentUser != null
-                            ? favoriteProvider.isPostFavorite(currentUser.uid, post.id)
-                            : Future.value(false),
-                        builder: (context, snapshot) {
-                          final isFavorite = snapshot.data ?? false;
-                          return IconButton(
-                            icon: Icon(isFavorite ? Icons.bookmark : Icons.bookmark_border),
-                            onPressed: () async {
-                              if (currentUser != null) {
-                                final userId = currentUser.uid;
-                                if (isFavorite) {
-                                  // Nếu đã là yêu thích, thực hiện xóa
-                                  await favoriteProvider.removeFavorite(userId, post.id);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Đã xóa khỏi mục đã lưu.')),
-                                  );
-                                } else {
-                                  // Nếu chưa là yêu thích, thực hiện thêm
-                                  final favorite = Favorite(
-                                    id: 0,
-                                    userId: userId,
-                                    postId: post.id,
-                                  );
-                                  await favoriteProvider.addFavoriteAutoIncrement(favorite);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Đã thêm vào yêu thích!')),
-                                  );
-                                }
-                                setState(() {}); // Cập nhật giao diện
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Bạn cần đăng nhập để thêm vào yêu thích.')),
-                                );
-                              }
+                      Consumer<FavoriteProvider>(
+                        builder: (context, favoriteProvider, child) {
+                          final currentUser = FirebaseAuth.instance.currentUser;
+                          return FutureBuilder<bool>(
+                            future: currentUser != null
+                                ? favoriteProvider.isPostFavorite(currentUser.uid, post.id)
+                                : Future.value(false),
+                            builder: (context, snapshot) {
+                              final isCurrentlyFavorite = snapshot.data ?? false;
+                              return IconButton(
+                                icon: Icon(isCurrentlyFavorite ? Icons.bookmark : Icons.bookmark_border),
+                                onPressed: () async {
+                                  if (currentUser != null) {
+                                    final userId = currentUser.uid;
+                                    if (isCurrentlyFavorite) {
+                                      await favoriteProvider.removeFavorite(userId, post.id);
+                                    } else {
+                                      final favorite = Favorite(
+                                        id: 0,
+                                        userId: userId,
+                                        postId: post.id,
+                                      );
+                                      await favoriteProvider.addFavoriteAutoIncrement(favorite);
+                                    }
+                                    // Gọi notifyListeners để cập nhật trạng thái icon ngay lập tức
+                                    favoriteProvider.toggleFavoriteLocal(post.id);
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Bạn cần đăng nhập để thêm vào yêu thích.')),
+                                    );
+                                  }
+                                },
+                              );
                             },
                           );
                         },

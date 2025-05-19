@@ -198,9 +198,6 @@ class _FavoritePostsScreenState extends State<FavoritePostsScreen> {
                       final currentUser = FirebaseAuth.instance.currentUser;
                       if (currentUser != null) {
                         await favoriteProvider.removeFavorite(currentUser.uid, post.id);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Đã xóa khỏi mục đã lưu.')),
-                        );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Bạn cần đăng nhập.')),

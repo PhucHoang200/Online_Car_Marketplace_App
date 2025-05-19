@@ -21,7 +21,9 @@ import 'package:online_car_marketplace_app/ui/screen/user/image_upload_screen.da
 import 'package:online_car_marketplace_app/ui/screen/user/price_title_description_screen.dart';
 import 'package:online_car_marketplace_app/ui/screen/user/year_selection_screen.dart';
 
-import '../ui/widgets/user/main_app_screen.dart';
+import 'package:online_car_marketplace_app/ui/widgets/user/buy_app_screen.dart';
+
+import '../ui/widgets/user/sell_app_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -46,10 +48,17 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const LoginScreen(),
     ),
     GoRoute(
-      path: '/profile',
+      path: '/profile/1',
       builder: (context, state) {
         final uId = state.extra as String;
-        return ProfileScreen(uid: uId);
+        return BuyAppScreen(currentIndex: 3, child: ProfileScreen(uid: uId));
+      },
+    ),
+    GoRoute(
+      path: '/profile/2',
+      builder: (context, state) {
+        final uId = state.extra as String;
+        return SellAppScreen(currentIndex: 3, child: ProfileScreen(uid: uId));
       },
     ),
     GoRoute(
@@ -259,7 +268,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/favorites',
       builder: (context, state) =>
-      const MainAppScreen(currentIndex: 1, child: FavoritePostsScreen(uid: '')),
+      const BuyAppScreen(currentIndex: 1, child: FavoritePostsScreen(uid: '')),
     ),
   ],
 );

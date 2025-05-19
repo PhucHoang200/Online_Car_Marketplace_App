@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class MainBottomNavigationBar extends StatelessWidget {
+class BuyBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
 
-  const MainBottomNavigationBar({super.key, required this.currentIndex});
+  const BuyBottomNavigationBar({super.key, required this.currentIndex});
 
   void _onItemTapped(BuildContext context, int index) {
     switch (index) {
@@ -23,12 +23,13 @@ class MainBottomNavigationBar extends StatelessWidget {
         }
         break;
       case 2:
-      // Navigate to chat screen
+      // Điều hướng đến màn hình Thông báo
+        GoRouter.of(context).go('/notifications'); // Đảm bảo bạn có route '/notifications'
         break;
       case 3:
         final firebaseUser = FirebaseAuth.instance.currentUser;
         if (firebaseUser != null) {
-          GoRouter.of(context).go('/profile', extra: firebaseUser.uid);
+          GoRouter.of(context).go('/profile/1', extra: firebaseUser.uid);
         }
         break;
     }
@@ -43,10 +44,10 @@ class MainBottomNavigationBar extends StatelessWidget {
       unselectedItemColor: Colors.grey,
       onTap: (index) => _onItemTapped(context, index),
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.directions_car), label: 'Buy'),
-        BottomNavigationBarItem(icon: Icon(Icons.bookmark_border), label: 'Favorite'),
-        BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Chat'),
-        BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
+        BottomNavigationBarItem(icon: Icon(Icons.directions_car), label: 'Trang mua'),
+        BottomNavigationBarItem(icon: Icon(Icons.bookmark_border), label: 'Tin lưu'),
+        BottomNavigationBarItem(icon: Icon(Icons.notifications_none), label: 'Thông báo'),
+        BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Tài khoản'),
       ],
     );
   }

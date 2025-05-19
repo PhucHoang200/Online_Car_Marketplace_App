@@ -3,7 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:online_car_marketplace_app/providers/brand_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:online_car_marketplace_app/ui/widgets/user/main_bottom_navigation_bar.dart';
+
+
+import '../../widgets/user/sell_bottom_navigation_bar.dart';
 
 class SellScreen extends StatefulWidget {
   const SellScreen({super.key});
@@ -23,7 +25,7 @@ class _SellScreenState extends State<SellScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: const MainBottomNavigationBar(currentIndex: 0),
+      bottomNavigationBar: const SellBottomNavigationBar(currentIndex: 0),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),

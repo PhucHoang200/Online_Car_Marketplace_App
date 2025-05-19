@@ -32,8 +32,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ModelProvider()),
         Provider<StorageService>(create: (_) => StorageService()),
-        Provider<CarRepository>(create: (_) => CarRepository()), // Provide CarRepository
-        Provider<ImageRepository>(create: (_) => ImageRepository()), // Provide ImageRepository
+        Provider<CarRepository>(create: (_) => CarRepository()),
+        Provider<ImageRepository>(create: (_) => ImageRepository()),
       ],
       child: const MyApp(),
     ),

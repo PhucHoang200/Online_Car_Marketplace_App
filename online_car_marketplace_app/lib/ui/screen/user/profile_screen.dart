@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:online_car_marketplace_app/providers/user_provider.dart';
@@ -27,7 +26,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? _avatarUrl;
   XFile? _selectedImage;
   final ImagePicker _picker = ImagePicker();
-  final StorageService _storageService = StorageService(); // Sử dụng StorageService
+  final StorageService _storageService = StorageService();
 
   @override
   void initState() {
@@ -73,11 +72,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  Future<void> _toggleEdit(UserProvider userProvider) async {
+    if (_isEditing) {
+      await _saveChanges(userProvider);
+    }
+    setState(() {
+      _isEditing = !_isEditing;
+    });
+  }
+
   Future<void> _saveChanges(UserProvider userProvider) async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isEditing = false;
-      });
       String? newAvatarUrl = _avatarUrl;
       if (_selectedImage != null) {
         try {
@@ -128,166 +133,212 @@ class _ProfileScreenState extends State<ProfileScreen> {
           return const Scaffold(body: Center(child: Text("No user data found")));
         }
 
-        final userData = snapshot.data!;
-
         return Scaffold(
-          backgroundColor: const Color(0xFFF8F9FB),
+          backgroundColor: Colors.white, // Đổi màu nền tổng thể thành trắng
           appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.go('/buy', extra: userId),
-            ),
-            title: const Text('Profile'),
-            actions: [
-              IconButton(
-                icon: Icon(_isEditing ? Icons.save : Icons.edit, color: Colors.orange),
-                onPressed: () {
-                  if (_isEditing) {
-                    _saveChanges(userProvider);
-                  } else {
-                    setState(() {
-                      _isEditing = true;
-                    });
-                  }
-                },
-              ),
-            ],
+            title: const Text('Thông tin tài khoản', style: TextStyle(color: Colors.black)), // Đổi màu tiêu đề
+            backgroundColor: Colors.white, // Đổi màu nền appbar
+            iconTheme: const IconThemeData(color: Colors.black), // Đổi màu icon appbar
+            elevation: 0, // Loại bỏ bóng đổ dưới appbar
           ),
-          body: Column(
-            children: [
-              // Thông tin người dùng (có thể chỉnh sửa)
-              Container(
-                color: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Avatar
+                Center(
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      // Thanh tiêu đề (chỉ nút edit/save)
-                      const SizedBox(height: 40), // Khoảng trống cho nút back
-                      Stack(
-                        alignment: Alignment.bottomRight,
-                        children: [
-                          CircleAvatar(
-                            radius: 60,
-                            backgroundColor: Colors.teal,
-                            backgroundImage: _selectedImage != null
-                                ? FileImage(File(_selectedImage!.path)) as ImageProvider<Object>?
-                                : NetworkImage(_avatarUrl ?? ''),
-                          ),
-                          if (_isEditing)
-                            GestureDetector(
-                              onTap: _pickImage,
-                              child: const CircleAvatar(
-                                radius: 20,
-                                backgroundColor: Colors.white,
-                                child: Icon(Icons.camera_alt, size: 20, color: Colors.orange),
-                              ),
+                      CircleAvatar(
+                        radius: 60,
+                        backgroundColor: Colors.grey[300],
+                        backgroundImage: _selectedImage != null
+                            ? FileImage(File(_selectedImage!.path)) as ImageProvider<Object>?
+                            : NetworkImage(_avatarUrl ?? ''),
+                      ),
+                      if (_isEditing)
+                        GestureDetector(
+                          onTap: _pickImage,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
                             ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      _isEditing
-                          ? TextFormField(
-                        controller: _nameController,
-                        decoration: const InputDecoration(labelText: 'Name'),
-                        validator: (value) => value == null || value.isEmpty ? 'Please enter your name' : null,
-                      )
-                          : Text(
-                        userData['name'] ?? 'No Name',
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 12),
-                      _isEditing
-                          ? TextFormField(
-                        controller: _phoneController,
-                        decoration: const InputDecoration(labelText: 'Phone'),
-                        keyboardType: TextInputType.phone,
-                        validator: (value) => value == null || value.isEmpty ? 'Please enter your phone' : null,
-                      )
-                          : _buildUserInfoRow(Icons.phone, userData['phone'] ?? 'No phone'),
-                      const SizedBox(height: 12),
-                      _isEditing
-                          ? TextFormField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(labelText: 'Email'),
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) return 'Please enter your email';
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) return 'Please enter a valid email';
-                          return null;
-                        },
-                      )
-                          : _buildUserInfoRow(Icons.email, userData['email'] ?? 'No email'),
-                      const SizedBox(height: 12),
-                      _isEditing
-                          ? TextFormField(
-                        controller: _addressController,
-                        decoration: const InputDecoration(labelText: 'Address'),
-                        maxLines: 2,
-                        validator: (value) => value == null || value.isEmpty ? 'Please enter your address' : null,
-                      )
-                          : _buildUserInfoRow(Icons.home, userData['address'] ?? 'No address'),
-                      const SizedBox(height: 20),
+                            child: const Icon(Icons.camera_alt, size: 20, color: Colors.grey),
+                          ),
+                        ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              // Danh sách các lựa chọn profile (không chỉnh sửa)
-              Expanded(
-                child: ListView(
-                  children: [
-                    const _ProfileItem(icon: Icons.favorite_border, label: "Favorites"),
-                    const _ProfileItem(icon: Icons.payment, label: "Payments"),
-                    const _ProfileItem(icon: Icons.share, label: "Tell your friends"),
-                    const _ProfileItem(icon: Icons.settings, label: "Setting"),
-                    const _ProfileItem(icon: Icons.logout, label: "Logout"),
-                    ListTile(
-                      leading: const Icon(Icons.lock, color: Colors.orange),
-                      title: const Text("Change Password"),
-                      onTap: () {
-                        // Xử lý chuyển đến màn hình đổi mật khẩu
-                      },
-                    ),
-                  ],
+                const SizedBox(height: 24),
+
+                // Thông tin người dùng
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildTextField(
+                        controller: _nameController,
+                        labelText: 'Tên liên hệ',
+                        enabled: _isEditing,
+                        validator: (value) => value == null || value.isEmpty ? 'Vui lòng nhập tên liên hệ!' : null,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        controller: _phoneController,
+                        labelText: 'Số điện thoại',
+                        enabled: _isEditing,
+                        keyboardType: TextInputType.phone,
+                        validator: (value) => value == null || value.isEmpty ? 'Vui lòng nhập số điện thoại!' : null,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        controller: _emailController,
+                        labelText: 'Tên tài khoản đăng nhập',
+                        enabled: false,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTextField(
+                        controller: _addressController,
+                        labelText: 'Tỉnh/Thành phố',
+                        enabled: _isEditing,
+                        validator: (value) => value == null || value.isEmpty ? 'Vui lòng nhập tỉnh/thành phố!' : null,
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Edit/Save Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => _toggleEdit(userProvider),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _isEditing ? Colors.green : Colors.blue, // Đổi màu button
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), // Bo góc
+                          ),
+                          child: Text(
+                            _isEditing ? 'Lưu lại' : 'Chỉnh sửa',
+                            style: const TextStyle(fontSize: 18, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              )
-            ],
+                const SizedBox(height: 32),
+
+                // Profile Options List
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey[300]!), // Thêm border cho container
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _ProfileOptionItem(
+                        icon: Icons.list_alt,
+                        label: "Quản lý tin rao",
+                        onTap: () {
+                          // Navigate to manage listings screen
+                        },
+                      ),
+                      const Divider(height: 1, color: Colors.grey),
+                      _ProfileOptionItem(
+                        icon: Icons.lock_outline,
+                        label: "Thay đổi mật khẩu",
+                        onTap: () {
+                          // Navigate to change password screen
+                        },
+                      ),
+                      const Divider(height: 1, color: Colors.grey),
+                      _ProfileOptionItem(
+                        icon: Icons.logout,
+                        label: "Đăng xuất",
+                        onTap: () {
+                          // Xử lý logout
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildUserInfoRow(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.purple),
-          const SizedBox(width: 12),
-          Text(text, style: const TextStyle(fontSize: 16)),
-        ],
+  Widget _buildTextField({
+    required TextEditingController? controller,
+    required String labelText,
+    bool enabled = true,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      enabled: enabled,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        labelText: labelText,
+        labelStyle: TextStyle(color: Colors.grey[600]),
+        border: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey),
+        ),
+        enabledBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey),
+        ),
+        focusedBorder: const UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.blue),
+        ),
+        filled: false,
+        suffixIcon: enabled && controller?.text.isNotEmpty == true
+            ? IconButton(
+          icon: const Icon(Icons.clear, color: Colors.grey),
+          onPressed: () {
+            controller?.clear();
+            setState(() {}); // Cập nhật giao diện khi xóa text
+          },
+        )
+            : null,
       ),
+      validator: validator,
     );
   }
 }
 
-class _ProfileItem extends StatelessWidget {
+class _ProfileOptionItem extends StatelessWidget {
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
 
-  const _ProfileItem({required this.icon, required this.label});
+  const _ProfileOptionItem({
+    required this.icon,
+    required this.label,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.orange),
-      title: Text(label),
-      onTap: () {
-        // Thực hiện hành động khi người dùng nhấn vào item (nếu cần)
-      },
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.grey[600]), // Đổi màu icon
+            const SizedBox(width: 16),
+            Text(label, style: const TextStyle(fontSize: 16, color: Colors.black)), // Đổi màu text
+          ],
+        ),
+      ),
     );
   }
 }
