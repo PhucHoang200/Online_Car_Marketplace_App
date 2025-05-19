@@ -23,6 +23,8 @@ import 'package:online_car_marketplace_app/ui/screen/user/year_selection_screen.
 
 import 'package:online_car_marketplace_app/ui/widgets/user/buy_app_screen.dart';
 
+import '../providers/favorite_provider.dart';
+import '../ui/screen/user/post_detail_screen.dart';
 import '../ui/widgets/user/sell_app_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();

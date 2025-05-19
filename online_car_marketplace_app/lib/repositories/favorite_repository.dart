@@ -25,7 +25,7 @@ class FavoriteRepository {
     final newFavorite = Favorite(
       id: nextId,
       userId: favorite.userId,
-     postId: favorite.postId,
+      postId: favorite.postId,
     );
 
     await _firestore

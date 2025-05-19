@@ -48,4 +48,14 @@ class PostProvider with ChangeNotifier {
     _posts = [];
     notifyListeners();
   }
+
+  Future<PostWithCarAndImages?> getPostWithDetailsById(String postId) async {
+    try {
+      final postWithDetails = await _postRepository.getPostWithCarAndImagesById(postId);
+      return postWithDetails;
+    } catch (error) {
+      print('Error fetching post details by ID: $error');
+      return null;
+    }
+  }
 }

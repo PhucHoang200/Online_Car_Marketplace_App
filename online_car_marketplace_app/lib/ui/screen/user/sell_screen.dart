@@ -46,8 +46,8 @@ class _SellScreenState extends State<SellScreen> {
                           context.go('/buy', extra: ''); // Hoặc một giá trị mặc định, hoặc xử lý khác
                         }
                       },
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[300]),
-                      child: const Text("Switch to Buy", style: TextStyle(color: Colors.black)),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                      child: const Text("Chuyển sang mua", style: TextStyle(color: Colors.white)),
                     ),
                   ),
               const SizedBox(height: 30),

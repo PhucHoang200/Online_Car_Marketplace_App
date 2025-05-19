@@ -165,21 +165,23 @@ class _FavoritePostsScreenState extends State<FavoritePostsScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
+                  Column( // Changed Row to Column
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.person_outline, size: 16, color: Colors.grey),
-                      const SizedBox(width: 4),
-                      Text(postWithDetails.sellerName ?? 'N/A', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                      Row(
+                        children: [
+                          const Icon(Icons.person_outline, size: 16, color: Colors.grey),
+                          const SizedBox(width: 4),
+                          Text(postWithDetails.sellerName ?? 'N/A', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                        ],
+                      ),
                       if (postWithDetails.sellerPhone != null && postWithDetails.sellerPhone!.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.phone_outlined, size: 16, color: Colors.grey),
-                              const SizedBox(width: 4),
-                              Text(postWithDetails.sellerPhone!, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                            ],
-                          ),
+                        Row(
+                          children: [
+                            const Icon(Icons.phone_outlined, size: 16, color: Colors.grey),
+                            const SizedBox(width: 4),
+                            Text(postWithDetails.sellerPhone!, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                          ],
                         ),
                     ],
                   ),
@@ -218,7 +220,7 @@ class _FavoritePostsScreenState extends State<FavoritePostsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-       title: const Text('Bài đăng đã lưu'),
+        title: const Text('Bài đăng đã lưu'),
         titleTextStyle: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
       ),
       body: Consumer<FavoriteProvider>(
