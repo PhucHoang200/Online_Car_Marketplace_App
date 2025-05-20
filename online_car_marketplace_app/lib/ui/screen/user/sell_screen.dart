@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:online_car_marketplace_app/providers/brand_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-
 import '../../widgets/user/sell_bottom_navigation_bar.dart';
 
 class SellScreen extends StatefulWidget {
@@ -15,47 +14,89 @@ class SellScreen extends StatefulWidget {
 }
 
 class _SellScreenState extends State<SellScreen> {
-  late String userId;
+  // UserId không cần thiết ở đây nếu không được sử dụng trực tiếp trong State
+  // late String userId;
 
   @override
   void initState() {
     super.initState();
+    // userId = widget.uid; // Không có uid trong constructor của SellScreen nữa
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<BrandProvider>(context, listen: false).fetchBrands();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: const SellBottomNavigationBar(currentIndex: 0),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: ListView(
-            children: [
-              _buildBanner(),
-              const SizedBox(height: 30),
-          Align(
-                    alignment: Alignment.centerRight,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Lấy userId hiện tại (bạn cần có logic để lấy userId này)
-                        final String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
-                        if (currentUserId != null) {
-                          context.go('/buy', extra: currentUserId);
-                        } else {
-                          // Xử lý trường hợp không có userId (ví dụ: điều hướng mà không có uid)
-                          context.go('/buy', extra: ''); // Hoặc một giá trị mặc định, hoặc xử lý khác
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                      child: const Text("Chuyển sang mua", style: TextStyle(color: Colors.white)),
-                    ),
+      backgroundColor: Colors.white, // Đặt màu nền trắng cho toàn bộ Scaffold
+      body: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            pinned: true, // Đặt thành true để AppBar được giữ cố định
+            floating: false, // Không cần floating khi pinned
+            backgroundColor: Colors.blue, // Nền màu xanh dương
+            elevation: 1,
+            title: const Text(
+              'OTO', // Đổi chữ thành "OTO"
+              style: TextStyle(
+                fontSize: 30,
+                color: Colors.white, // Chữ màu trắng
+                fontWeight: FontWeight.bold, // Chữ in đậm
+              ),
+            ),
+            centerTitle: true, // Căn giữa tiêu đề
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(60), // Chiều cao cho phần button
+              child: Container(
+                color: Colors.white, // Nền trắng cho phần này
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
+                      if (currentUserId != null) {
+                        context.go('/buy', extra: currentUserId);
+                      } else {
+                        context.go('/buy', extra: '');
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                    child: const Text("Chuyển sang mua", style: TextStyle(color: Colors.white)),
                   ),
-              const SizedBox(height: 30),
-              _buildBrandSelector(),
-            ],
+                ),
+              ),
+            ),
           ),
-        ),
+          // Thanh ngang phân cách 1 (giữa AppBar và Banner)
+          SliverToBoxAdapter(
+            child: Container(
+              height: 8, // Chiều cao của thanh phân cách
+              color: Colors.grey[100], // Màu nền của thanh phân cách
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                Padding(
+                  padding: const EdgeInsets.all(16.0), // Padding cho banner
+                  child: _buildBanner(),
+                ),
+                // Thanh ngang phân cách 2 (giữa Banner và Brand Selector)
+                Container(
+                  height: 8,
+                  color: Colors.grey[100],
+                  margin: const EdgeInsets.symmetric(vertical: 16.0), // Khoảng cách trên dưới
+                ),
+                _buildBrandSelector(),
+                const SizedBox(height: 80), // Khoảng trống cho BottomNavigationBar
+              ],
+            ),
+          ),
+        ],
       ),
+      bottomNavigationBar: const SellBottomNavigationBar(currentIndex: 0),
     );
   }
 
@@ -109,14 +150,14 @@ class _SellScreenState extends State<SellScreen> {
               ),
             ),
             GridView.builder(
-              shrinkWrap: true, // Quan trọng để sử dụng bên trong Column/ListView
-              physics: const NeverScrollableScrollPhysics(), // Ngăn cuộn bên trong GridView
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, // Hiển thị 3 logo trên một hàng (điều chỉnh theo nhu cầu)
+                crossAxisCount: 3,
                 crossAxisSpacing: 12.0,
                 mainAxisSpacing: 12.0,
-                childAspectRatio: 1.0, // Tỷ lệ khung hình vuông cho mỗi item
+                childAspectRatio: 1.0,
               ),
               itemCount: brands.length,
               itemBuilder: (context, index) {
@@ -133,7 +174,7 @@ class _SellScreenState extends State<SellScreen> {
                     context.push(
                       '/sell/models',
                       extra: {
-                        'brandId': brand.id.toString(), // Truyền brand.id dưới dạng String qua extra
+                        'brandId': brand.id.toString(),
                         'brandName': brand.name,
                       },
                     );
@@ -155,13 +196,16 @@ class _SellScreenState extends State<SellScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(
-                          width: 50, // Kích thước logo
+                          width: 50,
                           height: 50,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Image.asset(
                               brandAvatarPath,
                               fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(Icons.error_outline, size: 40, color: Colors.grey);
+                              },
                             ),
                           ),
                         ),
@@ -170,7 +214,7 @@ class _SellScreenState extends State<SellScreen> {
                           brandName,
                           textAlign: TextAlign.center,
                           style: const TextStyle(fontSize: 10),
-                          overflow: TextOverflow.ellipsis, // Xử lý tên quá dài
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
@@ -183,5 +227,4 @@ class _SellScreenState extends State<SellScreen> {
       },
     );
   }
-
 }

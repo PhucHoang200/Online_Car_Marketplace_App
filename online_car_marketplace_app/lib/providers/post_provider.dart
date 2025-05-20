@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:online_car_marketplace_app/models/post_model.dart';
 import 'package:online_car_marketplace_app/repositories/post_repository.dart';
 import 'package:online_car_marketplace_app/models/post_with_car_and_images.dart';
+import 'package:online_car_marketplace_app/models/car_model.dart';
 
 class PostProvider with ChangeNotifier {
   final PostRepository _postRepository = PostRepository();
@@ -28,6 +29,7 @@ class PostProvider with ChangeNotifier {
           sellerAddress: item['sellerAddress'] as String?,
           carLocation: item['carLocation'] as String?,
           imageUrls: List<String>.from(item['images']),
+          carModelName: item['carModelName'] as String?,
         );
       }).toList();
     } catch (error) {

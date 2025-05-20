@@ -9,6 +9,7 @@ class PostWithCarAndImages {
   final String? sellerPhone;
   final String? sellerAddress;
   final String? carLocation;
+  final String? carModelName;
 
   PostWithCarAndImages({
     required this.post,
@@ -18,6 +19,7 @@ class PostWithCarAndImages {
     this.sellerPhone,
     this.sellerAddress,
     this.carLocation,
+    this.carModelName,
   });
 
   factory PostWithCarAndImages.fromJson(Map<String, dynamic> map) {
@@ -29,6 +31,7 @@ class PostWithCarAndImages {
       sellerPhone: map['sellerPhone'] as String?,
       sellerAddress: map['sellerAddress'] as String?,
       carLocation: map['carLocation'] as String?,
+      carModelName: map['carModelName'] as String?,
     );
   }
 }

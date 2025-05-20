@@ -23,8 +23,6 @@ class _BuyScreenState extends State<BuyScreen> {
   String? _selectedSortOption;
   String? _currentLocation = 'Toàn quốc'; // Giá trị mặc định
   final TextEditingController _searchController = TextEditingController();
-  ScrollController _scrollController = ScrollController();
-  double _appBarOffset = 0;
 
   @override
   void initState() {
@@ -34,20 +32,11 @@ class _BuyScreenState extends State<BuyScreen> {
       Provider.of<PostProvider>(context, listen: false).fetchPosts();
       Provider.of<BrandProvider>(context, listen: false).fetchBrands();
     });
-    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
     super.dispose();
-  }
-
-  void _onScroll() {
-    setState(() {
-      _appBarOffset = _scrollController.offset;
-    });
   }
 
   Future<void> _showFilterModal(BuildContext context) async {
@@ -83,80 +72,98 @@ class _BuyScreenState extends State<BuyScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white, // Đặt màu nền trắng cho toàn bộ Scaffold
+      backgroundColor: Colors.white,
       body: CustomScrollView(
-        controller: _scrollController,
+        // Không cần controller nữa nếu AppBar được pinned
+        // controller: _scrollController,
         slivers: <Widget>[
           SliverAppBar(
-            pinned: false, // AppBar không cố định khi cuộn
-            floating: true, // AppBar hiển thị lại khi bắt đầu cuộn lên
-            backgroundColor: Colors.white,
+            pinned: true, // Đặt thành true để AppBar được giữ cố định
+            floating: false, // Không cần floating khi pinned
+            backgroundColor: Colors.blue, // Nền màu xanh dương
             elevation: 1,
-            title: const Text('Mua bán ô tô cũ', style: TextStyle(color: Colors.blue)), // Giữ lại title màu blue đậm
+            title: const Text(
+              'OTO', // Đổi chữ thành "OTO"
+              style: TextStyle(
+                fontSize: 30,
+                color: Colors.white, // Chữ màu trắng
+                fontWeight: FontWeight.bold, // Chữ in đậm
+              ),
+            ),
+            centerTitle: true, // Căn giữa tiêu đề
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(100), // Increased height for the button
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        InkWell(
-                          onTap: () => _showFilterModal(context),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.grey[300]!),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.tune, color: Colors.blue),
-                                SizedBox(width: 8),
-                                Text('Tìm nâng cao', style: TextStyle(color: Colors.blue)),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: TextField(
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                              hintText: "Tìm theo hãng, dòng...",
-                              prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(25)),
-                              contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                              filled: true,
-                              fillColor: Colors.grey[100],
+              child: Container( // Sử dụng Container để làm nền trắng cho phần bottom
+                color: Colors.white, // Nền trắng cho thanh tìm kiếm và nút
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          InkWell(
+                            onTap: () => _showFilterModal(context),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey[300]!),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.tune, color: Colors.blue),
+                                  SizedBox(width: 8),
+                                  Text('Tìm nâng cao', style: TextStyle(color: Colors.blue)),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton(
-                        onPressed: () => context.go('/sell'),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                        child: const Text('Chuyển sang bán', style: TextStyle(color: Colors.white)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                hintText: "Tìm theo hãng, dòng...",
+                                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(25)),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                                filled: true,
+                                fillColor: Colors.grey[100],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: ElevatedButton(
+                          onPressed: () => context.go('/sell'),
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                          child: const Text('Chuyển sang bán', style: TextStyle(color: Colors.white)),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
+          // Thêm thanh ngang phân cách 1
+          SliverToBoxAdapter(
+            child: Container(
+              height: 8, // Chiều cao của thanh phân cách
+              color: Colors.grey[100], // Màu nền của thanh phân cách
+            ),
+          ),
           SliverSafeArea(
-            top: false, // Đã có SliverAppBar lo phần top
+            top: false,
             sliver: SliverPadding(
               padding: const EdgeInsets.all(12),
               sliver: SliverList(
                 delegate: SliverChildListDelegate(
                   [
-                    const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -171,8 +178,19 @@ class _BuyScreenState extends State<BuyScreen> {
                       ],
                     ),
                     const SizedBox(height: 12),
+                    // Thêm thanh ngang phân cách 2
+                    Container(
+                      height: 1, // Chiều cao của thanh phân cách
+                      color: Colors.grey[300], // Màu nền của thanh phân cách
+                      margin: const EdgeInsets.symmetric(vertical: 8), // Khoảng cách trên dưới
+                    ),
                     _buildBrandSelector(),
-                    const SizedBox(height: 16),
+                    // Thêm thanh ngang phân cách 3
+                    Container(
+                      height: 8, // Chiều cao của thanh phân cách
+                      color: Colors.grey[100], // Màu nền của thanh phân cách
+                      margin: const EdgeInsets.symmetric(vertical: 8), // Khoảng cách trên dưới
+                    ),
                     _buildPostList(sortedPosts),
                     const SizedBox(height: 80), // Khoảng trống cho BottomNavigationBar
                   ],
@@ -200,7 +218,7 @@ class _BuyScreenState extends State<BuyScreen> {
           _selectedSortOption = newValue;
         });
       },
-      items: <String>['Ngẫu nhiên', 'Tin mới nhất', 'Giá tăng dần', 'Giá giảm dần', 'Năm sản xuất cũ nhất', 'Năm sản xuất mới nhất']
+      items: <String>['Mặc định', 'Tin mới nhất', 'Giá tăng dần', 'Giá giảm dần', 'Năm sản xuất cũ nhất', 'Năm sản xuất mới nhất']
           .map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
           value: value,
@@ -554,9 +572,21 @@ class AdvancedFilterScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              ElevatedButton(onPressed: () {}, child: const Text('Xe cũ')),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.blue, // Đổi màu chữ thành blue
+                ),
+                child: const Text('Xe cũ'),
+              ),
               const SizedBox(width: 8),
-              ElevatedButton(onPressed: () {}, child: const Text('Xe mới')),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.blue, // Đổi màu chữ thành blue
+                ),
+                child: const Text('Xe mới'),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -564,11 +594,29 @@ class AdvancedFilterScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              ElevatedButton(onPressed: () {}, child: const Text('Tất cả')),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.blue, // Đổi màu chữ thành blue
+                ),
+                child: const Text('Tất cả'),
+              ),
               const SizedBox(width: 8),
-              ElevatedButton(onPressed: () {}, child: const Text('Trong nước')),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.blue, // Đổi màu chữ thành blue
+                ),
+                child: const Text('Trong nước'),
+              ),
               const SizedBox(width: 8),
-              ElevatedButton(onPressed: () {}, child: const Text('Nhập khẩu')),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.blue, // Đổi màu chữ thành blue
+                ),
+                child: const Text('Nhập khẩu'),
+              ),
             ],
           ),
           const SizedBox(height: 24),

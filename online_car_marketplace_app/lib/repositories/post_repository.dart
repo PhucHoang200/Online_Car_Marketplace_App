@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_car_marketplace_app/models/post_model.dart';
 import 'package:online_car_marketplace_app/models/car_model.dart';
-
-import '../models/post_with_car_and_images.dart';
+import 'package:online_car_marketplace_app/models/model_model.dart';
+import 'package:online_car_marketplace_app/models/post_with_car_and_images.dart';
 
 class PostRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -55,6 +55,7 @@ class PostRepository {
       String? sellerPhone;
       String? sellerAddress;
       String? carLocation;
+      String? carModelName;
       List<String> imageUrls = [];
 
       // Lấy thông tin xe
@@ -63,6 +64,20 @@ class PostRepository {
         final carData = carDoc.data() as Map<String, dynamic>;
         car = Car.fromMap(carData);
         carLocation = carData['location'] as String?;
+
+        // Lấy tên model từ collection 'models' dựa vào car.modelId
+        if (car?.modelId != null) {
+          try {
+            final modelDoc = await _firestore.collection('models').doc(car!.modelId.toString()).get();
+            if (modelDoc.exists) {
+              final modelData = modelDoc.data() as Map<String, dynamic>;
+              carModelName = CarModel.fromMap(modelData).name; // <-- Lấy name từ CarModel
+            }
+          } catch (e) {
+            print('Error fetching car model name for modelId ${car!.modelId}: $e');
+            carModelName = null;
+          }
+        }
       }
 
 
@@ -79,14 +94,17 @@ class PostRepository {
           } else {
             sellerName = null;
             sellerPhone = null;
+            sellerAddress = null;
           }
         } catch (e) {
           sellerName = null;
           sellerPhone = null;
+          sellerAddress = null;
         }
       } else {
         sellerName = null;
         sellerPhone = null;
+        sellerAddress = null;
       }
 
       // Lấy ảnh
@@ -104,6 +122,7 @@ class PostRepository {
         'sellerAddress': sellerAddress,
         'carLocation': carLocation,
         'images': imageUrls,
+        'carModelName': carModelName,
       });
     }
 
@@ -134,6 +153,7 @@ class PostRepository {
     String? sellerPhone;
     String? sellerAddress;
     String? carLocation;
+    String? carModelName;
     List<String> imageUrls = [];
 
     // Lấy thông tin xe
@@ -143,6 +163,20 @@ class PostRepository {
         final carData = carDoc.data() as Map<String, dynamic>;
         car = Car.fromMap(carData);
         carLocation = carData['location'] as String?;
+
+        // Lấy tên model từ collection 'models' dựa vào car.modelId
+        if (car?.modelId != null) {
+          try {
+            final modelDoc = await _firestore.collection('models').doc(car!.modelId.toString()).get();
+            if (modelDoc.exists) {
+              final modelData = modelDoc.data() as Map<String, dynamic>;
+              carModelName = CarModel.fromMap(modelData).name; // <-- Lấy name từ CarModel
+            }
+          } catch (e) {
+            print('Error fetching car model name for modelId ${car!.modelId}: $e');
+            carModelName = null;
+          }
+        }
       }
     } catch (e) {
       print('Error fetching car details for post ${post.id}: $e');
@@ -194,6 +228,7 @@ class PostRepository {
       sellerAddress: sellerAddress,
       carLocation: carLocation,
       imageUrls: imageUrls,
+      carModelName: carModelName,
     );
   }
 }
