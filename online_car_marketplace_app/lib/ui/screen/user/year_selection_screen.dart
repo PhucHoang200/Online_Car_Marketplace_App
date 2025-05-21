@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 class YearSelectionScreen extends StatefulWidget {
   final String brandId;
+  final int modelId;
   final String modelName;
   final String? initialYear;
   final Map<String, dynamic>? initialData;
@@ -10,6 +11,7 @@ class YearSelectionScreen extends StatefulWidget {
   const YearSelectionScreen({
     super.key,
     required this.brandId,
+    required this.modelId,
     required this.modelName,
     this.initialYear,
     this.initialData,
@@ -57,6 +59,7 @@ class _YearSelectionScreenState extends State<YearSelectionScreen> {
                 '/sell/condition-origin',
                 extra: {
                   'brandId': widget.brandId,
+                  'modelId': widget.modelId,
                   'modelName': widget.modelName,
                   'selectedYear': year,
                   'initialData': widget.initialData,

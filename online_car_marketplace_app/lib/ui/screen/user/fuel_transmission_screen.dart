@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 class FuelTransmissionScreen extends StatefulWidget {
   final String brandId;
+  final int modelId;
   final String modelName;
   final String selectedYear;
   final String condition;
@@ -15,6 +16,7 @@ class FuelTransmissionScreen extends StatefulWidget {
   const FuelTransmissionScreen({
     super.key,
     required this.brandId,
+    required this.modelId,
     required this.modelName,
     required this.selectedYear,
     required this.condition,
@@ -101,6 +103,7 @@ class _FuelTransmissionScreenState extends State<FuelTransmissionScreen> {
                   '/sell/price-title-description',
                   extra: {
                     'brandId': widget.brandId,
+                    'modelId': widget.modelId,
                     'modelName': widget.modelName,
                     'selectedYear': widget.selectedYear,
                     'condition': widget.condition,

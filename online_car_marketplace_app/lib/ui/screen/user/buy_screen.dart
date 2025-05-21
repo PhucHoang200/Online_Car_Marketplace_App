@@ -36,8 +36,15 @@ class _BuyScreenState extends State<BuyScreen> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     super.dispose();
   }
+
+  // Hàm này sẽ được gọi khi người dùng nhấn Enter trên bàn phím
+  void _onSearchSubmitted(String query) {
+    Provider.of<PostProvider>(context, listen: false).searchPosts(query);
+  }
+
 
   Future<void> _showFilterModal(BuildContext context) async {
     await showModalBottomSheet(
@@ -123,11 +130,12 @@ class _BuyScreenState extends State<BuyScreen> {
                           Expanded(
                             child: TextField(
                               controller: _searchController,
+                              onSubmitted: _onSearchSubmitted,
                               decoration: InputDecoration(
                                 hintText: "Tìm theo hãng, dòng...",
                                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(25)),
-                                contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 7, horizontal: 12),
                                 filled: true,
                                 fillColor: Colors.grey[100],
                               ),

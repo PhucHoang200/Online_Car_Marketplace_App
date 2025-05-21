@@ -88,6 +88,7 @@ class _ModelListScreenState extends State<ModelListScreen> {
                     '/sell/year',
                     extra: {
                       'brandId': widget.brandId,
+                      'modelId': model.id,
                       'modelName': model.name,
                       'initialYear': widget.initialData?['selectedYear'],
                       'initialData': widget.initialData,

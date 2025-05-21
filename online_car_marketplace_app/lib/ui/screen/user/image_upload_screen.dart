@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 class ImageUploadScreen extends StatefulWidget {
   final String brandId;
+  final int modelId;
   final String modelName;
   final String selectedYear;
   final String condition;
@@ -21,6 +22,7 @@ class ImageUploadScreen extends StatefulWidget {
   const ImageUploadScreen({
     super.key,
     required this.brandId,
+    required this.modelId,
     required this.modelName,
     required this.selectedYear,
     required this.condition,
@@ -99,6 +101,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
                   '/sell/confirm-post',
                   extra: {
                     'brandId': widget.brandId,
+                    'modelId': widget.modelId,
                     'modelName': widget.modelName,
                     'selectedYear': widget.selectedYear,
                     'condition': widget.condition, // Ép kiểu an toàn vì đã kiểm tra null

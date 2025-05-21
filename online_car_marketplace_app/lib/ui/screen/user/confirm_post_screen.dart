@@ -15,6 +15,7 @@ import 'package:online_car_marketplace_app/repositories/image_repository.dart';
 
 class ConfirmPostScreen extends StatefulWidget {
   final String brandId;
+  final int modelId;
   final String modelName;
   final String selectedYear;
   final String condition;
@@ -30,6 +31,7 @@ class ConfirmPostScreen extends StatefulWidget {
   const ConfirmPostScreen({
     super.key,
     required this.brandId,
+    required this.modelId,
     required this.modelName,
     required this.selectedYear,
     required this.condition,
@@ -51,6 +53,7 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
   XFile? _selectedImage;
   String? _imageUrl;
   bool _isUploading = false;
+  late int _modelId;
   late String _modelName;
   late String _selectedYear;
   late String _condition;
@@ -68,6 +71,7 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
     super.initState();
     _selectedImage = widget.selectedImage;
     _brandId = widget.brandId;
+    _modelId = widget.modelId;
     _modelName = widget.modelName;
     _selectedYear = widget.selectedYear;
     _condition = widget.condition;
@@ -118,7 +122,7 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
       final car = Car(
         id: 0,
         userId: userId,
-        modelId: 1,
+        modelId: _modelId,
         fuelType: _fuelType,
         transmission: _transmission,
         year: int.parse(_selectedYear),
@@ -139,7 +143,7 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
         carId: carId,
         title: _title,
         description: _description,
-        creationDate: Timestamp.now(),
+        creationDate: Timestamp.now().toDate(),
       );
       final postRepository = Provider.of<PostRepository>(context, listen: false);
       await postRepository.addPostAutoIncrement(post);

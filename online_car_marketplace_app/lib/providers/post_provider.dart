@@ -60,4 +60,37 @@ class PostProvider with ChangeNotifier {
       return null;
     }
   }
+
+  // Phương thức để fetch tất cả bài đăng (ban đầu hoặc khi cần)
+  void fetchPosts1() {
+    _isLoading = true;
+    notifyListeners();
+
+    _postRepository.getAllPosts().listen((postList) {
+      _posts = postList;
+      _isLoading = false;
+      notifyListeners();
+    }, onError: (error) {
+      _isLoading = false;
+      print('Error fetching posts: $error');
+      notifyListeners();
+    });
+  }
+
+  // Phương thức mới để tìm kiếm
+  void searchPosts(String query) {
+    _isLoading = true;
+    notifyListeners();
+
+    _postRepository.searchPosts(query).listen((postList) {
+      _posts = postList;
+      _isLoading = false;
+      notifyListeners();
+    }, onError: (error) {
+      _isLoading = false;
+      print('Error searching posts: $error');
+      notifyListeners();
+    });
+  }
+
 }

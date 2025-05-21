@@ -1,11 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:online_car_marketplace_app/models/post_model.dart';
 import 'package:online_car_marketplace_app/models/car_model.dart';
 import 'package:online_car_marketplace_app/models/model_model.dart';
 import 'package:online_car_marketplace_app/models/post_with_car_and_images.dart';
 
+import '../models/brand_model.dart';
+
 class PostRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String _djangoApiBaseUrl = 'http://10.0.2.2:8000/onlinecar';
 
   Future<void> addPost(Post post) async {
     await _firestore.doc('posts/${post.id}').set(post.toMap());
@@ -230,5 +235,108 @@ class PostRepository {
       imageUrls: imageUrls,
       carModelName: carModelName,
     );
+  }
+
+  // Phương thức hiện có để lấy tất cả bài đăng
+  Stream<List<PostWithCarAndImages>> getAllPosts() {
+    return _firestore.collection('posts').snapshots().asyncMap((postSnapshot) async {
+      final posts = postSnapshot.docs.map((doc) => Post.fromMap(doc.data())).toList();
+
+      final List<PostWithCarAndImages> postWithDetails = [];
+      for (var post in posts) {
+        // Lấy thông tin Car
+        final carDoc = await _firestore.collection('cars').doc(post.carId.toString()).get();
+        final car = carDoc.exists ? Car.fromMap(carDoc.data()!) : null;
+
+        if (car != null) {
+          // Lấy thông tin CarModel
+          final modelDoc = await _firestore.collection('models').doc(car.modelId.toString()).get();
+          final carModel = modelDoc.exists ? CarModel.fromMap(modelDoc.data()!) : null;
+
+          // Lấy thông tin Brand
+          Brand? brand;
+          if (carModel != null) {
+            final brandDoc = await _firestore.collection('brands').doc(carModel.brandId.toString()).get();
+            brand = brandDoc.exists ? Brand.fromMap(brandDoc.data()!) : null;
+          }
+
+          // Lấy ảnh
+          final imagesSnapshot = await _firestore.collection('images')
+              .where('carId', isEqualTo: car.id)
+              .get();
+          final imageUrls = imagesSnapshot.docs
+              .map((doc) => doc.data()['url'] as String)
+              .toList();
+
+          // Lấy thông tin người bán (nếu có, bạn cần thêm logic này)
+          // final userDoc = await _firestore.collection('users').doc(post.userId).get();
+          // final sellerName = userDoc.exists ? userDoc.data()!['name'] : 'Unknown';
+          // final sellerPhone = userDoc.exists ? userDoc.data()!['phone'] : null;
+          // final sellerAddress = userDoc.exists ? userDoc.data()!['address'] : null;
+
+          postWithDetails.add(PostWithCarAndImages(
+            post: post,
+            car: car,
+            carModelName: carModel?.name,
+            brand: brand,
+            imageUrls: imageUrls,
+            // sellerName: sellerName,
+            // sellerPhone: sellerPhone,
+            // sellerAddress: sellerAddress,
+          ));
+        }
+      }
+      return postWithDetails;
+    });
+  }
+
+  // Phương thức mới để tìm kiếm bằng cách gọi API Django
+  Stream<List<PostWithCarAndImages>> searchPosts(String query) async* {
+    if (query.isEmpty) {
+      yield* getAllPosts(); // Nếu query rỗng, trả về tất cả bài đăng
+      return;
+    }
+
+    try {
+      final response = await http.get(Uri.parse('$_djangoApiBaseUrl/search-posts/?query=$query')); // Đảm bảo '/api' trong đường dẫn
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonResponse = json.decode(response.body);
+        // print('Django Search API Response: ${jsonResponse.toString()}'); // Giữ lại dòng này để debug
+
+        final List<PostWithCarAndImages> searchResults = jsonResponse.map((item) {
+          final post = Post.fromMap(item['post']);
+          final car = Car.fromMap(item['car']);
+          final carModel = item['carModel'] != null ? CarModel.fromMap(item['carModel']) : null;
+          final brand = item['brand'] != null ? Brand.fromMap(item['brand']) : null;
+          final imageUrls = List<String>.from(item['imageUrls'] ?? []);
+
+          // Lấy các trường mới từ response JSON
+          final sellerName = item['sellerName'] as String?;
+          final sellerPhone = item['sellerPhone'] as String?;
+          final sellerAddress = item['sellerAddress'] as String?;
+          final carLocation = item['carLocation'] as String?;
+
+          return PostWithCarAndImages(
+            post: post,
+            car: car,
+            carModelName: carModel?.name,
+            brand: brand,
+            imageUrls: imageUrls,
+            sellerName: sellerName,
+            sellerPhone: sellerPhone,
+            sellerAddress: sellerAddress,
+            carLocation: carLocation,
+          );
+        }).toList();
+        yield searchResults;
+      } else {
+        print('Failed to load search results from Django: ${response.statusCode}');
+        yield [];
+      }
+    } catch (e) {
+      print('Error calling Django search API: $e');
+      yield [];
+    }
   }
 }

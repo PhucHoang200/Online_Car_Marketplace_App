@@ -143,6 +143,7 @@ final GoRouter appRouter = GoRouter(
 
             return YearSelectionScreen(
               brandId: extra?['brandId'] as String ?? '',
+              modelId: extra?['modelId'] as int ?? 0,
               modelName: extra?['modelName'] as String ?? '',
               initialYear: initialYear,
               initialData: extra, // Pass the whole map
@@ -159,6 +160,7 @@ final GoRouter appRouter = GoRouter(
             final initialMileage = extra?['initialMileage'] as int?;
             return ConditionOriginScreen(
               brandId: extra?['brandId'] as String ?? '',
+              modelId: extra?['modelId'] as int ?? 0,
               modelName: extra?['modelName'] as String ?? '',
               selectedYear: extra?['selectedYear'] as String ?? '',
               initialData: extra,
@@ -177,6 +179,7 @@ final GoRouter appRouter = GoRouter(
             extra?['initialTransmission'] as String?; // Make nullable
             return FuelTransmissionScreen(
               brandId: extra?['brandId'] as String ?? '',
+              modelId: extra?['modelId'] as int ?? 0,
               modelName: extra?['modelName'] as String ?? '',
               selectedYear: extra?['selectedYear'] as String ?? '',
               condition: extra?['condition'] as String ??
@@ -201,6 +204,7 @@ final GoRouter appRouter = GoRouter(
             extra?['initialDescription'] as String?; // Make nullable
             return PriceTitleDescriptionScreen(
               brandId: extra?['brandId'] as String ?? '',
+              modelId: extra?['modelId'] as int ?? 0,
               modelName: extra?['modelName'] as String ?? '',
               selectedYear: extra?['selectedYear'] as String ?? '',
               condition: extra?['condition'] as String ??
@@ -227,6 +231,7 @@ final GoRouter appRouter = GoRouter(
             final initialImage = extra?['initialImage'] as XFile?; // Make nullable
             return ImageUploadScreen(
               brandId: extra?['brandId'] as String ?? '',
+              modelId: extra?['modelId'] as int ?? 0,
               modelName: extra?['modelName'] as String ?? '',
               selectedYear: extra?['selectedYear'] as String ?? '',
               condition: extra?['condition'] as String ?? '',
@@ -250,6 +255,7 @@ final GoRouter appRouter = GoRouter(
             final selectedImage = extra?['selectedImage'] as XFile?;
             return ConfirmPostScreen(
               brandId: extra?['brandId'] as String ?? '',
+              modelId: extra?['modelId'] as int ?? 0,
               modelName: extra?['modelName'] as String ?? '',
               selectedYear: extra?['selectedYear'] as String ?? '',
               condition: extra?['condition'] as String ?? '',

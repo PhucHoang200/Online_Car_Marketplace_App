@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 class ConditionOriginScreen extends StatefulWidget {
   final String brandId;
+  final int modelId;
   final String modelName;
   final String selectedYear;
   final Map<String, dynamic>? initialData;
@@ -13,6 +14,7 @@ class ConditionOriginScreen extends StatefulWidget {
   const ConditionOriginScreen({
     super.key,
     required this.brandId,
+    required this.modelId,
     required this.modelName,
     required this.selectedYear,
     this.initialData,
@@ -145,6 +147,7 @@ class _ConditionOriginScreenState extends State<ConditionOriginScreen> {
                   '/sell/fuel-transmission',
                   extra: {
                     'brandId': widget.brandId,
+                    'modelId': widget.modelId,
                     'modelName': widget.modelName,
                     'selectedYear': widget.selectedYear,
                     'condition': selectedCondition,
