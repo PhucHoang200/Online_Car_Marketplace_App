@@ -220,8 +220,10 @@ class _FavoritePostsScreenState extends State<FavoritePostsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blue,
         title: const Text('Bài đăng đã lưu'),
-        titleTextStyle: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+        centerTitle: true,
+        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
       ),
       body: Consumer<FavoriteProvider>(
         builder: (context, favoriteProvider, child) {

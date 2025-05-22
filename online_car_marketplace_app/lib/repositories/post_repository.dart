@@ -268,11 +268,12 @@ class PostRepository {
               .map((doc) => doc.data()['url'] as String)
               .toList();
 
-          // Lấy thông tin người bán (nếu có, bạn cần thêm logic này)
-          // final userDoc = await _firestore.collection('users').doc(post.userId).get();
-          // final sellerName = userDoc.exists ? userDoc.data()!['name'] : 'Unknown';
-          // final sellerPhone = userDoc.exists ? userDoc.data()!['phone'] : null;
-          // final sellerAddress = userDoc.exists ? userDoc.data()!['address'] : null;
+          // Lấy thông tin người bán
+          final userDoc = await _firestore.collection('users').doc(post.userId).get();
+          final sellerName = userDoc.exists ? userDoc.data()!['name'] : null; // Thay đổi 'Unknown' thành null
+          final sellerPhone = userDoc.exists ? userDoc.data()!['phone'] : null;
+          final sellerAddress = userDoc.exists ? userDoc.data()!['address'] : null;
+          final carLocation = car.location; // Lấy vị trí xe từ đối tượng car
 
           postWithDetails.add(PostWithCarAndImages(
             post: post,
@@ -280,9 +281,10 @@ class PostRepository {
             carModelName: carModel?.name,
             brand: brand,
             imageUrls: imageUrls,
-            // sellerName: sellerName,
-            // sellerPhone: sellerPhone,
-            // sellerAddress: sellerAddress,
+            sellerName: sellerName,
+            sellerPhone: sellerPhone,
+            sellerAddress: sellerAddress,
+            carLocation: carLocation, // Thêm vào đây
           ));
         }
       }
@@ -339,4 +341,5 @@ class PostRepository {
       yield [];
     }
   }
+
 }

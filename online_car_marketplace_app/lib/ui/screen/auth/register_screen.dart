@@ -204,6 +204,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
             ),
             value: _selectedProvince,
+            menuMaxHeight: 200,
             items: _provinces.map((province) {
               return DropdownMenuItem<String>(
                 value: province,

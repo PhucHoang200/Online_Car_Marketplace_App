@@ -10,6 +10,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:online_car_marketplace_app/ui/widgets/user/buy_bottom_navigation_bar.dart';
 import 'package:go_router/go_router.dart';
 
+import 'location_filter_screen.dart';
+
 class BuyScreen extends StatefulWidget {
   final String uid;
   const BuyScreen({required this.uid, super.key});
@@ -54,11 +56,29 @@ class _BuyScreenState extends State<BuyScreen> {
         return SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-            child: const AdvancedFilterScreen(), // Widget cho bộ lọc nâng cao (ảnh 2)
+            child: const AdvancedFilterScreen(), // Widget cho bộ lọc nâng cao
           ),
         );
       },
     );
+  }
+
+  // Phương thức mới để hiển thị màn hình chọn địa điểm
+  Future<void> _showLocationFilter(BuildContext context) async {
+    final selectedProvince = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true, // Cho phép kéo modal lên hết màn hình
+      builder: (BuildContext context) {
+        return const LocationFilterScreen();
+      },
+    );
+
+    if (selectedProvince != null) {
+      setState(() {
+        _currentLocation = selectedProvince; // Cập nhật địa điểm hiện tại
+      });
+      // Logic lọc đã được gọi trong LocationFilterScreen, không cần gọi lại ở đây
+    }
   }
 
   @override
@@ -92,14 +112,14 @@ class _BuyScreenState extends State<BuyScreen> {
             title: const Text(
               'OTO', // Đổi chữ thành "OTO"
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 40,
                 color: Colors.white, // Chữ màu trắng
                 fontWeight: FontWeight.bold, // Chữ in đậm
               ),
             ),
             centerTitle: true, // Căn giữa tiêu đề
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(100), // Increased height for the button
+              preferredSize: const Size.fromHeight(110), // Increased height for the button
               child: Container( // Sử dụng Container để làm nền trắng cho phần bottom
                 color: Colors.white, // Nền trắng cho thanh tìm kiếm và nút
                 child: Padding(
@@ -111,31 +131,32 @@ class _BuyScreenState extends State<BuyScreen> {
                           InkWell(
                             onTap: () => _showFilterModal(context),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(25),
                                 border: Border.all(color: Colors.grey[300]!),
                               ),
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.tune, color: Colors.blue),
-                                  SizedBox(width: 8),
-                                  Text('Tìm nâng cao', style: TextStyle(color: Colors.blue)),
+                                  Icon(Icons.tune, color: Colors.white),
+                                  SizedBox(width: 4),
+                                  Text('Tìm nâng cao', style: TextStyle(color: Colors.white, fontSize: 16)),
                                 ],
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 10),
                           Expanded(
                             child: TextField(
                               controller: _searchController,
                               onSubmitted: _onSearchSubmitted,
                               decoration: InputDecoration(
-                                hintText: "Tìm theo hãng, dòng...",
+                                hintText: "Tìm theo hãng, dòng",
                                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(25)),
-                                contentPadding: const EdgeInsets.symmetric(vertical: 7, horizontal: 12),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 3),
                                 filled: true,
                                 fillColor: Colors.grey[100],
                               ),
@@ -149,7 +170,7 @@ class _BuyScreenState extends State<BuyScreen> {
                         child: ElevatedButton(
                           onPressed: () => context.go('/sell'),
                           style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                          child: const Text('Chuyển sang bán', style: TextStyle(color: Colors.white)),
+                          child: const Text('Chuyển sang bán', style: TextStyle(color: Colors.white, fontSize: 16)),
                         ),
                       ),
                     ],
@@ -175,12 +196,17 @@ class _BuyScreenState extends State<BuyScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.location_on_outlined, size: 16, color: Colors.grey),
-                            const SizedBox(width: 4),
-                            Text(_currentLocation!, style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                          ],
+                        // InkWell để mở màn hình chọn địa điểm
+                        InkWell(
+                          onTap: () => _showLocationFilter(context),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.location_on_outlined, color: Colors.black),
+                              const SizedBox(width: 4),
+                              Text(_currentLocation!, style: const TextStyle(fontSize: 16, color: Colors.black)),
+                              const Icon(Icons.arrow_drop_down, color: Colors.black), // Thêm icon mũi tên
+                            ],
+                          ),
                         ),
                         _buildSortDropdown(),
                       ],
@@ -215,11 +241,10 @@ class _BuyScreenState extends State<BuyScreen> {
   Widget _buildSortDropdown() {
     return DropdownButton<String>(
       value: _selectedSortOption,
-      hint: const Text('Sắp xếp tin rao', style: TextStyle(fontSize: 14, color: Colors.grey)),
-      icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
-      iconSize: 24,
+      hint: const Text('Sắp xếp tin rao', style: TextStyle(fontSize: 16, color: Colors.black)),
+      icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
       elevation: 2,
-      style: const TextStyle(color: Colors.black, fontSize: 14),
+      style: const TextStyle(color: Colors.black, fontSize: 16),
       underline: Container(height: 1, color: Colors.grey[300]),
       onChanged: (String? newValue) {
         setState(() {
@@ -281,7 +306,7 @@ class _BuyScreenState extends State<BuyScreen> {
                   const SizedBox(height: 6),
                   Text(
                     brandName,
-                    style: const TextStyle(fontSize: 12), // Increased font size
+                    style: const TextStyle(fontSize: 14), // Increased font size
                   ),
                 ],
               );

@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:online_car_marketplace_app/models/post_model.dart';
 import 'package:online_car_marketplace_app/repositories/post_repository.dart';
@@ -12,6 +13,10 @@ class PostProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
+
+  // BIẾN MỚI CHO LỌC ĐỊA ĐIỂM
+  String _locationFilter = ''; // Lưu trữ tỉnh/thành phố được chọn
+  String get currentLocationFilter => _locationFilter; // Getter cho UI
 
   Future<void> fetchPosts() async {
     _isLoading = true;
@@ -48,6 +53,7 @@ class PostProvider with ChangeNotifier {
 
   void clearPosts() {
     _posts = [];
+    _locationFilter = '';
     notifyListeners();
   }
 
@@ -59,22 +65,6 @@ class PostProvider with ChangeNotifier {
       print('Error fetching post details by ID: $error');
       return null;
     }
-  }
-
-  // Phương thức để fetch tất cả bài đăng (ban đầu hoặc khi cần)
-  void fetchPosts1() {
-    _isLoading = true;
-    notifyListeners();
-
-    _postRepository.getAllPosts().listen((postList) {
-      _posts = postList;
-      _isLoading = false;
-      notifyListeners();
-    }, onError: (error) {
-      _isLoading = false;
-      print('Error fetching posts: $error');
-      notifyListeners();
-    });
   }
 
   // Phương thức mới để tìm kiếm

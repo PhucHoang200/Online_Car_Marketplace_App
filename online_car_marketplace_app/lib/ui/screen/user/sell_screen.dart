@@ -40,7 +40,7 @@ class _SellScreenState extends State<SellScreen> {
             title: const Text(
               'OTO', // Đổi chữ thành "OTO"
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 40,
                 color: Colors.white, // Chữ màu trắng
                 fontWeight: FontWeight.bold, // Chữ in đậm
               ),
@@ -63,7 +63,7 @@ class _SellScreenState extends State<SellScreen> {
                       }
                     },
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                    child: const Text("Chuyển sang mua", style: TextStyle(color: Colors.white)),
+                    child: const Text("Chuyển sang mua", style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
                 ),
               ),
@@ -143,9 +143,9 @@ class _SellScreenState extends State<SellScreen> {
               child: Text(
                 'Chọn hãng xe để đăng tin',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Colors.black,
                 ),
               ),
             ),
@@ -213,7 +213,7 @@ class _SellScreenState extends State<SellScreen> {
                         Text(
                           brandName,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 10),
+                          style: const TextStyle(fontSize: 14),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],

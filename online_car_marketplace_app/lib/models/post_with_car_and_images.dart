@@ -2,6 +2,7 @@ import 'package:online_car_marketplace_app/models/post_model.dart';
 import 'package:online_car_marketplace_app/models/car_model.dart';
 
 import 'brand_model.dart';
+import 'model_model.dart';
 
 class PostWithCarAndImages {
   final Post post;
@@ -27,6 +28,10 @@ class PostWithCarAndImages {
   });
 
   factory PostWithCarAndImages.fromJson(Map<String, dynamic> map) {
+    // Để đọc carModelName, bạn cần parse carModel object trước
+    final carModelData = map['carModel'] as Map<String, dynamic>?;
+    final carModel = carModelData != null ? CarModel.fromMap(carModelData) : null;
+
     return PostWithCarAndImages(
       post: Post.fromMap(map['post'] as Map<String, dynamic>),
       car: map['car'] != null ? Car.fromMap(map['car'] as Map<String, dynamic>) : null,
@@ -35,7 +40,7 @@ class PostWithCarAndImages {
       sellerPhone: map['sellerPhone'] as String?,
       sellerAddress: map['sellerAddress'] as String?,
       carLocation: map['carLocation'] as String?,
-      carModelName: map['carModelName'] as String?,
+      carModelName: carModel?.name,
       brand: map['brand'] != null ? Brand.fromMap(map['brand'] as Map<String, dynamic>) : null,
     );
   }
