@@ -67,20 +67,38 @@ class PostProvider with ChangeNotifier {
     }
   }
 
-  // Phương thức mới để tìm kiếm
-  void searchPosts(String query) {
-    _isLoading = true;
-    notifyListeners();
+  // Phương thức mới để tìm kiếm, giờ trả về Future<void>
+  Future<void> searchPosts(String query) async {
+    _isLoading = true; // Bật loading trong provider
+    notifyListeners(); // Thông báo cho Consumers rằng trạng thái đã thay đổi
 
-    _postRepository.searchPosts(query).listen((postList) {
-      _posts = postList;
-      _isLoading = false;
+    try {
+      // Lắng nghe Stream từ repository và xử lý dữ liệu
+      // Bạn chỉ cần take(1) nếu bạn mong đợi Stream chỉ phát ra một lần cho kết quả tìm kiếm
+      // Hoặc xử lý theo cách Stream có thể phát ra nhiều lần (ví dụ: Live search)
+      await _postRepository.searchPosts(query).first.then((postList) {
+        _posts = postList;
+        _isLoading = false; // Tắt loading khi dữ liệu đã được nhận
+        notifyListeners(); // Cập nhật Consumers với dữ liệu mới
+      }).catchError((error) {
+        _isLoading = false; // Tắt loading nếu có lỗi
+        print('Error searching posts: $error');
+        notifyListeners(); // Thông báo cho Consumers ngay cả khi có lỗi
+      });
+    } catch (e) {
+      _isLoading = false; // Tắt loading nếu có lỗi ở mức cao hơn
+      print('Error during searchPosts call: $e');
       notifyListeners();
-    }, onError: (error) {
-      _isLoading = false;
-      print('Error searching posts: $error');
-      notifyListeners();
-    });
+    }
   }
 
+  Future<void> resetPosts() async {
+    _isLoading = true;
+    notifyListeners();
+    // Đặt lại danh sách bài đăng về rỗng trước khi fetch mới
+    _posts = [];
+    notifyListeners();
+    // Sau đó gọi lại hàm fetchPosts để lấy tất cả bài đăng ban đầu
+    await fetchPosts();
+  }
 }

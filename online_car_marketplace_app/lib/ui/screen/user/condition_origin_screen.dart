@@ -51,9 +51,7 @@ class _ConditionOriginScreenState extends State<ConditionOriginScreen> {
   }
 
   void _updateButtonState() {
-    setState(() {
-      // Rebuild the UI to re-evaluate the onPressed condition for the button
-    });
+    setState(() {});
   }
 
   bool _isButtonEnabled() {
@@ -72,8 +70,6 @@ class _ConditionOriginScreenState extends State<ConditionOriginScreen> {
       appBar: AppBar(
         title: const Text('Tình trạng & Xuất xứ'),
         centerTitle: true,
-        backgroundColor: Colors.blue, // Màu nền AppBar
-        foregroundColor: Colors.white, // Màu chữ trên AppBar
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -125,13 +121,13 @@ class _ConditionOriginScreenState extends State<ConditionOriginScreen> {
                 child: TextField(
                   controller: mileageController,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Số km đã đi*',
                     hintText: 'Ví dụ: 50000',
-                    border: const OutlineInputBorder(),
+                    border: OutlineInputBorder(),
                     suffixText: 'km',
                     // Đặt màu cho viền khi focus và màu label khi focus
-                    focusedBorder: const OutlineInputBorder(
+                    focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.blue, width: 2.0),
                     ),
                     labelStyle: TextStyle(color: Colors.blue), // Màu của label text khi focus

@@ -359,7 +359,7 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
           transmission: _transmission,
           year: int.parse(_selectedYear),
           mileage: _mileage,
-          location: 'Vietnam',
+          location: 'Việt Nam',
           price: _price,
           condition: _condition,
           origin: _origin,
@@ -397,8 +397,16 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
           backgroundColor: Colors.grey, // Màu xám nhạt
         );
       }
-      // Sau khi hoàn tất (tạo mới hoặc sửa), quay về màn hình quản lý tin đăng
-      context.go('/my_posts');
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Đăng bài thành công!',
+              style: TextStyle(color: Colors.white), // Chữ màu trắng
+            ),
+            backgroundColor: Colors.grey, // Màu xám nhạt
+          ),
+      );
+      context.go('/sell');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Đã có lỗi xảy ra: $e')),
@@ -751,11 +759,11 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
                               border: Border.all(color: Colors.blue.shade300, width: 1.5),
                               borderRadius: BorderRadius.circular(10.0),
                             ),
-                            child: Column(
+                            child: const Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.add_a_photo, size: 36, color: Colors.blue),
-                                const SizedBox(height: 4),
+                                SizedBox(height: 4),
                                 Text(
                                   'Thêm ảnh',
                                   style: TextStyle(color: Colors.blue, fontSize: 13, fontWeight: FontWeight.bold),

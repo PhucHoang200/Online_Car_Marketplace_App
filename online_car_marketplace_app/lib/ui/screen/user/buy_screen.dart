@@ -21,6 +21,7 @@ class BuyScreen extends StatefulWidget {
 }
 
 class _BuyScreenState extends State<BuyScreen> {
+  bool _isSearching = false;
   late String userId;
   String? _selectedSortOption;
   String? _currentLocation = 'Toàn quốc'; // Giá trị mặc định
@@ -43,8 +44,15 @@ class _BuyScreenState extends State<BuyScreen> {
   }
 
   // Hàm này sẽ được gọi khi người dùng nhấn Enter trên bàn phím
-  void _onSearchSubmitted(String query) {
-    Provider.of<PostProvider>(context, listen: false).searchPosts(query);
+  void _onSearchSubmitted(String query) async { // Thêm async
+    setState(() {
+      _isSearching = true; // Bắt đầu hiển thị loading
+    });
+    // Đảm bảo PostProvider có hàm searchPosts và hàm đó có thể được await
+    await Provider.of<PostProvider>(context, listen: false).searchPosts(query);
+    setState(() {
+      _isSearching = false; // Kết thúc loading
+    });
   }
 
 
@@ -152,9 +160,27 @@ class _BuyScreenState extends State<BuyScreen> {
                             child: TextField(
                               controller: _searchController,
                               onSubmitted: _onSearchSubmitted,
+                              // Thêm onChanged để theo dõi việc xóa nội dung
+                              onChanged: (value) {
+                                if (value.isEmpty) {
+                                  // Nếu người dùng xóa hết nội dung tìm kiếm, reset bài đăng
+                                  Provider.of<PostProvider>(context, listen: false).resetPosts();
+                                }
+                              },
                               decoration: InputDecoration(
                                 hintText: "Tìm theo hãng, dòng",
                                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                                // // Thêm icon X nếu có nội dung trong thanh tìm kiếm
+                                // suffixIcon: _searchController.text.isNotEmpty
+                                //     ? IconButton(
+                                //   icon: const Icon(Icons.clear, color: Colors.grey),
+                                //   onPressed: () {
+                                //     _searchController.clear(); // Xóa nội dung
+                                //     // Reset bài đăng khi nhấn nút X
+                                //     Provider.of<PostProvider>(context, listen: false).resetPosts();
+                                //   },
+                                // )
+                                //     : null,
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(25)),
                                 contentPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 3),
                                 filled: true,
@@ -225,6 +251,11 @@ class _BuyScreenState extends State<BuyScreen> {
                       color: Colors.grey[100], // Màu nền của thanh phân cách
                       margin: const EdgeInsets.symmetric(vertical: 8), // Khoảng cách trên dưới
                     ),
+                    if (_isSearching) // Nếu đang tìm kiếm...
+                      const Center(child: CircularProgressIndicator())
+                    else if (posts.isEmpty) // ...và không tìm kiếm, nhưng danh sách rỗng
+                      const Center(child: Text('Không tìm thấy bài đăng nào.'))
+                    else // ...và không tìm kiếm, và có bài đăng
                     _buildPostList(sortedPosts),
                     const SizedBox(height: 80), // Khoảng trống cho BottomNavigationBar
                   ],
@@ -264,9 +295,9 @@ class _BuyScreenState extends State<BuyScreen> {
   Widget _buildBrandSelector() {
     return Consumer<BrandProvider>(
       builder: (context, brandProvider, child) {
-        if (brandProvider.isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
+        // if (brandProvider.isLoading) {
+        //   return const Center(child: CircularProgressIndicator());
+        // }
 
         final brands = brandProvider.brands;
 
@@ -500,6 +531,7 @@ class _BuyScreenState extends State<BuyScreen> {
                       Consumer<FavoriteProvider>(
                         builder: (context, favoriteProvider, child) {
                           final currentUser = FirebaseAuth.instance.currentUser;
+                          // Sử dụng FutureBuilder để kiểm tra trạng thái yêu thích hiện tại của bài đăng
                           return FutureBuilder<bool>(
                             future: currentUser != null
                                 ? favoriteProvider.isPostFavorite(currentUser.uid, post.id)
@@ -507,7 +539,10 @@ class _BuyScreenState extends State<BuyScreen> {
                             builder: (context, snapshot) {
                               final isCurrentlyFavorite = snapshot.data ?? false;
                               return IconButton(
-                                icon: Icon(isCurrentlyFavorite ? Icons.bookmark : Icons.bookmark_border),
+                                icon: Icon(
+                                  isCurrentlyFavorite ? Icons.bookmark : Icons.bookmark_border,
+                                  color: isCurrentlyFavorite ? Colors.amber : null, // Màu vàng khi đã đánh dấu
+                                ),
                                 onPressed: () async {
                                   if (currentUser != null) {
                                     final userId = currentUser.uid;
@@ -515,13 +550,19 @@ class _BuyScreenState extends State<BuyScreen> {
                                       await favoriteProvider.removeFavorite(userId, post.id);
                                     } else {
                                       final favorite = Favorite(
-                                        id: 0,
+                                        id: 0, // Id tự tăng, có thể không cần thiết nếu backend tự xử lý
                                         userId: userId,
                                         postId: post.id,
                                       );
                                       await favoriteProvider.addFavoriteAutoIncrement(favorite);
                                     }
-                                    favoriteProvider.toggleFavoriteLocal(post.id);
+                                    // Gọi hàm fetchFavoritePosts để làm mới dữ liệu sau khi thêm/xóa thành công
+                                    // Điều này sẽ cập nhật giao diện ngay lập tức với dữ liệu mới nhất từ backend
+                                    await favoriteProvider.fetchFavoritePosts(userId);
+
+                                    // favoriteProvider.toggleFavoriteLocal(post.id); // Bạn có thể bỏ dòng này nếu fetchFavoritePosts đã làm mới toàn bộ list
+                                    // hoặc giữ lại nếu bạn muốn cập nhật UI ngay lập tức trước khi fetch hoàn tất
+                                    // nhưng việc fetchFavoritePosts sau đó sẽ đảm bảo tính nhất quán.
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(content: Text('Bạn cần đăng nhập để thêm vào yêu thích.')),
@@ -543,6 +584,7 @@ class _BuyScreenState extends State<BuyScreen> {
       },
     );
   }
+
 }
 
 class AdvancedFilterScreen extends StatelessWidget {

@@ -48,63 +48,114 @@ class FavoriteProvider extends ChangeNotifier {
     }
   }
 
+  // Future<void> fetchFavoritePosts(String userId) async {
+  //   _isLoading = true;
+  //   notifyListeners();
+  //   _favoritePostsWithDetails.clear();
+  //   try {
+  //     final favoriteList = await _favoriteRepository.getFavoritesByUserId(userId);
+  //     for (final favorite in favoriteList) {
+  //       final postDoc = await _postRepository.getPostDetails(favorite.postId.toString()); // Sử dụng PostRepository
+  //
+  //       if (postDoc.exists) {
+  //         final post = Post.fromMap(postDoc.data() as Map<String, dynamic>);
+  //         Car? car;
+  //         String? sellerName;
+  //         String? sellerPhone;
+  //         String? sellerAddress;
+  //         String? carLocation;
+  //         List<String> imageUrls = [];
+  //
+  //         // Lấy thông tin xe
+  //         final carDoc = await _postRepository.getCarDetails(post.carId.toString()); // Sử dụng PostRepository
+  //         if (carDoc.exists) {
+  //           final carData = carDoc.data() as Map<String, dynamic>;
+  //           car = Car.fromMap(carData);
+  //           carLocation = carData['location'] as String?;
+  //
+  //           // Lấy ảnh theo carId (tương tự PostRepository)
+  //           final imagesSnapshot = await FirebaseFirestore.instance
+  //               .collection('images')
+  //               .where('carId', isEqualTo: post.carId)
+  //               .get();
+  //           imageUrls = imagesSnapshot.docs.map((e) => e['url'] as String).toList();
+  //         }
+  //
+  //         // Lấy thông tin người dùng (tương tự PostRepository)
+  //         if (post.userId != null) {
+  //           final String sellerId = post.userId!;
+  //           final userDoc = await FirebaseFirestore.instance.collection('users').doc(sellerId).get();
+  //           if (userDoc.exists) {
+  //             final userData = userDoc.data() as Map<String, dynamic>;
+  //             sellerName = userData['name'] as String?;
+  //             sellerPhone = userData['phone'] as String?;
+  //             sellerAddress = userData['address'] as String?;
+  //           }
+  //         }
+  //
+  //         final postWithDetails = PostWithCarAndImages(
+  //           post: post,
+  //           car: car,
+  //           sellerName: sellerName,
+  //           sellerPhone: sellerPhone,
+  //           sellerAddress: sellerAddress,
+  //           carLocation: carLocation,
+  //           imageUrls: imageUrls,
+  //         );
+  //         _favoritePostsWithDetails.add(postWithDetails);
+  //       } else {
+  //       }
+  //     }
+  //   } catch (e) {
+  //     print('Error fetching favorite posts with details: $e');
+  //   } finally {
+  //     _isLoading = false;
+  //     notifyListeners();
+  //   }
+  // }
+
   Future<void> fetchFavoritePosts(String userId) async {
     _isLoading = true;
     notifyListeners();
-    _favoritePostsWithDetails.clear();
+    _favoritePostsWithDetails.clear(); // Xóa dữ liệu cũ trước khi fetch mới
+
     try {
       final favoriteList = await _favoriteRepository.getFavoritesByUserId(userId);
+
       for (final favorite in favoriteList) {
-        final postDoc = await _postRepository.getPostDetails(favorite.postId.toString()); // Sử dụng PostRepository
+        // Gọi hàm getPostDetails đã được sửa đổi
+        final postDetails = await _postRepository.getPostDetails(favorite.postId.toString());
 
-        if (postDoc.exists) {
-          final post = Post.fromMap(postDoc.data() as Map<String, dynamic>);
-          Car? car;
-          String? sellerName;
-          String? sellerPhone;
-          String? carLocation;
-          List<String> imageUrls = [];
-
-          // Lấy thông tin xe
-          final carDoc = await _postRepository.getCarDetails(post.carId.toString()); // Sử dụng PostRepository
-          if (carDoc.exists) {
-            final carData = carDoc.data() as Map<String, dynamic>;
-            car = Car.fromMap(carData);
-            carLocation = carData['location'] as String?;
-
-            // Lấy ảnh theo carId (tương tự PostRepository)
-            final imagesSnapshot = await FirebaseFirestore.instance
-                .collection('images')
-                .where('carId', isEqualTo: post.carId)
-                .get();
-            imageUrls = imagesSnapshot.docs.map((e) => e['url'] as String).toList();
-          }
-
-          // Lấy thông tin người dùng (tương tự PostRepository)
-          if (post.userId != null) {
-            final String sellerId = post.userId!;
-            final userDoc = await FirebaseFirestore.instance.collection('users').doc(sellerId).get();
-            if (userDoc.exists) {
-              final userData = userDoc.data() as Map<String, dynamic>;
-              sellerName = userData['name'] as String?;
-              sellerPhone = userData['phone'] as String?;
-            }
-          }
+        // Kiểm tra xem postDetails có rỗng không (nghĩa là post không tồn tại)
+        if (postDetails.isNotEmpty) {
+          final post = postDetails['post'] as Post;
+          final car = postDetails['car'] as Car?;
+          final sellerName = postDetails['sellerName'] as String?;
+          final sellerPhone = postDetails['sellerPhone'] as String?;
+          final sellerAddress = postDetails['sellerAddress'] as String?;
+          final carLocation = postDetails['carLocation'] as String?;
+          final imageUrls = postDetails['images'] as List<String>;
+          final carModelName = postDetails['carModelName'] as String?; // Lấy carModelName
 
           final postWithDetails = PostWithCarAndImages(
             post: post,
             car: car,
             sellerName: sellerName,
             sellerPhone: sellerPhone,
+            sellerAddress: sellerAddress,
             carLocation: carLocation,
             imageUrls: imageUrls,
+            carModelName: carModelName, // Gán carModelName vào PostWithCarAndImages
           );
           _favoritePostsWithDetails.add(postWithDetails);
         } else {
+          // Xử lý trường hợp bài đăng không tồn tại (ví dụ: in ra log)
+          print('Post with ID ${favorite.postId} not found or details empty.');
         }
       }
     } catch (e) {
       print('Error fetching favorite posts with details: $e');
+      // Có thể hiển thị SnackBar hoặc thông báo lỗi cho người dùng
     } finally {
       _isLoading = false;
       notifyListeners();

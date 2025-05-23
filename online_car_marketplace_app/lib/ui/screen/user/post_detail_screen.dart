@@ -163,7 +163,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> with SingleTickerPr
                           crossAxisSpacing: 10,
                           children: [
                             _buildInfoRow(Icons.calendar_today, 'Năm SX', car?.year?.toString() ?? 'N/A'),
-                            _buildInfoRow(Icons.location_on_outlined, 'Nơi bán', carLocation),
+                            _buildInfoRow(Icons.location_on_outlined, 'Nơi bán', sellerAddress),
                             _buildInfoRow(Icons.speed, 'Số ODO', '${car?.mileage?.toString() ?? 'N/A'} km'),
                             _buildInfoRow(Icons.local_gas_station, 'Nhiên liệu', car?.fuelType ?? 'N/A'),
                             _buildInfoRow(Icons.settings, 'Hộp số', car?.transmission ?? 'N/A'),
@@ -198,7 +198,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> with SingleTickerPr
                               // Chi phí trả góp Tab Content (Placeholder)
                               const Center(
                                 child: Text(
-                                  'Thông tin chi phí trả góp sẽ hiển thị tại đây.',
+                                  'Chưa có thông tin chi phó trả góp.',
                                   style: TextStyle(fontSize: 16),
                                 ),
                               ),

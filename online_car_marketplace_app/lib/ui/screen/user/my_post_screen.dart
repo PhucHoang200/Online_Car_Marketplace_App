@@ -272,7 +272,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${postData.car.year} | ${postData.car.mileage} km | ${postData.car.location}',
+                              '${postData.car.year} | ${postData.car.mileage} km',
                               style: const TextStyle(color: Colors.grey, fontSize: 13.0),
                             ),
                             const SizedBox(height: 4),
@@ -351,6 +351,7 @@ class PostDisplayData {
   final Car car;
   final String? imageUrl;
   final String? modelName;
+  final String? location;
   final int brandId; // Vẫn là int như bạn đã định nghĩa
   final List<String> allImageUrls;
 
@@ -359,6 +360,7 @@ class PostDisplayData {
     required this.car,
     this.imageUrl,
     this.modelName,
+    this.location,
     required this.brandId, // brandId là bắt buộc (non-nullable)
     required this.allImageUrls,
   });

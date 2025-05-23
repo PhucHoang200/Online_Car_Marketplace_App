@@ -184,7 +184,7 @@ class UserRepository {
     } catch (e) {
       return {
         'success': false,
-        'message': 'Lỗi đăng ký: $e',
+        'message': 'Email đã được sử dụng. Vui lòng sử dụng email khác.',
       };
     }
   }

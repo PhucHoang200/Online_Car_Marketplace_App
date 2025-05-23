@@ -134,8 +134,82 @@ class PostRepository {
     return results;
   }
 
-  Future<DocumentSnapshot<Map<String, dynamic>>> getPostDetails(String postId) async {
-    return await _firestore.collection('posts').doc(postId).get();
+  // Future<DocumentSnapshot<Map<String, dynamic>>> getPostDetails(String postId) async {
+  //   return await _firestore.collection('posts').doc(postId).get();
+  // }
+
+  Future<Map<String, dynamic>> getPostDetails(String postId) async {
+    final postDoc = await _firestore.collection('posts').doc(postId).get();
+
+    if (!postDoc.exists) {
+      // Trả về một Map rỗng hoặc null nếu bài đăng không tồn tại
+      return {};
+    }
+
+    final post = Post.fromMap(postDoc.data()!);
+    Car? car;
+    String? sellerName;
+    String? sellerPhone;
+    String? sellerAddress;
+    String? carLocation;
+    String? carModelName; // Thêm biến này
+    List<String> imageUrls = [];
+
+    // Lấy thông tin xe (Tương tự như getPostsWithCarAndImages)
+    final carDoc = await _firestore.collection('cars').doc(post.carId.toString()).get();
+    if (carDoc.exists) {
+      final carData = carDoc.data() as Map<String, dynamic>;
+      car = Car.fromMap(carData);
+      carLocation = carData['location'] as String?;
+
+      // Lấy tên model từ collection 'models' dựa vào car.modelId
+      if (car?.modelId != null) {
+        try {
+          final modelDoc = await _firestore.collection('models').doc(car!.modelId.toString()).get();
+          if (modelDoc.exists) {
+            final modelData = modelDoc.data() as Map<String, dynamic>;
+            carModelName = CarModel.fromMap(modelData).name; // Lấy name từ CarModel
+          }
+        } catch (e) {
+          print('Error fetching car model name for modelId ${car!.modelId}: $e');
+          carModelName = null;
+        }
+      }
+    }
+
+    // Lấy thông tin người dùng (Tương tự như getPostsWithCarAndImages)
+    if (post.userId != null) {
+      final String userId = post.userId!;
+      try {
+        final userDoc = await _firestore.collection('users').doc(userId).get();
+        if (userDoc.exists) {
+          final userData = userDoc.data() as Map<String, dynamic>;
+          sellerName = userData['name'] as String?;
+          sellerPhone = userData['phone'] as String?;
+          sellerAddress = userData['address'] as String?;
+        }
+      } catch (e) {
+        print('Error fetching user data for userId $userId: $e');
+      }
+    }
+
+    // Lấy ảnh (Tương tự như getPostsWithCarAndImages)
+    final imagesSnapshot = await _firestore
+        .collection('images')
+        .where('carId', isEqualTo: post.carId)
+        .get();
+    imageUrls = imagesSnapshot.docs.map((e) => e['url'] as String).toList();
+
+    return {
+      'post': post,
+      'car': car,
+      'sellerName': sellerName,
+      'sellerPhone': sellerPhone,
+      'sellerAddress': sellerAddress,
+      'carLocation': carLocation,
+      'images': imageUrls,
+      'carModelName': carModelName, // Thêm carModelName vào kết quả
+    };
   }
 
   Future<DocumentSnapshot<Map<String, dynamic>>> getCarDetails(String carId) async {

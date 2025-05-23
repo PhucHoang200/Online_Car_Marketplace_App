@@ -21,11 +21,11 @@ class _FavoritePostsScreenState extends State<FavoritePostsScreen> {
     super.initState();
     userId = widget.uid;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser != null) {
-        favoriteProvider.fetchFavoritePosts(currentUser.uid);
-      }
+      // final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
+      // final currentUser = FirebaseAuth.instance.currentUser;
+      // if (currentUser != null) {
+      //   favoriteProvider.fetchFavoritePosts(currentUser.uid);
+      // }
     });
   }
 
@@ -194,7 +194,10 @@ class _FavoritePostsScreenState extends State<FavoritePostsScreen> {
                   ),
                   // Icon dấu trang đã lưu và chức năng xóa
                   IconButton(
-                    icon: const Icon(Icons.bookmark), // Icon dấu trang đã lưu
+                    icon: const Icon(
+                        Icons.bookmark,
+                        color: Colors.amber,
+                    ), // Icon dấu trang đã lưu
                     onPressed: () async {
                       final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
                       final currentUser = FirebaseAuth.instance.currentUser;
