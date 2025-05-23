@@ -42,88 +42,132 @@ class _FuelTransmissionScreenState extends State<FuelTransmissionScreen> {
     transmission = widget.initialTransmission;
   }
 
+  // Helper method to check if the button should be enabled
+  bool _isButtonEnabled() {
+    return fuelType != null && transmission != null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Nhiên liệu & Hộp số')),
+      appBar: AppBar(
+        title: const Text('Nhiên liệu & Hộp số'),
+        centerTitle: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Loại nhiên liệu*', style: TextStyle(fontWeight: FontWeight.bold)),
+            // Phần loại nhiên liệu
+            Text(
+              'Loại nhiên liệu*',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                // Đặt màu viền và màu label khi focus
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                ),
+                labelStyle: TextStyle(color: Colors.blue),
+                hintText: 'Chọn loại nhiên liệu', // Thêm hint text
               ),
               value: fuelType,
-              items: <String>['Xăng', 'Dầu', 'Điện', 'Hybrid']
-                  .map((String value) {
+              items: <String>['Xăng', 'Dầu', 'Điện', 'Hybrid'].map((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
                 );
               }).toList(),
               onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    fuelType = value;
-                  });
-                }
+                setState(() {
+                  fuelType = value;
+                });
               },
+              // Màu của icon mũi tên xổ xuống
+              iconEnabledColor: Colors.blue,
             ),
             const SizedBox(height: 24),
-            const Text('Hộp số*', style: TextStyle(fontWeight: FontWeight.bold)),
+
+            // Phần Hộp số
+            Text(
+              'Hộp số*',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                // Đặt màu viền và màu label khi focus
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                ),
+                labelStyle: TextStyle(color: Colors.blue),
+                hintText: 'Chọn loại hộp số', // Thêm hint text
               ),
               value: transmission,
-              items: <String>['Số sàn', 'Số tự động', 'Bán tự động']
-                  .map((String value) {
+              items: <String>['Số sàn', 'Số tự động', 'Bán tự động'].map((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
                 );
               }).toList(),
               onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    transmission = value;
-                  });
-                }
+                setState(() {
+                  transmission = value;
+                });
               },
+              // Màu của icon mũi tên xổ xuống
+              iconEnabledColor: Colors.blue,
             ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: fuelType != null &&
-                  transmission != null
-                  ? () {
-                context.go(
-                  '/sell/price-title-description',
-                  extra: {
-                    'brandId': widget.brandId,
-                    'modelId': widget.modelId,
-                    'modelName': widget.modelName,
-                    'selectedYear': widget.selectedYear,
-                    'condition': widget.condition,
-                    'origin': widget.origin,
-                    'mileage': widget.mileage,
-                    'fuelType': fuelType!,
-                    'transmission': transmission!,
-                    'initialData': {
-                      ...widget.initialData ?? {},
-                      'fuelType': fuelType,
-                      'transmission': transmission,
+            const Spacer(), // Đẩy nút "Tiếp tục" xuống dưới cùng
+
+            // Nút Tiếp tục
+            SizedBox(
+              width: double.infinity, // Nút rộng full màn hình
+              child: ElevatedButton(
+                onPressed: _isButtonEnabled()
+                    ? () {
+                  context.go(
+                    '/sell/price-title-description',
+                    extra: {
+                      'brandId': widget.brandId,
+                      'modelId': widget.modelId,
+                      'modelName': widget.modelName,
+                      'selectedYear': widget.selectedYear,
+                      'condition': widget.condition,
+                      'origin': widget.origin,
+                      'mileage': widget.mileage,
+                      'fuelType': fuelType!,
+                      'transmission': transmission!,
+                      'initialData': {
+                        ...widget.initialData ?? {},
+                        'fuelType': fuelType,
+                        'transmission': transmission,
+                      },
+                      'initialPrice': widget.initialData?['price'],
+                      'initialTitle': widget.initialData?['title'],
+                      'initialDescription': widget.initialData?['description'],
                     },
-                    'initialPrice': widget.initialData?['price'],
-                    'initialTitle': widget.initialData?['title'],
-                    'initialDescription': widget.initialData?['description'],
-                  },
-                );
-              }
-                  : null,
-              child: const Text('Tiếp tục'),
+                  );
+                }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14), // Tăng kích thước nút
+                  backgroundColor: Colors.blue, // Màu nền nút
+                  foregroundColor: Colors.white, // Màu chữ nút
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8), // Bo tròn góc nút
+                  ),
+                ),
+                child: const Text(
+                  'Tiếp tục',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // Kích thước chữ nút
+                ),
+              ),
             ),
           ],
         ),

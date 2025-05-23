@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io'; // Import để sử dụng File
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -16,7 +16,7 @@ class ImageUploadScreen extends StatefulWidget {
   final double price;
   final String title;
   final String description;
-  final XFile? initialImage;
+  final List<XFile>? initialImages; // Changed to List<XFile>?
   final Map<String, dynamic>? initialData;
 
   const ImageUploadScreen({
@@ -33,7 +33,7 @@ class ImageUploadScreen extends StatefulWidget {
     required this.price,
     required this.title,
     required this.description,
-    this.initialImage,
+    this.initialImages, // Updated to initialImages
     this.initialData,
   });
 
@@ -42,84 +42,200 @@ class ImageUploadScreen extends StatefulWidget {
 }
 
 class _ImageUploadScreenState extends State<ImageUploadScreen> {
-  XFile? _selectedImage;
+  List<XFile> _selectedImages = []; // Changed to a list
+  final int _maxImages = 5; // Giới hạn số lượng ảnh tối đa
 
   @override
   void initState() {
     super.initState();
-    _selectedImage = widget.initialImage;
+    if (widget.initialImages != null) {
+      _selectedImages = List.from(widget.initialImages!);
+    }
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImages() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    // Cho phép chọn nhiều ảnh
+    final pickedFiles = await picker.pickMultiImage(
+      imageQuality: 80, // Giảm chất lượng ảnh để tối ưu hiệu suất và dung lượng
+      maxWidth: 1024, // Giới hạn chiều rộng ảnh
+      maxHeight: 768, // Giới hạn chiều cao ảnh
+    );
 
-    if (pickedFile != null) {
+    if (pickedFiles.isNotEmpty) {
       setState(() {
-        _selectedImage = pickedFile;
+        if (_selectedImages.length + pickedFiles.length <= _maxImages) {
+          _selectedImages.addAll(pickedFiles);
+        } else {
+          final remainingSlots = _maxImages - _selectedImages.length;
+          // Chỉ thêm đủ số ảnh còn lại
+          _selectedImages.addAll(pickedFiles.sublist(0, remainingSlots));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Chỉ có thể chọn tối đa $_maxImages ảnh.'),
+              backgroundColor: Colors.red, // Màu nền đỏ cho lỗi
+            ),
+          );
+        }
       });
     }
   }
+
+  void _removeImage(int index) {
+    setState(() {
+      _selectedImages.removeAt(index);
+    });
+  }
+
+  // Helper method to check if the button should be enabled
+  bool _isButtonEnabled() {
+    return _selectedImages.isNotEmpty; // Chỉ cần có ít nhất 1 ảnh
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Tải ảnh lên'),
+        title: const Text('Tải ảnh lên'),
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start, // Căn chỉnh trái cho văn bản
           children: [
-            const Text('Chọn ảnh từ máy của bạn để tải lên'),
-            const SizedBox(height: 20),
-            GestureDetector(
-              onTap: _pickImage,
-              child: Container(
-                width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
+            Text(
+              'Chọn tối thiểu 1 ảnh và tối đa $_maxImages ảnh để tải lên',
+              style: Theme.of(context).textTheme.bodyLarge, // Sử dụng TextStyle của theme
+            ),
+            const SizedBox(height: 16), // Tăng khoảng cách
+
+            Expanded(
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3, // 3 ảnh mỗi hàng
+                  crossAxisSpacing: 10.0, // Khoảng cách ngang giữa các ảnh
+                  mainAxisSpacing: 10.0, // Khoảng cách dọc giữa các ảnh
+                  childAspectRatio: 1, // Tỷ lệ khung hình vuông
                 ),
-                child: _selectedImage != null
-                    ? Image.file(File(_selectedImage!.path), fit: BoxFit.cover)
-                    : const Center(child: Icon(Icons.add_a_photo, size: 48, color: Colors.grey)),
+                itemCount: _selectedImages.length + (_selectedImages.length < _maxImages ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (index == _selectedImages.length) {
+                    // Nút "Thêm ảnh"
+                    return GestureDetector(
+                      onTap: _pickImages,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200, // Màu nền nhẹ
+                          border: Border.all(color: Colors.blue.shade300, width: 2), // Viền xanh
+                          borderRadius: BorderRadius.circular(12.0), // Bo tròn góc nhiều hơn
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add_a_photo, size: 40, color: Colors.blue), // Icon xanh
+                            const SizedBox(height: 8),
+                            Text(
+                              'Thêm ảnh',
+                              style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              '(${_selectedImages.length}/$_maxImages)', // Hiển thị số lượng ảnh
+                              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  } else {
+                    // Hiển thị ảnh đã chọn
+                    return Stack(
+                      children: [
+                        Positioned.fill(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12.0), // Bo tròn góc ảnh
+                            child: Image.file(
+                              File(_selectedImages[index].path),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 4, // Đẩy nút xóa vào trong hơn
+                          right: 4, // Đẩy nút xóa vào trong hơn
+                          child: GestureDetector(
+                            onTap: () => _removeImage(index),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade600, // Màu đỏ đậm hơn
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 1.5), // Viền trắng
+                              ),
+                              padding: const EdgeInsets.all(4), // Tăng padding nút xóa
+                              child: const Icon(Icons.close, color: Colors.white, size: 18), // Kích thước icon nhỏ hơn
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                },
               ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () { // Remove the conditions from here
-                if (_selectedImage == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Vui lòng chọn một ảnh trước khi tiếp tục.'),
-                      duration: Duration(seconds: 2),
-                    ),
+            const SizedBox(height: 24), // Tăng khoảng cách trước nút
+
+            // Nút Tiếp tục
+            SizedBox(
+              width: double.infinity, // Nút rộng full màn hình
+              child: ElevatedButton(
+                onPressed: _isButtonEnabled()
+                    ? () {
+                  context.go(
+                    '/sell/confirm-post',
+                    extra: {
+                      'brandId': widget.brandId,
+                      'modelId': widget.modelId,
+                      'modelName': widget.modelName,
+                      'selectedYear': widget.selectedYear,
+                      'condition': widget.condition,
+                      'origin': widget.origin,
+                      'mileage': widget.mileage,
+                      'fuelType': widget.fuelType,
+                      'transmission': widget.transmission,
+                      'price': widget.price,
+                      'title': widget.title,
+                      'description': widget.description,
+                      'selectedImages': _selectedImages, // Pass the list of images
+                      'initialData': {
+                        ...widget.initialData ?? {},
+                        'selectedImages': _selectedImages, // Update initialData with list
+                      },
+                    },
                   );
-                  return; // Stop, if no image.
                 }
-                context.go(
-                  '/sell/confirm-post',
-                  extra: {
-                    'brandId': widget.brandId,
-                    'modelId': widget.modelId,
-                    'modelName': widget.modelName,
-                    'selectedYear': widget.selectedYear,
-                    'condition': widget.condition, // Ép kiểu an toàn vì đã kiểm tra null
-                    'origin': widget.origin,       // Ép kiểu an toàn vì đã kiểm tra null
-                    'mileage': widget.mileage,
-                    'fuelType': widget.fuelType,   // Ép kiểu an toàn vì đã kiểm tra null
-                    'transmission': widget.transmission, // Ép kiểu an toàn vì đã kiểm tra null
-                    'price': widget.price,
-                    'title': widget.title,         // Ép kiểu an toàn vì đã kiểm tra null
-                    'description': widget.description!, // Ép kiểu an toàn vì đã kiểm tra null
-                    'selectedImage': _selectedImage,
-                  },
-                );
-              },
-              child: const Text('Tiếp tục'),
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14), // Tăng kích thước nút
+                  backgroundColor: Colors.blue, // Màu nền nút
+                  foregroundColor: Colors.white, // Màu chữ nút
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8), // Bo tròn góc nút
+                  ),
+                ),
+                child: const Text(
+                  'Tiếp tục',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // Kích thước chữ nút
+                ),
+              ),
             ),
-            const SizedBox(height: 20),
-            const Text('Sau khi chọn ảnh, bạn sẽ được xem lại toàn bộ thông tin trước khi đăng bài.'),
+            const SizedBox(height: 16), // Khoảng cách sau nút
+            Center( // Căn giữa văn bản thông báo
+              child: Text(
+                'Sau khi chọn ảnh, bạn sẽ được xem lại toàn bộ thông tin trước khi đăng bài.',
+                textAlign: TextAlign.center, // Căn giữa văn bản
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+              ),
+            ),
           ],
         ),
       ),

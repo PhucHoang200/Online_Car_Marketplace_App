@@ -50,6 +50,9 @@ class _ModelListScreenState extends State<ModelListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Chọn dòng xe'),
+        centerTitle: true,
+        actions: const [
+        ],
       ),
       body: FutureBuilder<void>(
         future: _fetchFuture,

@@ -50,4 +50,14 @@ class CarRepository {
     return null;
   }
 
+  // NEW: Phương thức để cập nhật một chiếc xe
+  Future<void> updateCar(Car car) async {
+    await _firestore.collection('cars').doc(car.id.toString()).update(car.toMap());
+  }
+
+  // NEW: Phương thức để xóa một chiếc xe
+  Future<void> deleteCar(int carId) async {
+    await _firestore.collection('cars').doc(carId.toString()).delete();
+  }
+
 }

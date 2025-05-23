@@ -24,7 +24,7 @@ class BuyBottomNavigationBar extends StatelessWidget {
         break;
       case 2:
       // Điều hướng đến màn hình Thông báo
-        GoRouter.of(context).go('/notifications'); // Đảm bảo bạn có route '/notifications'
+        GoRouter.of(context).go('/notifications/1'); // Đảm bảo bạn có route '/notifications'
         break;
       case 3:
         final firebaseUser = FirebaseAuth.instance.currentUser;

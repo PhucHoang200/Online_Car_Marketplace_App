@@ -23,7 +23,8 @@ class YearSelectionScreen extends StatefulWidget {
 
 class _YearSelectionScreenState extends State<YearSelectionScreen> {
   String? _selectedYear;
-  final List<String> _years = List.generate(50, (index) => (DateTime.now().year - index).toString());
+  final List<String> _years =
+  List.generate(50, (index) => (DateTime.now().year - index).toString());
 
   @override
   void initState() {
@@ -36,8 +37,13 @@ class _YearSelectionScreenState extends State<YearSelectionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chọn năm sản xuất'),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back), // Nút quay lại
+          onPressed: () => context.pop(),
+        ),
       ),
-      body: ListView.builder(
+      body: ListView.builder( // Directly use ListView.builder as the body
         itemCount: _years.length,
         itemBuilder: (context, index) {
           final year = _years[index];
@@ -46,24 +52,27 @@ class _YearSelectionScreenState extends State<YearSelectionScreen> {
             title: Text(
               year,
               style: TextStyle(
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontWeight:
+                isSelected ? FontWeight.bold : FontWeight.normal,
                 color: isSelected ? Theme.of(context).primaryColor : null,
               ),
             ),
             onTap: () {
               setState(() {
-                _selectedYear = year;
+                _selectedYear = year; // Update selected year immediately
               });
+
               // Navigate to the next screen, passing all data
+              final updatedInitialData =
+              Map<String, dynamic>.from(widget.initialData ?? {});
+              updatedInitialData['selectedYear'] = year; // Pass the selected year directly
+              updatedInitialData['brandId'] = widget.brandId;
+              updatedInitialData['modelId'] = widget.modelId;
+              updatedInitialData['modelName'] = widget.modelName;
+
               context.push(
                 '/sell/condition-origin',
-                extra: {
-                  'brandId': widget.brandId,
-                  'modelId': widget.modelId,
-                  'modelName': widget.modelName,
-                  'selectedYear': year,
-                  'initialData': widget.initialData,
-                },
+                extra: updatedInitialData,
               );
             },
           );

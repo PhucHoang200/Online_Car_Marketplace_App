@@ -63,8 +63,8 @@ class UserRepository {
     }
   }
 
-  Future<User?> getUserById(int id) async {
-    final doc = await _firestore.collection('users').doc(id.toString()).get();
+  Future<User?> getUserById(String id) async {
+    final doc = await _firestore.collection('users').doc(id).get();
     if (doc.exists) {
       return User.fromMap(doc.data()!);
     }
@@ -143,7 +143,7 @@ class UserRepository {
     } catch (e) {
       return {
         'success': false,
-        'message': 'Lỗi đăng nhập: $e',
+        'message': 'Email hoặc mật khẩu không chính xác. Vui lòng nhập lại!',
       };
     }
   }

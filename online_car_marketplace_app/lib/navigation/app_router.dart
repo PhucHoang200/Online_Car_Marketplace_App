@@ -24,6 +24,8 @@ import 'package:online_car_marketplace_app/ui/screen/user/year_selection_screen.
 import 'package:online_car_marketplace_app/ui/widgets/user/buy_app_screen.dart';
 
 import '../providers/favorite_provider.dart';
+import '../ui/screen/user/my_post_screen.dart';
+import '../ui/screen/user/notifications_screen.dart';
 import '../ui/screen/user/post_detail_screen.dart';
 import '../ui/widgets/user/sell_app_screen.dart';
 
@@ -120,15 +122,14 @@ final GoRouter appRouter = GoRouter(
                       CircularProgressIndicator()); // Show loading indicator
                 } else if (snapshot.hasError) {
                   return Center(
-                      child: Text(
-                          'Error: ${snapshot.error}')); // Show error message
+                    child: Text(
+                        'Error: ${snapshot.error}'),); // Show error message
                 } else {
                   // Truyền dữ liệu đã fetch vào ModelListScreen
                   return ModelListScreen(
                     brandId: brandId,
                     name: brandName,
-                    initialData: extra ??
-                        {}, // Truyền initialData để giữ lại các giá trị đã chọn
+                    initialData: extra, // Pass the whole map
                   );
                 }
               },
@@ -163,7 +164,7 @@ final GoRouter appRouter = GoRouter(
               modelId: extra?['modelId'] as int ?? 0,
               modelName: extra?['modelName'] as String ?? '',
               selectedYear: extra?['selectedYear'] as String ?? '',
-              initialData: extra,
+              initialData: extra, // Pass the whole map
               initialCondition: initialCondition,
               initialOrigin: initialOrigin,
               initialMileage: initialMileage,
@@ -188,7 +189,7 @@ final GoRouter appRouter = GoRouter(
                   '', // Keep as non-nullable, passed from previous screen
               mileage: extra?['mileage'] as int ??
                   0, // Keep as non-nullable, passed from previous screen
-              initialData: extra,
+              initialData: extra, // Pass the whole map
               initialFuelType: initialFuelType, // Use nullable
               initialTransmission: initialTransmission, // Use nullable
             );
@@ -217,7 +218,7 @@ final GoRouter appRouter = GoRouter(
                   '', // Keep non-nullable, passed from previous
               transmission: extra?['transmission'] as String ??
                   '', // Keep non-nullable, passed from previous
-              initialData: extra,
+              initialData: extra, // Pass the whole map
               initialPrice: initialPrice, // Use nullable
               initialTitle: initialTitle, // Use nullable
               initialDescription: initialDescription, // Use nullable
@@ -228,7 +229,8 @@ final GoRouter appRouter = GoRouter(
           path: 'image-upload',
           builder: (context, state) {
             final extra = state.extra as Map<String, dynamic>?;
-            final initialImage = extra?['initialImage'] as XFile?; // Make nullable
+            // Changed from initialImage to initialImages
+            final initialImages = extra?['initialImages'] as List<XFile>?;
             return ImageUploadScreen(
               brandId: extra?['brandId'] as String ?? '',
               modelId: extra?['modelId'] as int ?? 0,
@@ -242,8 +244,8 @@ final GoRouter appRouter = GoRouter(
               price: extra?['price'] as double ?? 0.0,
               title: extra?['title'] as String ?? '',
               description: extra?['description'] as String ?? '',
-              initialImage: initialImage, // Use nullable
-              initialData: extra,
+              initialImages: initialImages, // Pass the list
+              initialData: extra, // Pass the whole map
             );
           },
         ),
@@ -251,8 +253,8 @@ final GoRouter appRouter = GoRouter(
           path: 'confirm-post',
           builder: (context, state) {
             final extra = state.extra as Map<String, dynamic>?;
-            // Handle nullables
-            final selectedImage = extra?['selectedImage'] as XFile?;
+            // Changed from selectedImage to selectedImages
+            final selectedImages = extra?['selectedImages'] as List<XFile>?;
             return ConfirmPostScreen(
               brandId: extra?['brandId'] as String ?? '',
               modelId: extra?['modelId'] as int ?? 0,
@@ -266,7 +268,8 @@ final GoRouter appRouter = GoRouter(
               price: extra?['price'] as double ?? 0.0,
               title: extra?['title'] as String ?? '',
               description: extra?['description'] as String ?? '',
-              selectedImage: selectedImage, // Use nullable
+              selectedImages: selectedImages, // Pass the list
+              initialData: extra, // Pass initialData here as well
             );
           },
         ),
@@ -278,6 +281,17 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) =>
       const BuyAppScreen(currentIndex: 1, child: FavoritePostsScreen(uid: '')),
     ),
+    GoRoute(
+      path: '/my_posts', // Route cho màn hình quản lý tin rao
+      builder: (context, state) => const SellAppScreen(currentIndex: 1, child: MyPostsScreen()),
+    ),
+    GoRoute(
+      path: '/notifications/2', // Đường dẫn bạn muốn
+      builder: (context, state) => const SellAppScreen(currentIndex: 2, child: NotificationsScreen()),
+    ),
+    GoRoute(
+      path: '/notifications/1', // Đường dẫn bạn muốn
+      builder: (context, state) => const BuyAppScreen(currentIndex: 2, child: NotificationsScreen()),
+    ),
   ],
 );
-

@@ -40,36 +40,72 @@ class _ConditionOriginScreenState extends State<ConditionOriginScreen> {
     if (widget.initialMileage != null && widget.initialMileage != 0) {
       mileageController.text = widget.initialMileage.toString();
     }
+    mileageController.addListener(_updateButtonState);
+  }
+
+  @override
+  void dispose() {
+    mileageController.removeListener(_updateButtonState);
+    mileageController.dispose();
+    super.dispose();
+  }
+
+  void _updateButtonState() {
+    setState(() {
+      // Rebuild the UI to re-evaluate the onPressed condition for the button
+    });
+  }
+
+  bool _isButtonEnabled() {
+    if (condition == null || origin == null) {
+      return false;
+    }
+    if (condition == 'Cũ' && mileageController.text.trim().isEmpty) {
+      return false;
+    }
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tình trạng & Xuất xứ')),
+      appBar: AppBar(
+        title: const Text('Tình trạng & Xuất xứ'),
+        centerTitle: true,
+        backgroundColor: Colors.blue, // Màu nền AppBar
+        foregroundColor: Colors.white, // Màu chữ trên AppBar
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Tình trạng xe*', style: TextStyle(fontWeight: FontWeight.bold)),
-            Row(
-              children: [
-                Expanded(
-                  child: RadioListTile<String>(
+            // Phần Tình trạng xe
+            Text(
+              'Tình trạng xe*',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: [
+                  RadioListTile<String>(
                     title: const Text('Xe cũ'),
                     value: 'Cũ',
                     groupValue: condition,
                     onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          condition = value;
-                        });
-                      }
+                      setState(() {
+                        condition = value;
+                      });
                     },
+                    activeColor: Colors.blue, // Đặt màu cho radio button khi được chọn
                   ),
-                ),
-                Expanded(
-                  child: RadioListTile<String>(
+                  const Divider(height: 1),
+                  RadioListTile<String>(
                     title: const Text('Xe mới'),
                     value: 'Mới',
                     groupValue: condition,
@@ -78,9 +114,10 @@ class _ConditionOriginScreenState extends State<ConditionOriginScreen> {
                         condition = value;
                       });
                     },
+                    activeColor: Colors.blue, // Đặt màu cho radio button khi được chọn
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             if (condition == 'Cũ')
               Padding(
@@ -88,84 +125,112 @@ class _ConditionOriginScreenState extends State<ConditionOriginScreen> {
                 child: TextField(
                   controller: mileageController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Số km đã đi*',
-                    border: OutlineInputBorder(),
+                    hintText: 'Ví dụ: 50000',
+                    border: const OutlineInputBorder(),
+                    suffixText: 'km',
+                    // Đặt màu cho viền khi focus và màu label khi focus
+                    focusedBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                    ),
+                    labelStyle: TextStyle(color: Colors.blue), // Màu của label text khi focus
                   ),
+                  cursorColor: Colors.blue, // Màu của con trỏ khi nhập
                 ),
               ),
             const SizedBox(height: 24),
-            const Text('Xuất xứ*', style: TextStyle(fontWeight: FontWeight.bold)),
-            Row(
-              children: [
-                Expanded(
-                  child: RadioListTile<String>(
+            // Phần Xuất xứ
+            Text(
+              'Xuất xứ*',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                children: [
+                  RadioListTile<String>(
                     title: const Text('Trong nước'),
                     value: 'Trong nước',
                     groupValue: origin,
                     onChanged: (value) {
-                      if (value != null) { // Null check
-                        setState(() {
-                          origin = value; // Correct variable
-                        });
-                      }
+                      setState(() {
+                        origin = value;
+                      });
                     },
+                    activeColor: Colors.blue, // Đặt màu cho radio button khi được chọn
                   ),
-                ),
-                Expanded(
-                  child: RadioListTile<String>(
+                  const Divider(height: 1),
+                  RadioListTile<String>(
                     title: const Text('Nhập khẩu'),
                     value: 'Nhập khẩu',
                     groupValue: origin,
                     onChanged: (value) {
-                      if (value != null) { // Null check
-                        setState(() {
-                          origin = value; // Correct variable
-                        });
-                      }
+                      setState(() {
+                        origin = value;
+                      });
                     },
+                    activeColor: Colors.blue, // Đặt màu cho radio button khi được chọn
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: condition != null && origin != null
-                  ? () {
-                String selectedCondition = condition!; // Chỉ ép kiểu khi đã kiểm tra null
-                String selectedOrigin = origin!;   // Chỉ ép kiểu khi đã kiểm tra null
-                int? mileage = condition == 'Cũ'
-                    ? int.tryParse(mileageController.text) : 0;
-                if (condition == 'Cũ' && mileage == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Vui lòng nhập số km đã đi.')),
-                  );
-                  return;
-                }
+            const Spacer(),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isButtonEnabled()
+                    ? () {
+                  String selectedCondition = condition!;
+                  String selectedOrigin = origin!;
+                  int? mileage = condition == 'Cũ'
+                      ? int.tryParse(mileageController.text) : 0;
+                  if (condition == 'Cũ' && (mileage == null || mileage <= 0)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Vui lòng nhập số km đã đi hợp lệ.')),
+                    );
+                    return;
+                  }
 
-                context.go(
-                  '/sell/fuel-transmission',
-                  extra: {
-                    'brandId': widget.brandId,
-                    'modelId': widget.modelId,
-                    'modelName': widget.modelName,
-                    'selectedYear': widget.selectedYear,
-                    'condition': selectedCondition,
-                    'origin': selectedOrigin,
-                    'mileage': mileage ?? 0,
-                    'initialData': {
-                      ...widget.initialData ?? {},
+                  context.go(
+                    '/sell/fuel-transmission',
+                    extra: {
+                      'brandId': widget.brandId,
+                      'modelId': widget.modelId,
+                      'modelName': widget.modelName,
+                      'selectedYear': widget.selectedYear,
                       'condition': selectedCondition,
                       'origin': selectedOrigin,
                       'mileage': mileage ?? 0,
+                      'initialData': {
+                        ...widget.initialData ?? {},
+                        'condition': selectedCondition,
+                        'origin': selectedOrigin,
+                        'mileage': mileage ?? 0,
+                      },
+                      'initialFuelType': widget.initialData?['fuelType'],
+                      'initialTransmission': widget.initialData?['transmission'],
                     },
-                    'initialFuelType': widget.initialData?['fuelType'],
-                    'initialTransmission': widget.initialData?['transmission'],
-                  },
-                );
-              }
-                  : null,
-              child: const Text('Tiếp tục'),
+                  );
+                }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Tiếp tục',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
             ),
           ],
         ),

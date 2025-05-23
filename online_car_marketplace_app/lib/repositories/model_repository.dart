@@ -38,4 +38,16 @@ class ModelRepository {
     final snapshot = await _firestore.collection('models').get();
     return snapshot.docs.map((doc) => CarModel.fromMap(doc.data())).toList();
   }
+
+  Future<CarModel?> getModelById(int modelId) async {
+    try {
+      final doc = await _firestore.collection('models').doc(modelId.toString()).get();
+      if (doc.exists && doc.data() != null) {
+        return CarModel.fromMap(doc.data()!);
+      }
+    } catch (e) {
+      print('Error getting model by ID $modelId: $e');
+    }
+    return null;
+  }
 }

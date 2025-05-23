@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:online_car_marketplace_app/repositories/car_repository.dart';
 import 'package:online_car_marketplace_app/repositories/image_repository.dart';
+import 'package:online_car_marketplace_app/repositories/model_repository.dart';
 import 'package:online_car_marketplace_app/repositories/post_repository.dart';
+import 'package:online_car_marketplace_app/repositories/user_repository.dart';
 import 'package:online_car_marketplace_app/services/storage_service.dart';
 import 'package:provider/provider.dart';
 import 'package:online_car_marketplace_app/providers/post_provider.dart';
@@ -34,6 +36,8 @@ void main() async {
         Provider<StorageService>(create: (_) => StorageService()),
         Provider<CarRepository>(create: (_) => CarRepository()),
         Provider<ImageRepository>(create: (_) => ImageRepository()),
+        Provider<ModelRepository>(create: (_) => ModelRepository()),
+        Provider<UserRepository>(create: (_) => UserRepository()),
       ],
       child: const MyApp(),
     ),

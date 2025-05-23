@@ -342,4 +342,22 @@ class PostRepository {
     }
   }
 
+  // NEW: Phương thức để lấy các bài đăng của một người dùng cụ thể
+  Future<List<Post>> getPostsByUserId(String userId) async {
+    final snapshot = await _firestore
+        .collection('posts')
+        .where('userId', isEqualTo: userId)
+        .get();
+    return snapshot.docs.map((doc) => Post.fromMap(doc.data())).toList();
+  }
+
+  // NEW: Phương thức để cập nhật một bài đăng
+  Future<void> updatePost(Post post) async {
+    await _firestore.collection('posts').doc(post.id.toString()).update(post.toMap());
+  }
+
+  // NEW: Phương thức để xóa một bài đăng
+  Future<void> deletePost(int postId) async {
+    await _firestore.collection('posts').doc(postId.toString()).delete();
+  }
 }

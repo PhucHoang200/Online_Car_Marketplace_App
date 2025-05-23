@@ -148,7 +148,7 @@ class UserProvider with ChangeNotifier {
       return result['success'];
     } catch (e) {
       _isLoading = false;
-      _errorMessage = 'Lỗi đăng nhập: $e';
+      _errorMessage = 'Email hoặc mật khẩu không chính xác. Vui lòng nhập lại!';
       notifyListeners();
       return false;
     }

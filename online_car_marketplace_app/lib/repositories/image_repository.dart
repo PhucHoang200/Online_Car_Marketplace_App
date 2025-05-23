@@ -73,4 +73,42 @@ class ImageRepository {
       await doc.reference.delete();
     }
   }
+
+  // NEW: Phương thức để lấy ảnh theo carId (đã có nhưng cần đảm bảo trả về List<ImageModel>)
+  Future<List<ImageModel>> getImagesByCarId(int carId) async {
+    final snapshot = await _firestore
+        .collection('images')
+        .where('carId', isEqualTo: carId)
+        .get();
+    return snapshot.docs.map((doc) => ImageModel.fromMap(doc.data())).toList();
+  }
+
+  // NEW: Phương thức để xóa tất cả ảnh của một xe dựa trên carId
+  Future<void> deleteImagesByCarId(int carId) async {
+    final snapshot = await _firestore
+        .collection('images')
+        .where('carId', isEqualTo: carId)
+        .get();
+    for (var doc in snapshot.docs) {
+      await doc.reference.delete();
+    }
+  }
+
+  // NEW: Phương thức để xóa một ảnh cụ thể dựa trên URL (quan trọng khi người dùng xóa ảnh trong quá trình sửa)
+  Future<void> deleteImageByUrl(String imageUrl) async {
+    final snapshot = await _firestore
+        .collection('images')
+        .where('url', isEqualTo: imageUrl)
+        .limit(1) // Assuming URL is unique per image entry for simplicity
+        .get();
+    if (snapshot.docs.isNotEmpty) {
+      await snapshot.docs.first.reference.delete();
+    }
+  }
+
+  // NEW: Phương thức để cập nhật một ảnh (ít dùng trực tiếp, thường là xóa cũ thêm mới)
+  // Nhưng nếu bạn muốn sửa URL ảnh mà không xóa hẳn, có thể thêm:
+  Future<void> updateImage(ImageModel image) async {
+    await _firestore.collection('images').doc(image.id.toString()).update(image.toMap());
+  }
 }

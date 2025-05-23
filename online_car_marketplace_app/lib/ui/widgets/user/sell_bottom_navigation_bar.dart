@@ -14,10 +14,12 @@ class SellBottomNavigationBar extends StatelessWidget {
         GoRouter.of(context).go('/sell'); // Đảm bảo bạn có route '/sell'
         break;
       case 1:
+      // Điều hướng đến màn hình Quản lý tin rao
+        GoRouter.of(context).go('/my_posts'); // <-- Cập nhật route tại đây
         break;
       case 2:
       // Điều hướng đến màn hình Thông báo
-        GoRouter.of(context).go('/notifications'); // Đảm bảo bạn có route '/notifications'
+        GoRouter.of(context).go('/notifications/2'); // Đảm bảo bạn có route '/notifications'
         break;
       case 3:
         final firebaseUser = FirebaseAuth.instance.currentUser;

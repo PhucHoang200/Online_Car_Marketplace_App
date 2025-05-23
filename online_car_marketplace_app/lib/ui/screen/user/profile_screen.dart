@@ -136,8 +136,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return Scaffold(
           backgroundColor: Colors.white, // Đổi màu nền tổng thể thành trắng
           appBar: AppBar(
-            title: const Text('Thông tin tài khoản', style: TextStyle(color: Colors.black)), // Đổi màu tiêu đề
-            backgroundColor: Colors.white, // Đổi màu nền appbar
+            title: const Text('Thông tin tài khoản'),
+            titleTextStyle: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),// Đổi màu tiêu đề
+            backgroundColor: Colors.blue, // Đổi màu nền appbar
+            centerTitle: true,
             iconTheme: const IconThemeData(color: Colors.black), // Đổi màu icon appbar
             elevation: 0, // Loại bỏ bóng đổ dưới appbar
           ),
