@@ -557,7 +557,6 @@ class _BuyScreenState extends State<BuyScreen> {
                                       await favoriteProvider.addFavoriteAutoIncrement(favorite);
                                     }
                                     // Gọi hàm fetchFavoritePosts để làm mới dữ liệu sau khi thêm/xóa thành công
-                                    // Điều này sẽ cập nhật giao diện ngay lập tức với dữ liệu mới nhất từ backend
                                     await favoriteProvider.fetchFavoritePosts(userId);
 
                                     // favoriteProvider.toggleFavoriteLocal(post.id); // Bạn có thể bỏ dòng này nếu fetchFavoritePosts đã làm mới toàn bộ list

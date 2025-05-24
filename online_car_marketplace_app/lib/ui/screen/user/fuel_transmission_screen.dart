@@ -66,10 +66,10 @@ class _FuelTransmissionScreenState extends State<FuelTransmissionScreen> {
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
                 // Đặt màu viền và màu label khi focus
-                focusedBorder: const OutlineInputBorder(
+                focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.blue, width: 2.0),
                 ),
                 labelStyle: TextStyle(color: Colors.blue),

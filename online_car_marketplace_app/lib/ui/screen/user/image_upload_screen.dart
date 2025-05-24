@@ -42,7 +42,7 @@ class ImageUploadScreen extends StatefulWidget {
 }
 
 class _ImageUploadScreenState extends State<ImageUploadScreen> {
-  List<XFile> _selectedImages = []; // Changed to a list
+  List<XFile> _selectedImages = [];
   final int _maxImages = 5; // Giới hạn số lượng ảnh tối đa
 
   @override
@@ -87,9 +87,8 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
     });
   }
 
-  // Helper method to check if the button should be enabled
   bool _isButtonEnabled() {
-    return _selectedImages.isNotEmpty; // Chỉ cần có ít nhất 1 ảnh
+    return _selectedImages.isNotEmpty;
   }
 
   @override
@@ -102,11 +101,11 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // Căn chỉnh trái cho văn bản
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Chọn tối thiểu 1 ảnh và tối đa $_maxImages ảnh để tải lên',
-              style: Theme.of(context).textTheme.bodyLarge, // Sử dụng TextStyle của theme
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 16), // Tăng khoảng cách
 

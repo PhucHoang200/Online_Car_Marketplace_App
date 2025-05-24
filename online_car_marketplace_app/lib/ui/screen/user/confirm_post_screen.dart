@@ -240,18 +240,10 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
     _mileage = int.tryParse(_mileageController.text) ?? 0;
     _price = double.tryParse(_priceController.text) ?? 0.0;
 
-    // Kiểm tra ảnh tối thiểu chỉ khi tạo mới.
-    // Khi sửa, ảnh có thể đã tồn tại.
-    if (!_isEditing && _newSelectedImages.isEmpty) {
+    // Kiểm tra ảnh tối thiểu
+    if (_newSelectedImages.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Vui lòng chọn ít nhất một ảnh.')),
-      );
-      return;
-    }
-    // Hoặc nếu là sửa, và không có ảnh mới, không có ảnh cũ, thì báo lỗi.
-    if (_isEditing && _newSelectedImages.isEmpty && _existingImageUrls.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng có ít nhất một ảnh.')),
       );
       return;
     }
@@ -278,134 +270,62 @@ class _ConfirmPostScreenState extends State<ConfirmPostScreen> {
         return;
       }
 
-      // Xử lý các ảnh cần xóa khỏi Storage và Firestore
-      for (var urlToDelete in _imageUrlsToDelete) {
-        if (urlToDelete.startsWith('https://firebasestorage.googleapis.com')) {
-          await storageService.deleteImage(urlToDelete); // Xóa khỏi Storage
-        }
-        await imageRepository.deleteImageByUrl(urlToDelete); // Xóa khỏi Firestore
-      }
-
       // Upload ảnh mới
       List<String> uploadedNewImageUrls = [];
       for (var imageFile in _newSelectedImages) {
-        // ID xe sẽ được biết sau khi xe được tạo (nếu là tạo mới) hoặc từ _carIdToEdit (nếu là sửa)
-        // Tạm thời truyền 0 nếu không biết, sau đó cập nhật lại.
-        // Hoặc truyền null nếu hàm uploadImage cho phép.
-        // Tốt nhất là upload sau khi carId đã có.
-        // Để đơn giản hóa, ta sẽ upload trước rồi gán carId sau khi có.
-        // Cần đảm bảo hàm uploadImage có thể hoạt động mà không cần carId ngay lập tức,
-        // hoặc carId được truyền vào hàm uploadImage khi biết.
-        // Giả định `uploadImage` không cần `carId` lúc này hoặc có thể chấp nhận `null`.
-        final url = await storageService.uploadImage(imageFile); // Hàm này có vẻ thiếu carId
+        final url = await storageService.uploadImage(imageFile);
         uploadedNewImageUrls.add(url);
       }
 
-      // Gộp các URL ảnh hiện có (đã được giữ lại) và các URL ảnh mới được tải lên
-      List<String> finalImageUrls = [..._existingImageUrls, ...uploadedNewImageUrls];
+      // Tạo mới Car
+      final car = Car(
+        id: 0, // ID sẽ được tự động tạo bởi Firestore
+        userId: userId,
+        modelId: _modelId,
+        fuelType: _fuelType,
+        transmission: _transmission,
+        year: int.parse(_selectedYear),
+        mileage: _mileage,
+        location: 'Việt Nam', // Bạn có thể thêm logic để lấy địa điểm thực tế
+        price: _price,
+        condition: _condition,
+        origin: _origin,
+      );
+      final String carIdString = await carRepository.addCarAutoIncrement(car);
+      final int carId = int.parse(carIdString);
 
-      if (_isEditing) {
-        // Cập nhật Car
-        final updatedCar = Car(
-          id: _carIdToEdit!,
-          userId: userId,
-          modelId: _modelId,
-          fuelType: _fuelType,
-          transmission: _transmission,
-          year: int.parse(_selectedYear),
-          mileage: _mileage,
-          location: 'Vietnam', // Cập nhật địa điểm nếu có thay đổi
-          price: _price,
-          condition: _condition,
-          origin: _origin, // update creationDate
-        );
-        await carRepository.updateCar(updatedCar);
+      // Tạo mới Post
+      final post = Post(
+        id: 0, // ID sẽ được tự động tạo bởi Firestore
+        userId: userId,
+        carId: carId,
+        title: _title,
+        description: _description,
+        creationDate: Timestamp.now().toDate(),
+      );
+      await postRepository.addPostAutoIncrement(post);
 
-        // Cập nhật Post
-        final updatedPost = Post(
-          id: _postIdToEdit!,
-          userId: userId,
-          carId: _carIdToEdit!,
-          title: _title,
-          description: _description,
-          creationDate: Timestamp.now().toDate(), // Cập nhật creationDate
-        );
-        await postRepository.updatePost(updatedPost);
-
-        // Xử lý ảnh:
-        // Đã xóa các ảnh cũ không được giữ lại ở trên (_imageUrlsToDelete).
-        // Giờ chỉ cần thêm các ảnh mới được tải lên (_newSelectedImages) vào Firestore.
-        // Các ảnh cũ đã được giữ lại (_existingImageUrls) không cần làm gì thêm vì chúng đã có trong Firestore.
-        for (var url in uploadedNewImageUrls) {
-          final image = ImageModel(
-            id: 0, // Firestore sẽ tự động tạo ID
-            carId: _carIdToEdit!,
-            url: url,
-            creationDate: Timestamp.now(),
-          );
-          await imageRepository.addImageAutoIncrement(image);
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cập nhật bài đăng thành công!')),
-        );
-      } else {
-        // Tạo mới Car
-        final car = Car(
-          id: 0,
-          userId: userId,
-          modelId: _modelId,
-          fuelType: _fuelType,
-          transmission: _transmission,
-          year: int.parse(_selectedYear),
-          mileage: _mileage,
-          location: 'Việt Nam',
-          price: _price,
-          condition: _condition,
-          origin: _origin,
-        );
-        final String carIdString = await carRepository.addCarAutoIncrement(car);
-        final int carId = int.parse(carIdString);
-
-        // Tạo mới Post
-        final post = Post(
-          id: 0,
-          userId: userId,
+      // Thêm ảnh mới vào Firestore liên kết với CarId
+      for (var url in uploadedNewImageUrls) {
+        final image = ImageModel(
+          id: 0, // ID sẽ được tự động tạo bởi Firestore
           carId: carId,
-          title: _title,
-          description: _description,
-          creationDate: Timestamp.now().toDate(),
+          url: url,
+          creationDate: Timestamp.now(),
         );
-        await postRepository.addPostAutoIncrement(post);
+        await imageRepository.addImageAutoIncrement(image);
+      }
 
-        // Thêm ảnh mới
-        for (var url in finalImageUrls) {
-          final image = ImageModel(
-            id: 0,
-            carId: carId,
-            url: url,
-            creationDate: Timestamp.now(),
-          );
-          await imageRepository.addImageAutoIncrement(image);
-        }
-
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             'Đăng bài thành công!',
-            style: TextStyle(color: Colors.white), // Chữ màu trắng
+            style: TextStyle(color: Colors.white),
           ),
-          backgroundColor: Colors.grey, // Màu xám nhạt
-        );
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Đăng bài thành công!',
-              style: TextStyle(color: Colors.white), // Chữ màu trắng
-            ),
-            backgroundColor: Colors.grey, // Màu xám nhạt
-          ),
+          backgroundColor: Colors.grey,
+        ),
       );
+      // Điều hướng sau khi đăng bài thành công
       context.go('/sell');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
